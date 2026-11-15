@@ -1,0 +1,27 @@
+# Go build output and test artefacts
+bin/
+*.test
+*.out
+coverage.*
+
+# Terraform: local state, provider downloads and variable files, which hold
+# project IDs and other values that must stay out of the repository
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+!example.tfvars
+crash.log
+
+# Secrets and credentials
+.env
+.env.*
+*.pem
+*.key
+*credentials*.json
+
+# Editor and OS files
+.DS_Store
+.idea/
+.vscode/
