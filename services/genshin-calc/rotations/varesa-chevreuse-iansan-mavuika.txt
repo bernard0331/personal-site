@@ -6,6 +6,9 @@
 #   (Varesa ECP) is first rotation only. Iansan's optional (C) is left out. Varesa's (Q) is her
 #   short burst, used in that slot when she has the energy and is in the state that allows it
 #   (Fiery Passion, or after any plunge at C2+; the simulator tracks this as "apex-drive").
+#   At C2+ she also short-bursts after the second ECP of each pair, per the guide's combo notes
+#   ("After C2, Varesa can use a short Burst after each Plunge"): about 7% higher for the
+#   owner's C2 Varesa than bursting only in the team rotation's (Q) slot.
 #   Notation (the guide's): E skill, hE hold skill, C charged attack (for Mavuika on her
 #   Flamestrider: Cyclic Charged Attack), C2 two of them, D dash (Mavuika: Sprint Attack),
 #   P plunge, Q burst.
@@ -62,5 +65,6 @@ for let i=0; i<6; i=i+1 {
     ecp();
     if .varesa.energy >= 30 && .varesa.status.apex-drive { varesa burst; }
     ecp();
+    if .varesa.cons >= 2 && .varesa.energy >= 30 && .varesa.status.apex-drive { varesa burst; }
   }
 }
