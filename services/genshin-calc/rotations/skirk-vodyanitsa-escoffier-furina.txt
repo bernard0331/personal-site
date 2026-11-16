@@ -1,7 +1,9 @@
 # Team: Skirk, Vodyanitsa, Escoffier, Furina
 # Written for this project on 2026-11-16. Not from the KQM Sim Database.
 # Source: the owner's own rotation (Furina E Q > Escoffier E Q > Vodyanitsa E > Skirk combo),
-#   with Skirk's combo from the Skirk tab of his spreadsheet: N5 Q, 2[N5 D], N2 C, N5 D, N2.
+#   with Skirk's combo from the Skirk tab of his spreadsheet: 2[N2 D], N2 Q, 2[2[N2 D], N3 W], N2 C D, N2 D, N3 W, N3
+#   (D = dash, W = walk cancel, C = charged attack). Of the three combos on that tab this simulates
+#   highest: about 7% above N5 Q, 2[N5 D], N2 C, N5 D, N2.
 # Structure follows the database's Skirk, Furina, Escoffier rotations by caxia5.
 # Assumes Skirk starts with full Serpent's Subtlety, the simulator's default.
 #
@@ -44,10 +46,12 @@ for let i=0; i<4; i=i+1 {
   escoffier skill, burst;
   vodyanitsa skill;
   skirk skill,
-        attack:5, burst,
-        attack:5, dash,
-        attack:5, dash,
-        attack:2, charge,
-        attack:5, dash,
-        attack:2;
+        attack:2, dash, attack:2, dash,
+        attack:2, burst,
+        attack:2, dash, attack:2, dash, attack:3, walk,
+        attack:2, dash, attack:2, dash, attack:3, walk,
+        attack:2, charge, dash,
+        attack:2, dash,
+        attack:3, walk,
+        attack:3;
 }
