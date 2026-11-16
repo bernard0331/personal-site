@@ -1,0 +1,4 @@
+# Characters that are in KQM Sim but not released in the game.
+# The optimizer never calculates these. One simulator key per line.
+anastasya
+danica

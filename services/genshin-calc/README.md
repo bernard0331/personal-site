@@ -39,6 +39,22 @@ Run one config and write the full result as JSON:
 The result's `statistics.dps.mean` is the team's DPS, and `statistics.element_dps`
 is the damage split by element, which decides the team's element.
 
+## Layout
+
+| Path | What it is |
+| :- | :- |
+| `main.go` | The command-line program. `inspect FILE` reads a GOOD file and says what it contains. |
+| `catalog/` | Every character, weapon and artifact set the pinned simulator supports, embedded as `catalog.json`. `unreleased.txt` lists characters that are never calculated. |
+| `good/` | Reads and checks a GOOD file. Nothing from the file is trusted: unknown keys and out-of-range values are dropped and reported. |
+| `tools/gen_catalog.py` | Regenerates `catalog/catalog.json` from a KQM Sim source checkout. Run it when the pinned release changes. |
+
+Run the tests and try it on a scan:
+
+```bash
+go test ./services/genshin-calc/...
+go run ./services/genshin-calc inspect path/to/scan.json
+```
+
 ## Local data
 
 Account scans, cached rotations and simulator results go in `local/`, which git

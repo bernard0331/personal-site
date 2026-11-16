@@ -1,0 +1,2240 @@
+{
+ "engine": {
+  "name": "kqmsim",
+  "release": "kqmsim-v7.3.3",
+  "commit": "7bdf45f2e299c6bf782f81dc60d6cb19fd0bfb4c"
+ },
+ "characters": [
+  {
+   "key": "aetheranemo",
+   "element": "anemo",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "aethercryo",
+   "element": "cryo",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "aetherdendro",
+   "element": "dendro",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "aetherelectro",
+   "element": "electro",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "aethergeo",
+   "element": "geo",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "aetherhydro",
+   "element": "hydro",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "aetherpyro",
+   "element": "pyro",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "aino",
+   "element": "hydro",
+   "weapon_type": "claymore",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "albedo",
+   "element": "geo",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "alhaitham",
+   "element": "dendro",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "aloy",
+   "element": "cryo",
+   "weapon_type": "bow",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "alyosha",
+   "element": "electro",
+   "weapon_type": "polearm",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "amber",
+   "element": "pyro",
+   "weapon_type": "bow",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "anastasya",
+   "element": "cryo",
+   "weapon_type": "bow",
+   "rarity": 5,
+   "released": false
+  },
+  {
+   "key": "aratakiitto",
+   "element": "geo",
+   "weapon_type": "claymore",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "arlecchino",
+   "element": "pyro",
+   "weapon_type": "polearm",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "baizhu",
+   "element": "dendro",
+   "weapon_type": "catalyst",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "barbara",
+   "element": "hydro",
+   "weapon_type": "catalyst",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "beidou",
+   "element": "electro",
+   "weapon_type": "claymore",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "bennett",
+   "element": "pyro",
+   "weapon_type": "sword",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "candace",
+   "element": "hydro",
+   "weapon_type": "polearm",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "charlotte",
+   "element": "cryo",
+   "weapon_type": "catalyst",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "chasca",
+   "element": "anemo",
+   "weapon_type": "bow",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "chevreuse",
+   "element": "pyro",
+   "weapon_type": "polearm",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "chiori",
+   "element": "geo",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "chongyun",
+   "element": "cryo",
+   "weapon_type": "claymore",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "citlali",
+   "element": "cryo",
+   "weapon_type": "catalyst",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "clorinde",
+   "element": "electro",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "collei",
+   "element": "dendro",
+   "weapon_type": "bow",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "columbina",
+   "element": "hydro",
+   "weapon_type": "catalyst",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "cyno",
+   "element": "electro",
+   "weapon_type": "polearm",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "dahlia",
+   "element": "hydro",
+   "weapon_type": "sword",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "danica",
+   "element": "electro",
+   "weapon_type": "claymore",
+   "rarity": 5,
+   "released": false
+  },
+  {
+   "key": "dehya",
+   "element": "pyro",
+   "weapon_type": "claymore",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "diluc",
+   "element": "pyro",
+   "weapon_type": "claymore",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "diona",
+   "element": "cryo",
+   "weapon_type": "bow",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "dori",
+   "element": "electro",
+   "weapon_type": "claymore",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "durin",
+   "element": "pyro",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "emilie",
+   "element": "dendro",
+   "weapon_type": "polearm",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "escoffier",
+   "element": "cryo",
+   "weapon_type": "polearm",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "eula",
+   "element": "cryo",
+   "weapon_type": "claymore",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "faruzan",
+   "element": "anemo",
+   "weapon_type": "bow",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "fischl",
+   "element": "electro",
+   "weapon_type": "bow",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "flins",
+   "element": "electro",
+   "weapon_type": "polearm",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "freminet",
+   "element": "cryo",
+   "weapon_type": "claymore",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "furina",
+   "element": "hydro",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "gaming",
+   "element": "pyro",
+   "weapon_type": "claymore",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "ganyu",
+   "element": "cryo",
+   "weapon_type": "bow",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "gorou",
+   "element": "geo",
+   "weapon_type": "bow",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "hutao",
+   "element": "pyro",
+   "weapon_type": "polearm",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "iansan",
+   "element": "electro",
+   "weapon_type": "polearm",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "ifa",
+   "element": "anemo",
+   "weapon_type": "catalyst",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "illuga",
+   "element": "geo",
+   "weapon_type": "polearm",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "ineffa",
+   "element": "electro",
+   "weapon_type": "polearm",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "jahoda",
+   "element": "anemo",
+   "weapon_type": "bow",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "jean",
+   "element": "anemo",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "kaedeharakazuha",
+   "element": "anemo",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "kaeya",
+   "element": "cryo",
+   "weapon_type": "sword",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "kamisatoayaka",
+   "element": "cryo",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "kamisatoayato",
+   "element": "hydro",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "kaveh",
+   "element": "dendro",
+   "weapon_type": "claymore",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "keqing",
+   "element": "electro",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "kinich",
+   "element": "dendro",
+   "weapon_type": "claymore",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "kirara",
+   "element": "dendro",
+   "weapon_type": "sword",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "klee",
+   "element": "pyro",
+   "weapon_type": "catalyst",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "kujousara",
+   "element": "electro",
+   "weapon_type": "bow",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "kukishinobu",
+   "element": "electro",
+   "weapon_type": "sword",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "lanyan",
+   "element": "anemo",
+   "weapon_type": "catalyst",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "lauma",
+   "element": "dendro",
+   "weapon_type": "catalyst",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "layla",
+   "element": "cryo",
+   "weapon_type": "sword",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "linnea",
+   "element": "geo",
+   "weapon_type": "bow",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "lisa",
+   "element": "electro",
+   "weapon_type": "catalyst",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "lohen",
+   "element": "cryo",
+   "weapon_type": "polearm",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "lumineanemo",
+   "element": "anemo",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "luminecryo",
+   "element": "cryo",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "luminedendro",
+   "element": "dendro",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "lumineelectro",
+   "element": "electro",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "luminegeo",
+   "element": "geo",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "luminehydro",
+   "element": "hydro",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "luminepyro",
+   "element": "pyro",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "lynette",
+   "element": "anemo",
+   "weapon_type": "sword",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "lyney",
+   "element": "pyro",
+   "weapon_type": "bow",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "mavuika",
+   "element": "pyro",
+   "weapon_type": "claymore",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "mika",
+   "element": "cryo",
+   "weapon_type": "polearm",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "mitya",
+   "element": "electro",
+   "weapon_type": "catalyst",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "mona",
+   "element": "hydro",
+   "weapon_type": "catalyst",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "mualani",
+   "element": "hydro",
+   "weapon_type": "catalyst",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "nahida",
+   "element": "dendro",
+   "weapon_type": "catalyst",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "navia",
+   "element": "geo",
+   "weapon_type": "claymore",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "neuvillette",
+   "element": "hydro",
+   "weapon_type": "catalyst",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "nicole",
+   "element": "pyro",
+   "weapon_type": "catalyst",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "nilou",
+   "element": "hydro",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "ningguang",
+   "element": "geo",
+   "weapon_type": "catalyst",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "noelle",
+   "element": "geo",
+   "weapon_type": "claymore",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "odette",
+   "element": "cryo",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "ororon",
+   "element": "electro",
+   "weapon_type": "bow",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "prune",
+   "element": "anemo",
+   "weapon_type": "catalyst",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "qiqi",
+   "element": "cryo",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "raidenshogun",
+   "element": "electro",
+   "weapon_type": "polearm",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "razor",
+   "element": "electro",
+   "weapon_type": "claymore",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "rosaria",
+   "element": "cryo",
+   "weapon_type": "polearm",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "sandrone",
+   "element": "cryo",
+   "weapon_type": "claymore",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "sangonomiyakokomi",
+   "element": "hydro",
+   "weapon_type": "catalyst",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "sayu",
+   "element": "anemo",
+   "weapon_type": "claymore",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "sethos",
+   "element": "electro",
+   "weapon_type": "bow",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "shenhe",
+   "element": "cryo",
+   "weapon_type": "polearm",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "shikanoinheizou",
+   "element": "anemo",
+   "weapon_type": "catalyst",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "sigewinne",
+   "element": "hydro",
+   "weapon_type": "bow",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "skirk",
+   "element": "cryo",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "sucrose",
+   "element": "anemo",
+   "weapon_type": "catalyst",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "tartaglia",
+   "element": "hydro",
+   "weapon_type": "bow",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "thoma",
+   "element": "pyro",
+   "weapon_type": "polearm",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "tighnari",
+   "element": "dendro",
+   "weapon_type": "bow",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "valeriy",
+   "element": "electro",
+   "weapon_type": "sword",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "varesa",
+   "element": "electro",
+   "weapon_type": "catalyst",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "varka",
+   "element": "anemo",
+   "weapon_type": "claymore",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "venti",
+   "element": "anemo",
+   "weapon_type": "bow",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "vesna",
+   "element": "anemo",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "vodyanitsa",
+   "element": "hydro",
+   "weapon_type": "catalyst",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "wanderer",
+   "element": "anemo",
+   "weapon_type": "catalyst",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "wriothesley",
+   "element": "cryo",
+   "weapon_type": "catalyst",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "xiangling",
+   "element": "pyro",
+   "weapon_type": "polearm",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "xianyun",
+   "element": "anemo",
+   "weapon_type": "catalyst",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "xiao",
+   "element": "anemo",
+   "weapon_type": "polearm",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "xilonen",
+   "element": "geo",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "xingqiu",
+   "element": "hydro",
+   "weapon_type": "sword",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "xinyan",
+   "element": "pyro",
+   "weapon_type": "claymore",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "yaemiko",
+   "element": "electro",
+   "weapon_type": "catalyst",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "yanfei",
+   "element": "pyro",
+   "weapon_type": "catalyst",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "yaoyao",
+   "element": "dendro",
+   "weapon_type": "polearm",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "yelan",
+   "element": "hydro",
+   "weapon_type": "bow",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "yoimiya",
+   "element": "pyro",
+   "weapon_type": "bow",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "yumemizukimizuki",
+   "element": "anemo",
+   "weapon_type": "catalyst",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "yunjin",
+   "element": "geo",
+   "weapon_type": "polearm",
+   "rarity": 4,
+   "released": true
+  },
+  {
+   "key": "zhongli",
+   "element": "geo",
+   "weapon_type": "polearm",
+   "rarity": 5,
+   "released": true
+  },
+  {
+   "key": "zibai",
+   "element": "geo",
+   "weapon_type": "sword",
+   "rarity": 5,
+   "released": true
+  }
+ ],
+ "weapons": [
+  {
+   "key": "absolution",
+   "weapon_type": "sword",
+   "rarity": 5
+  },
+  {
+   "key": "akuoumaru",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "alleyhunter",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "amenomakageuchi",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "amosbow",
+   "weapon_type": "bow",
+   "rarity": 5
+  },
+  {
+   "key": "angelosheptades",
+   "weapon_type": "catalyst",
+   "rarity": 5
+  },
+  {
+   "key": "apprenticesnotes",
+   "weapon_type": "catalyst",
+   "rarity": 1
+  },
+  {
+   "key": "aquasimulacra",
+   "weapon_type": "bow",
+   "rarity": 5
+  },
+  {
+   "key": "aquilafavonia",
+   "weapon_type": "sword",
+   "rarity": 5
+  },
+  {
+   "key": "ashgravendrinkinghorn",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "astralvulturescrimsonplumage",
+   "weapon_type": "bow",
+   "rarity": 5
+  },
+  {
+   "key": "ateaspoonoftranscendence",
+   "weapon_type": "claymore",
+   "rarity": 5
+  },
+  {
+   "key": "athameartis",
+   "weapon_type": "sword",
+   "rarity": 5
+  },
+  {
+   "key": "athousandblazingsuns",
+   "weapon_type": "claymore",
+   "rarity": 5
+  },
+  {
+   "key": "athousandfloatingdreams",
+   "weapon_type": "catalyst",
+   "rarity": 5
+  },
+  {
+   "key": "azurelight",
+   "weapon_type": "sword",
+   "rarity": 5
+  },
+  {
+   "key": "balladoftheboundlessblue",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "balladofthefjords",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "beaconofthereedsea",
+   "weapon_type": "claymore",
+   "rarity": 5
+  },
+  {
+   "key": "beginnersprotector",
+   "weapon_type": "polearm",
+   "rarity": 1
+  },
+  {
+   "key": "blackcliffagate",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "blackclifflongsword",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "blackcliffpole",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "blackcliffslasher",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "blackcliffwarbow",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "blackmarrowlantern",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "blacktassel",
+   "weapon_type": "polearm",
+   "rarity": 3
+  },
+  {
+   "key": "bladeofatonement",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "bloodsoakedruins",
+   "weapon_type": "polearm",
+   "rarity": 5
+  },
+  {
+   "key": "bloodtaintedgreatsword",
+   "weapon_type": "claymore",
+   "rarity": 3
+  },
+  {
+   "key": "calamityofeshu",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "calamityqueller",
+   "weapon_type": "polearm",
+   "rarity": 5
+  },
+  {
+   "key": "cashflowsupervision",
+   "weapon_type": "catalyst",
+   "rarity": 5
+  },
+  {
+   "key": "chainbreaker",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "cinnabarspindle",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "clashofkings",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "cloudforged",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "compoundbow",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "coolsteel",
+   "weapon_type": "sword",
+   "rarity": 3
+  },
+  {
+   "key": "covenantoffrostandsnow",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "cranesechoingcall",
+   "weapon_type": "catalyst",
+   "rarity": 5
+  },
+  {
+   "key": "crescentpike",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "crimsonmoonssemblance",
+   "weapon_type": "polearm",
+   "rarity": 5
+  },
+  {
+   "key": "darkironsword",
+   "weapon_type": "sword",
+   "rarity": 3
+  },
+  {
+   "key": "dawningfrost",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "deathmatch",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "debateclub",
+   "weapon_type": "claymore",
+   "rarity": 3
+  },
+  {
+   "key": "dialoguesofthedesertsages",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "disasterandremorse",
+   "weapon_type": "polearm",
+   "rarity": 5
+  },
+  {
+   "key": "dodocotales",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "dragonsbane",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "dragonspinespear",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "dullblade",
+   "weapon_type": "sword",
+   "rarity": 1
+  },
+  {
+   "key": "earthshaker",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "echoesoftheheart",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "elegyfortheend",
+   "weapon_type": "bow",
+   "rarity": 5
+  },
+  {
+   "key": "emberwell",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "emeraldorb",
+   "weapon_type": "catalyst",
+   "rarity": 3
+  },
+  {
+   "key": "endoftheline",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "engulfinglightning",
+   "weapon_type": "polearm",
+   "rarity": 5
+  },
+  {
+   "key": "etherlightspindlelute",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "everlastingmoonglow",
+   "weapon_type": "catalyst",
+   "rarity": 5
+  },
+  {
+   "key": "exaiphanesblade",
+   "weapon_type": "sword",
+   "rarity": 5
+  },
+  {
+   "key": "eyeofperception",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "fadingtwilight",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "fangofthemountainking",
+   "weapon_type": "claymore",
+   "rarity": 5
+  },
+  {
+   "key": "favoniuscodex",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "favoniusgreatsword",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "favoniuslance",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "favoniussword",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "favoniuswarbow",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "ferrousshadow",
+   "weapon_type": "claymore",
+   "rarity": 3
+  },
+  {
+   "key": "festeringdesire",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "filletblade",
+   "weapon_type": "sword",
+   "rarity": 3
+  },
+  {
+   "key": "finaleofthedeep",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "flameforgedinsight",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "fleuvecendreferryman",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "flowerwreathedfeathers",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "flowingpurity",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "fluteofezpitzal",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "footprintoftherainbow",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "forestregalia",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "forgedbythegoldenmelody",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "fracturedhalo",
+   "weapon_type": "polearm",
+   "rarity": 5
+  },
+  {
+   "key": "freedomsworn",
+   "weapon_type": "sword",
+   "rarity": 5
+  },
+  {
+   "key": "frostbearer",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "frostbreath",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "fruitfulhook",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "fruitoffulfillment",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "gestofthemightywolf",
+   "weapon_type": "claymore",
+   "rarity": 5
+  },
+  {
+   "key": "goldenfrostboundoath",
+   "weapon_type": "bow",
+   "rarity": 5
+  },
+  {
+   "key": "hakushinring",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "halberd",
+   "weapon_type": "polearm",
+   "rarity": 3
+  },
+  {
+   "key": "hamayumi",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "harangeppakufutsu",
+   "weapon_type": "sword",
+   "rarity": 5
+  },
+  {
+   "key": "harbingerofdawn",
+   "weapon_type": "sword",
+   "rarity": 3
+  },
+  {
+   "key": "huntersbow",
+   "weapon_type": "bow",
+   "rarity": 1
+  },
+  {
+   "key": "hunterspath",
+   "weapon_type": "bow",
+   "rarity": 5
+  },
+  {
+   "key": "ibispiercer",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "ironpoint",
+   "weapon_type": "polearm",
+   "rarity": 2
+  },
+  {
+   "key": "ironsting",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "jadefallssplendor",
+   "weapon_type": "catalyst",
+   "rarity": 5
+  },
+  {
+   "key": "jadevista",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "kagotsurubeisshin",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "kagurasverity",
+   "weapon_type": "catalyst",
+   "rarity": 5
+  },
+  {
+   "key": "katsuragikirinagamasa",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "keyofkhajnisut",
+   "weapon_type": "sword",
+   "rarity": 5
+  },
+  {
+   "key": "kingssquire",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "kitaincrossspear",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "lightbearingmoonshard",
+   "weapon_type": "sword",
+   "rarity": 5
+  },
+  {
+   "key": "lightoffoliarincision",
+   "weapon_type": "sword",
+   "rarity": 5
+  },
+  {
+   "key": "lionsroar",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "lithicblade",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "lithicspear",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "lostprayertothesacredwinds",
+   "weapon_type": "catalyst",
+   "rarity": 5
+  },
+  {
+   "key": "lumidouceelegy",
+   "weapon_type": "polearm",
+   "rarity": 5
+  },
+  {
+   "key": "luxurioussealord",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "magicguide",
+   "weapon_type": "catalyst",
+   "rarity": 3
+  },
+  {
+   "key": "mailedflower",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "makhairaaquamarine",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "mappamare",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "masterkey",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "memoryofdust",
+   "weapon_type": "catalyst",
+   "rarity": 5
+  },
+  {
+   "key": "messenger",
+   "weapon_type": "bow",
+   "rarity": 3
+  },
+  {
+   "key": "missivewindspear",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "mistsplitterreforged",
+   "weapon_type": "sword",
+   "rarity": 5
+  },
+  {
+   "key": "mitternachtswaltz",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "moonpiercer",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "moonweaversdawn",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "mountainbracingbolt",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "mouunsmoon",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "nightweaverslookingglass",
+   "weapon_type": "catalyst",
+   "rarity": 5
+  },
+  {
+   "key": "nocturnescurtaincall",
+   "weapon_type": "catalyst",
+   "rarity": 5
+  },
+  {
+   "key": "oathsworneye",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "oldmercspal",
+   "weapon_type": "claymore",
+   "rarity": 2
+  },
+  {
+   "key": "otherworldlystory",
+   "weapon_type": "catalyst",
+   "rarity": 3
+  },
+  {
+   "key": "peakpatrolsong",
+   "weapon_type": "sword",
+   "rarity": 5
+  },
+  {
+   "key": "pocketgrimoire",
+   "weapon_type": "catalyst",
+   "rarity": 2
+  },
+  {
+   "key": "polarstar",
+   "weapon_type": "bow",
+   "rarity": 5
+  },
+  {
+   "key": "portablepowersaw",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "predator",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "primordialjadecutter",
+   "weapon_type": "sword",
+   "rarity": 5
+  },
+  {
+   "key": "primordialjadewingedspear",
+   "weapon_type": "polearm",
+   "rarity": 5
+  },
+  {
+   "key": "prospectorsdrill",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "prospectorsshovel",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "prototypeamber",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "prototypearchaic",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "prototypecrescent",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "prototyperancour",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "prototypestarglitter",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "rainbowserpentsrainbow",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "rainslasher",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "rangegauge",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "ravenbow",
+   "weapon_type": "bow",
+   "rarity": 3
+  },
+  {
+   "key": "recurvebow",
+   "weapon_type": "bow",
+   "rarity": 3
+  },
+  {
+   "key": "redhornstonethresher",
+   "weapon_type": "claymore",
+   "rarity": 5
+  },
+  {
+   "key": "reliquaryoftruth",
+   "weapon_type": "catalyst",
+   "rarity": 5
+  },
+  {
+   "key": "rightfulreward",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "ringofyaxche",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "royalbow",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "royalgreatsword",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "royalgrimoire",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "royallongsword",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "royalspear",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "rust",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "sacrificersstaff",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "sacrificialbow",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "sacrificialfragments",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "sacrificialgreatsword",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "sacrificialjade",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "sacrificialsword",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "sapwoodblade",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "scionoftheblazingsun",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "seasonedhuntersbow",
+   "weapon_type": "bow",
+   "rarity": 2
+  },
+  {
+   "key": "sequenceofsolitude",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "serenityscall",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "serpentspine",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "sharpshootersoath",
+   "weapon_type": "bow",
+   "rarity": 3
+  },
+  {
+   "key": "silvershowerheartstrings",
+   "weapon_type": "bow",
+   "rarity": 5
+  },
+  {
+   "key": "silversword",
+   "weapon_type": "sword",
+   "rarity": 2
+  },
+  {
+   "key": "skyridergreatsword",
+   "weapon_type": "claymore",
+   "rarity": 3
+  },
+  {
+   "key": "skyridersword",
+   "weapon_type": "sword",
+   "rarity": 3
+  },
+  {
+   "key": "skywardatlas",
+   "weapon_type": "catalyst",
+   "rarity": 5
+  },
+  {
+   "key": "skywardblade",
+   "weapon_type": "sword",
+   "rarity": 5
+  },
+  {
+   "key": "skywardharp",
+   "weapon_type": "bow",
+   "rarity": 5
+  },
+  {
+   "key": "skywardpride",
+   "weapon_type": "claymore",
+   "rarity": 5
+  },
+  {
+   "key": "skywardspine",
+   "weapon_type": "polearm",
+   "rarity": 5
+  },
+  {
+   "key": "slingshot",
+   "weapon_type": "bow",
+   "rarity": 3
+  },
+  {
+   "key": "snarehook",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "snowtombedstarsilver",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "solarpearl",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "songofbrokenpines",
+   "weapon_type": "claymore",
+   "rarity": 5
+  },
+  {
+   "key": "songofstillness",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "songofthevigil",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "splendoroftranquilwaters",
+   "weapon_type": "sword",
+   "rarity": 5
+  },
+  {
+   "key": "staffofhoma",
+   "weapon_type": "polearm",
+   "rarity": 5
+  },
+  {
+   "key": "staffofthescarletsands",
+   "weapon_type": "polearm",
+   "rarity": 5
+  },
+  {
+   "key": "starcallerswatch",
+   "weapon_type": "catalyst",
+   "rarity": 5
+  },
+  {
+   "key": "sturdybone",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "summitshaper",
+   "weapon_type": "sword",
+   "rarity": 5
+  },
+  {
+   "key": "sunnymorningsleepin",
+   "weapon_type": "catalyst",
+   "rarity": 5
+  },
+  {
+   "key": "surfsup",
+   "weapon_type": "catalyst",
+   "rarity": 5
+  },
+  {
+   "key": "swordofdescension",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "swordofnarzissenkreuz",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "symphonistofscents",
+   "weapon_type": "polearm",
+   "rarity": 5
+  },
+  {
+   "key": "talkingstick",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "tamayurateinoohanashi",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "thealleyflash",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "thebell",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "theblacksword",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "thecatch",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "thedaybreakchronicles",
+   "weapon_type": "bow",
+   "rarity": 5
+  },
+  {
+   "key": "thedockhandsassistant",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "thefirstgreatmagic",
+   "weapon_type": "bow",
+   "rarity": 5
+  },
+  {
+   "key": "theflute",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "thestringless",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "theunforged",
+   "weapon_type": "claymore",
+   "rarity": 5
+  },
+  {
+   "key": "theviridescenthunt",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "thewidsith",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "thrillingtalesofdragonslayers",
+   "weapon_type": "catalyst",
+   "rarity": 3
+  },
+  {
+   "key": "thunderingpulse",
+   "weapon_type": "bow",
+   "rarity": 5
+  },
+  {
+   "key": "tidalshadow",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "tomeoftheeternalflow",
+   "weapon_type": "catalyst",
+   "rarity": 5
+  },
+  {
+   "key": "toukaboushigure",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "travelershandysword",
+   "weapon_type": "sword",
+   "rarity": 3
+  },
+  {
+   "key": "tulaytullahsremembrance",
+   "weapon_type": "catalyst",
+   "rarity": 5
+  },
+  {
+   "key": "twinnephrite",
+   "weapon_type": "catalyst",
+   "rarity": 3
+  },
+  {
+   "key": "ultimateoverlordsmegamagicsword",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "urakumisugiri",
+   "weapon_type": "sword",
+   "rarity": 5
+  },
+  {
+   "key": "verdict",
+   "weapon_type": "claymore",
+   "rarity": 5
+  },
+  {
+   "key": "vividnotions",
+   "weapon_type": "catalyst",
+   "rarity": 5
+  },
+  {
+   "key": "vortexvanquisher",
+   "weapon_type": "polearm",
+   "rarity": 5
+  },
+  {
+   "key": "wanderingevenstar",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "wastergreatsword",
+   "weapon_type": "claymore",
+   "rarity": 1
+  },
+  {
+   "key": "wavebreakersfin",
+   "weapon_type": "polearm",
+   "rarity": 4
+  },
+  {
+   "key": "waveridingwhirl",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "whiteblind",
+   "weapon_type": "claymore",
+   "rarity": 4
+  },
+  {
+   "key": "whiteirongreatsword",
+   "weapon_type": "claymore",
+   "rarity": 3
+  },
+  {
+   "key": "whitetassel",
+   "weapon_type": "polearm",
+   "rarity": 3
+  },
+  {
+   "key": "windblumeode",
+   "weapon_type": "bow",
+   "rarity": 4
+  },
+  {
+   "key": "wineandsong",
+   "weapon_type": "catalyst",
+   "rarity": 4
+  },
+  {
+   "key": "wolffang",
+   "weapon_type": "sword",
+   "rarity": 4
+  },
+  {
+   "key": "wolfsgravestone",
+   "weapon_type": "claymore",
+   "rarity": 5
+  },
+  {
+   "key": "xiphosmoonlight",
+   "weapon_type": "sword",
+   "rarity": 4
+  }
+ ],
+ "artifact_sets": [
+  "adaycarvedfromrisingwinds",
+  "archaicpetra",
+  "aubadeofmorningstarandmoon",
+  "berserker",
+  "blizzardstrayer",
+  "bloodstainedchivalry",
+  "braveheart",
+  "celestialgift",
+  "crimsonwitchofflames",
+  "deepwoodmemories",
+  "defenderswill",
+  "desertpavilionchronicle",
+  "disenchantmentindeepshadow",
+  "echoesofanoffering",
+  "emblemofseveredfate",
+  "finaleofthedeepgalleries",
+  "flowerofparadiselost",
+  "fragmentofharmonicwhimsy",
+  "gambler",
+  "gildeddreams",
+  "gladiatorsfinale",
+  "goldentroupe",
+  "heartofdepth",
+  "heartofthefurnace",
+  "huskofopulentdreams",
+  "instructor",
+  "lavawalker",
+  "longnightsoath",
+  "maidenbeloved",
+  "marechausseehunter",
+  "martialartist",
+  "nightoftheskysunveiling",
+  "nighttimewhispersintheechoingwoods",
+  "noblesseoblige",
+  "nymphsdream",
+  "obsidiancodex",
+  "oceanhuedclam",
+  "paleflame",
+  "resolutionofsojourner",
+  "retracingbolide",
+  "scarletproof",
+  "scholar",
+  "scrolloftheheroofcindercity",
+  "shimenawasreminiscence",
+  "silkenmoonsserenade",
+  "songofdayspast",
+  "tenacityofthemillelith",
+  "theexile",
+  "thunderingfury",
+  "thundersoother",
+  "unfinishedreverie",
+  "vermillionhereafter",
+  "viridescentvenerer",
+  "vourukashasglow",
+  "wandererstroupe"
+ ]
+}
