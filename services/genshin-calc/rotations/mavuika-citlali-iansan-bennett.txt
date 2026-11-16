@@ -49,19 +49,39 @@ bennett add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*4 atk=16.54*2 
 target lvl=100 resist=0.1 radius=2 pos=0,2.4 hp=999999999;
 energy every interval=480,720 amount=1;
 
+# Iansan's burst buff is 27% of her ATK at 42+ Nightsoul points and less below that. Her
+# points drain by 6 per second, and she regains them from the active character's movement,
+# which the simulator only counts when the script reports it (her burst also ends if she runs
+# out). mv() reports movement at move_speed metres per second of field time since the last
+# call. 8 m/s is the least that keeps her at 42+ through the burst, as the guides assume
+# ("easily maintain the maximum buff"); faster movement overflows her points, which at C6 adds
+# her damage bonus (about +2% team DPS here at 12 m/s). Without movement her buff fell to
+# under 4% of her ATK.
+let move_speed = 8;
+let last_f = 0;
+fn mv() {
+  movement((f() - last_f) / 60 * move_speed);
+  last_f = f();
+}
+
 active mavuika;
 for let i=0; i<6; i=i+1 {
   mavuika skill, attack;
   bennett skill, burst;
   iansan skill, attack;
   if .iansan.burst.ready { iansan burst; }
+  last_f = f();
   citlali skill;
   if .citlali.burst.ready { citlali burst; }
   citlali attack;
   while !.mavuika.burst.ready { mavuika attack; }
   mavuika burst;
+  mv();
   delay(18);                             # wait for Citlali's Cryo
   mavuika charge:3, charge[hold=6], charge[final=1], dash;
+  mv();
   mavuika charge:3, charge[hold=6], charge[final=1], dash;
+  mv();
   mavuika charge, charge[hold=30], charge[final=1];
+  mv();
 }

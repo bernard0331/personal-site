@@ -50,16 +50,24 @@ mavuika add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 
 target lvl=100 resist=0.1 radius=2 pos=0,2.4 hp=999999999;
 energy every interval=480,720 amount=1;
 
-# Iansan's burst buff is 27% of her ATK at 42+ Nightsoul points and less below that; she
-# regains points from the active character's movement, which the simulator only counts when
-# the script reports it. The guide says Varesa's plunges "easily maintain the maximum buff",
-# so each plunge combo (and each of Mavuika's C2D) reports 12m, the least that keeps Iansan
-# at 42+ until her burst ends. Without it her buff fell to under 4% of her ATK.
-let move_m = 12;
+# Iansan's burst buff is 27% of her ATK at 42+ Nightsoul points and less below that. Her
+# points drain by 6 per second, and she regains them from the active character's movement,
+# which the simulator only counts when the script reports it (her burst also ends if she runs
+# out). mv() reports movement at move_speed metres per second of field time since the last
+# call. 8 m/s is the least that keeps her at 42+ through the burst, as the guides assume
+# ("easily maintain the maximum buff"); faster movement overflows her points, which at C6 adds
+# her damage bonus (about +2% team DPS here at 12 m/s). Without movement her buff fell to
+# under 4% of her ATK.
+let move_speed = 8;
+let last_f = 0;
+fn mv() {
+  movement((f() - last_f) / 60 * move_speed);
+  last_f = f();
+}
 
 fn ecp() {
   varesa skill, attack, high_plunge[collision=1];
-  movement(move_m);
+  mv();
 }
 
 active varesa;
@@ -68,8 +76,9 @@ for let i=0; i<6; i=i+1 {
   if .chevreuse.burst.ready { chevreuse burst; }
   chevreuse skill[hold=1];
   iansan skill, burst;
+  last_f = f();
   mavuika skill, burst;
-  for let k=0; k<3; k=k+1 { mavuika charge:2, dash; movement(move_m); }
+  for let k=0; k<3; k=k+1 { mavuika charge:2, dash; mv(); }
   for let j=0; j<2; j=j+1 {
     ecp();
     if .varesa.energy >= 30 && .varesa.status.apex-drive { varesa burst; }
