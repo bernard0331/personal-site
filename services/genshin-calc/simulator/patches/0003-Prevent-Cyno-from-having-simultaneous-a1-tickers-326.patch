@@ -1,0 +1,120 @@
+From 7ce856cad921947970cfe22c98a9ab1af20c4d55 Mon Sep 17 00:00:00 2001
+From: jwalk-511 <jwalk511.genshin@gmail.com>
+Date: Wed, 4 Nov 2026 09:43:49 -0600
+Subject: [PATCH 3/5] Prevent Cyno from having simultaneous a1 tickers (#3263)
+
+* Prevent simultaneous a1 tickers
+
+* Update cyno.go
+
+* Cyno Q overwrites A1 timing
+
+* Fix skill CD mechanics
+
+* Remove outdated comment in skill.go
+
+(cherry picked from commit 020f28c140c8008618588d0cd02f3a717aaeb142)
+---
+ internal/characters/cyno/asc.go   |  4 ++++
+ internal/characters/cyno/burst.go | 21 +--------------------
+ internal/characters/cyno/skill.go | 14 +++++++++-----
+ 3 files changed, 14 insertions(+), 25 deletions(-)
+
+diff --git a/internal/characters/cyno/asc.go b/internal/characters/cyno/asc.go
+index 4c03fbce6..b3d551120 100644
+--- a/internal/characters/cyno/asc.go
++++ b/internal/characters/cyno/asc.go
+@@ -24,6 +24,10 @@ func (c *char) a1(src int) {
+ 	if !c.StatusIsActive(burstKey) {
+ 		return
+ 	}
++
++	if src != c.burstSrc {
++		return
++	}
+ 	c.a1Extended = false
+ 	c.AddStatus(a1Key, 84, true)
+ 	c.QueueCharTask(func() { c.a1(src) }, 234)
+diff --git a/internal/characters/cyno/burst.go b/internal/characters/cyno/burst.go
+index 4e002d0e3..65586175e 100644
+--- a/internal/characters/cyno/burst.go
++++ b/internal/characters/cyno/burst.go
+@@ -36,12 +36,8 @@ func (c *char) Burst(p map[string]int) (action.Info, error) {
+ 			return c.burstEM
+ 		},
+ 	})
+-	c.burstSrc = c.Core.F
+-	src := c.Core.F
+-	// if cyno extends his burst, we need to set skill CD properly
+-	c.QueueCharTask(func() { c.onBurstExpiry(src) }, 713+240)
+-	c.QueueCharTask(func() { c.onBurstExpiry(src) }, 713+480)
+ 
++	c.burstSrc = c.Core.F
+ 	c.a1OnBurst()
+ 
+ 	c.SetCD(action.ActionBurst, 1200)
+@@ -69,10 +65,6 @@ func (c *char) tryBurstPPSlide(hitmark int) {
+ 		c.ExtendStatus(c1RevKey, hitmark-duration+1)
+ 		c.Core.Log.NewEvent("pp slide activated", glog.LogCharacterEvent, c.Index()).
+ 			Write("expiry", c.StatusExpiry(burstKey))
+-		src := c.burstSrc
+-		c.QueueCharTask(func() {
+-			c.onBurstExpiry(src)
+-		}, hitmark-duration+3) // 3f because burst expires on 2f
+ 	}
+ }
+ 
+@@ -87,17 +79,6 @@ func (c *char) burstInit() {
+ 		prev := args[0].(int)
+ 		if prev == c.Index() {
+ 			c.DeleteStatus(burstKey)
+-			c.onBurstExpiry(c.burstSrc)
+ 		}
+ 	}, "cyno-burst-clear")
+ }
+-
+-func (c *char) onBurstExpiry(burstSrc int) {
+-	if burstSrc != c.burstSrc {
+-		return
+-	}
+-	if c.StatusIsActive(burstKey) {
+-		return
+-	}
+-	c.burstSrc = -1 // make sure we don't call other burst fns
+-}
+diff --git a/internal/characters/cyno/skill.go b/internal/characters/cyno/skill.go
+index 37d7515d4..ce0feb6e7 100644
+--- a/internal/characters/cyno/skill.go
++++ b/internal/characters/cyno/skill.go
+@@ -167,7 +167,7 @@ func (c *char) skillB() (action.Info, error) {
+ 
+ 	c.tryBurstPPSlide(skillBHitmark)
+ 
+-	c.SetCDWithDelay(action.ActionSpecialSkill, skillBCD, skillBCDDelay)
++	c.Core.Tasks.Add(c.triggerSkillCD, skillBCDDelay)
+ 	return action.Info{
+ 		Frames:          frames.NewAbilFunc(skillBFrames),
+ 		AnimationLength: skillBFrames[action.InvalidAction],
+@@ -176,11 +176,15 @@ func (c *char) skillB() (action.Info, error) {
+ 	}, nil
+ }
+ 
++// Using E puts both E and special E on CD for whichever has a charge available.
++// May trigger both CDs if both are available.
+ func (c *char) triggerSkillCD() {
+-	c.SetCD(action.ActionSkill, skillCD)
+-	// using E puts special E on CD. But using special E doesn't affect E CD
+-	c.ResetActionCooldown(action.ActionSpecialSkill)
+-	c.SetCD(action.ActionSpecialSkill, skillBCD)
++	if c.AvailableCDCharge[action.ActionSkill] > 0 {
++		c.SetCD(action.ActionSkill, skillCD)
++	}
++	if c.AvailableCDCharge[action.ActionSpecialSkill] > 0 {
++		c.SetCD(action.ActionSpecialSkill, skillBCD)
++	}
+ }
+ 
+ func (c *char) makeParticleCB(burst bool) info.AttackCBFunc {
+-- 
+2.42.0
+

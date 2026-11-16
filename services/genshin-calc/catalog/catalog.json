@@ -1,8 +1,8 @@
 {
  "engine": {
   "name": "kqmsim",
-  "release": "kqmsim-v7.3.3",
-  "commit": "7bdf45f2e299c6bf782f81dc60d6cb19fd0bfb4c"
+  "release": "kqmsim-v7.3.3+5patches",
+  "commit": "a7eba94dc32186d8ec07d8f86dd75b33a8edd5ba"
  },
  "characters": [
   {

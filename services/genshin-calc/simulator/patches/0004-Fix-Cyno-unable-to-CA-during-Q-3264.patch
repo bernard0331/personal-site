@@ -1,0 +1,44 @@
+From aab3da7a71d3b07978aef1d1b453f5f47dd78611 Mon Sep 17 00:00:00 2001
+From: soloxcx <58927267+soloxcx@users.noreply.github.com>
+Date: Wed, 4 Nov 2026 21:05:37 -0600
+Subject: [PATCH 4/5] Fix Cyno unable to CA during Q (#3264)
+
+(cherry picked from commit f1f70a615b110ab47a348b7364aeb66cca85e3b7)
+---
+ internal/characters/cyno/cyno.go | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/internal/characters/cyno/cyno.go b/internal/characters/cyno/cyno.go
+index a457f903a..7948cf835 100644
+--- a/internal/characters/cyno/cyno.go
++++ b/internal/characters/cyno/cyno.go
+@@ -5,6 +5,8 @@ import (
+ 	"github.com/genshinsim/gcsim/pkg/core"
+ 	"github.com/genshinsim/gcsim/pkg/core/action"
+ 	"github.com/genshinsim/gcsim/pkg/core/info"
++	"github.com/genshinsim/gcsim/pkg/core/keys"
++	"github.com/genshinsim/gcsim/pkg/core/player"
+ 	"github.com/genshinsim/gcsim/pkg/core/player/character"
+ )
+ 
+@@ -80,6 +82,17 @@ func (c *char) NextNormalCounter() int {
+ 	return c.NormalCounter + 1
+ }
+ 
++func (c *char) NextQueueItemIsValid(k keys.Char, a action.Action, p map[string]int) error {
++	if a == action.ActionCharge && c.StatusIsActive(burstKey) {
++		// Burst needs to check separate normal counter for valid CA
++		if c.normalBCounter == 0 {
++			return player.ErrInvalidChargeAction
++		}
++		return nil
++	}
++	return c.Character.NextQueueItemIsValid(k, a, p)
++}
++
+ func (c *char) ActionReady(a action.Action, p map[string]int) (bool, action.Failure) {
+ 	if a != action.ActionSkill {
+ 		return c.Character.ActionReady(a, p)
+-- 
+2.42.0
+

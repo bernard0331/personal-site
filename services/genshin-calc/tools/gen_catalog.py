@@ -89,7 +89,10 @@ def main():
         sys.exit(f"unreleased.txt names characters the simulator does not have: {sorted(missing)}")
 
     commit = subprocess.run(["git", "-C", str(sim), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
-    tag = subprocess.run(["git", "-C", str(sim), "describe", "--tags", "--exact-match"], capture_output=True, text=True).stdout.strip()
+    tag = subprocess.run(["git", "-C", str(sim), "describe", "--tags", "--abbrev=0"], capture_output=True, text=True).stdout.strip()
+    patches = sorted(p.name for p in (here / "simulator" / "patches").glob("*.patch"))
+    if patches:
+        tag += f"+{len(patches)}patches"
     out = {
         "engine": {"name": "kqmsim", "release": tag, "commit": commit},
         "characters": sorted(characters, key=lambda c: c["key"]),

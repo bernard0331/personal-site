@@ -1,0 +1,953 @@
+From e8b27282c0408150cb7b96363c556e6453a262f5 Mon Sep 17 00:00:00 2001
+From: Charlie-Zheng <Charlie-Zheng@users.noreply.github.com>
+Date: Wed, 28 Oct 2026 20:02:33 -0600
+Subject: [PATCH 1/5] Add Wrio Revelation (#3212)
+
+* Wrio revelation
+
+* Fix lint
+
+* Fix c4
+
+* Fix review
+
+* Fix review
+
+(cherry picked from commit 8e0bc716ce720ab3f3a5ee5c0e5608b56322bb91)
+---
+ internal/characters/wriothesley/asc.go        |  13 +-
+ internal/characters/wriothesley/attack.go     |  63 +++--
+ internal/characters/wriothesley/charge.go     |   6 +
+ internal/characters/wriothesley/config.yml    |  28 +-
+ internal/characters/wriothesley/cons.go       | 264 ++++++++++++++++--
+ internal/characters/wriothesley/stellar.go    | 131 +++++++++
+ .../characters/wriothesley/wriothesley.go     |  33 +--
+ pkg/core/attacks/attack.go                    |   2 +
+ .../docs/src/components/AoE/character.dm.json |   9 +
+ .../src/components/Fields/character.dm.json   |   4 +
+ .../src/components/Hitlag/character.dm.json   |   8 +
+ 11 files changed, 495 insertions(+), 66 deletions(-)
+ create mode 100644 internal/characters/wriothesley/stellar.go
+
+diff --git a/internal/characters/wriothesley/asc.go b/internal/characters/wriothesley/asc.go
+index 694be3698..75fc638cc 100644
+--- a/internal/characters/wriothesley/asc.go
++++ b/internal/characters/wriothesley/asc.go
+@@ -12,9 +12,10 @@ import (
+ )
+ 
+ const (
+-	a1Status = "wriothesley-a1"
+-	a1ICD    = 5 * 60
+-	a1ICDKey = "wriothesley-a1-icd"
++	a1Status   = "wriothesley-a1"
++	a1ICD      = 5 * 60
++	a1ICDKey   = "wriothesley-a1-icd"
++	a1HealName = "There Shall Be a Plea for Justice"
+ )
+ 
+ func (c *char) a1Ready() bool {
+@@ -60,8 +61,8 @@ func (c *char) a1(ai *info.AttackInfo, snap *info.Snapshot) info.AttackCBFunc {
+ 		c.Core.Player.Heal(info.HealInfo{
+ 			Caller:  c.Index(),
+ 			Target:  c.Index(),
+-			Message: "There Shall Be a Plea for Justice",
+-			Src:     c.caHeal * c.MaxHP(),
++			Message: a1HealName,
++			Src:     c.rebukeHeal * c.MaxHP(),
+ 			Bonus:   c.Stat(attributes.Heal),
+ 		})
+ 	}
+@@ -69,7 +70,7 @@ func (c *char) a1(ai *info.AttackInfo, snap *info.Snapshot) info.AttackCBFunc {
+ 
+ // When Wriothesley's current HP increases or decreases, if he is in the Chilling Penalty state conferred by Icefang Rush,
+ // Chilling Penalty will gain one stack of Prosecution Edict. Max 5 stacks. Each stack will increase Wriothesley's ATK by 6%.
+-func (c *char) a4() {
++func (c *char) a4Init() {
+ 	if c.Base.Ascension < 4 {
+ 		return
+ 	}
+diff --git a/internal/characters/wriothesley/attack.go b/internal/characters/wriothesley/attack.go
+index a089de202..3756c5df4 100644
+--- a/internal/characters/wriothesley/attack.go
++++ b/internal/characters/wriothesley/attack.go
+@@ -52,11 +52,11 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
+ 	case action.DashState, action.SkillState:
+ 		c.NormalCounter = c.savedNormalCounter
+ 	}
+-
++	n := c.NormalCounter
+ 	for i, mult := range attack[c.NormalCounter] {
+ 		ai := info.AttackInfo{
+ 			ActorIndex:         c.Index(),
+-			Abil:               fmt.Sprintf("Normal %v", c.NormalCounter),
++			Abil:               fmt.Sprintf("Normal %v", n+1),
+ 			AttackTag:          attacks.AttackTagNormal,
+ 			ICDTag:             attacks.ICDTagNormalAttack,
+ 			ICDGroup:           attacks.ICDGroupDefault,
+@@ -68,34 +68,65 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
+ 			HitlagHaltFrames:   attackHitlagHaltFrame[c.NormalCounter][i] * 60,
+ 			CanBeDefenseHalted: true,
+ 		}
+-		c1N5CB := c.makeC1N5CB() // here so that the normalcounter check is correct
+-		n := c.NormalCounter
++		c1N5CB := c.makeC1N5CB(n) // here so that the normalcounter check is correct
++
+ 		c.QueueCharTask(func() {
+ 			// TODO: when should this check happen?
+ 			skillIndex := 0
+ 			var particleCB info.AttackCBFunc
+ 			var chillingPenalty info.AttackCBFunc
++			var snap info.Snapshot
+ 			if c.skillBuffActive() {
+ 				skillIndex = 1
+ 				particleCB = c.particleCB
+ 				chillingPenalty = c.chillingPenalty
+-				ai.Abil = fmt.Sprintf("Normal %v (Enhanced)", n)
++				ai.Abil = fmt.Sprintf("Normal %v (Enhanced)", n+1)
++				ai.Mult *= skill[c.TalentLvlSkill()]
++				ai.Mult *= 1 + c.c2RevelationNAMult()
++			}
++
++			if c.skillBuffActive() && c.a1StellarEnabled() && (n == 2 || n == 4) {
++				ai.Abil += stellarConductText
++				ai.AttackTag = attacks.AttackTagDirectStellarConduct
++				ai.IgnoreDefPercent = 1
++				ai.Durability = 0
++				if n == 2 {
++					ai.Mult *= 0.6
++				} else {
++					ai.AdditionalTags = []attacks.AttackTag{attacks.AttackTagWrioSSCN5}
++					ai.Mult *= 0.8
++				}
++				// this won't overlap with the NA mult because the NA mult only get applied when the stellar field isn't enabled
++				ai.Mult *= 1 + c.c2RevelationSSCMult()
+ 			}
+-			c.Core.QueueAttack(
++
++			ap := combat.NewBoxHitOnTarget(
++				c.Core.Combat.Player(),
++				info.Point{Y: attackOffsets[skillIndex]},
++				attackHitboxes[skillIndex][c.NormalCounter][0],
++				attackHitboxes[skillIndex][c.NormalCounter][1],
++			)
++
++			snap = c.Snapshot(&ai)
++
++			if c.skillBuffActive() && c.a1StellarEnabled() {
++				c.addC6Buff(&snap)
++			}
++
++			c.Core.QueueAttackWithSnap(
+ 				ai,
+-				combat.NewBoxHitOnTarget(
+-					c.Core.Combat.Player(),
+-					info.Point{Y: attackOffsets[skillIndex]},
+-					attackHitboxes[skillIndex][c.NormalCounter][0],
+-					attackHitboxes[skillIndex][c.NormalCounter][1],
+-				),
+-				0,
++				snap,
++				ap,
+ 				0,
+ 				c1N5CB,
+ 				particleCB,
+ 				chillingPenalty,
+ 			)
+-		}, attackHitmarks[c.NormalCounter][i])
++
++			if n == 4 {
++				c.c6OnN5(&ai, &snap, &ap)
++			}
++		}, attackHitmarks[n][i])
+ 	}
+ 
+ 	defer func() {
+@@ -105,8 +136,8 @@ func (c *char) Attack(p map[string]int) (action.Info, error) {
+ 
+ 	return action.Info{
+ 		Frames:          frames.NewAttackFunc(c.Character, attackFrames),
+-		AnimationLength: attackFrames[c.NormalCounter][action.InvalidAction],
+-		CanQueueAfter:   attackHitmarks[c.NormalCounter][len(attackHitmarks[c.NormalCounter])-1],
++		AnimationLength: attackFrames[n][action.InvalidAction],
++		CanQueueAfter:   attackHitmarks[n][len(attackHitmarks[n])-1],
+ 		State:           action.NormalAttackState,
+ 	}, nil
+ }
+diff --git a/internal/characters/wriothesley/charge.go b/internal/characters/wriothesley/charge.go
+index aca64e8cb..675b13b8a 100644
+--- a/internal/characters/wriothesley/charge.go
++++ b/internal/characters/wriothesley/charge.go
+@@ -24,6 +24,10 @@ func init() {
+ }
+ 
+ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
++	if c.a1StellarCAReady() {
++		return c.a1StellarCA(), nil
++	}
++
+ 	ai := info.AttackInfo{
+ 		ActorIndex:       c.Index(),
+ 		Abil:             "Charge Attack",
+@@ -60,6 +64,8 @@ func (c *char) ChargeAttack(p map[string]int) (action.Info, error) {
+ 		}
+ 	}
+ 
++	ai.Mult *= 1 + c.c2RevelationCAMult()
++
+ 	c.Core.QueueAttackWithSnap(ai, snap, ap, chargeHitmark, rebukeCB, particleCB)
+ 	// When released, it will also unleash an icicle that deals 100% of Rebuke: Vaulting Fist's Base
+ 	// DMG. DMG dealt this way is regarded as Charged Attack DMG.
+diff --git a/internal/characters/wriothesley/config.yml b/internal/characters/wriothesley/config.yml
+index 3e85af41e..b1bffeb1e 100644
+--- a/internal/characters/wriothesley/config.yml
++++ b/internal/characters/wriothesley/config.yml
+@@ -26,6 +26,7 @@ talents:
+ docs:
+   fields:
+     .wriothesley.gracious-rebuke: Whether Wriothesley currently has a Gracious Rebuke or not.
++    .wriothesley.gracious-rebuke-unveiling: "Whether Wriothesley currently has Gracious Rebuke: Unveiling or not."
+   frames:
+     - count: https://docs.google.com/spreadsheets/d/1xQsRq1LKoU7Eu_81S4iOFY-kQNTGMWk9NJrjgSWzL6M/edit?usp=sharing
+       count_credit: caramielle
+@@ -81,37 +82,37 @@ abilities:
+         shape: Box
+         center: Player
+         box: [2.4, 3.4]
+-        hitlag: {defense_halt: true}
++        hitlag: { defense_halt: true }
+ 
+       - name: E-N2
+         shape: Box
+         center: Player
+         box: [2.4, 3.4]
+-        hitlag: {defense_halt: true}
++        hitlag: { defense_halt: true }
+ 
+       - name: E-N3
+         shape: Box
+         center: Player
+         box: [2.8, 3.4]
+-        hitlag: {time: 0.03, scale: 0.01, defense_halt: true}
++        hitlag: { time: 0.03, scale: 0.01, defense_halt: true }
+ 
+       - name: E-N4-1
+         shape: Box
+         center: Player
+         box: [2.4, 3.4]
+-        hitlag: {defense_halt: true}
++        hitlag: { defense_halt: true }
+ 
+       - name: E-N4-2
+         shape: Box
+         center: Player
+         box: [2.4, 3.4]
+-        hitlag: {defense_halt: true}
++        hitlag: { defense_halt: true }
+ 
+       - name: E-N5
+         shape: Box
+         center: Player
+         box: [3.4, 3.4]
+-        hitlag: {time: 0.06, scale: 0.01, defense_halt: true}
++        hitlag: { time: 0.06, scale: 0.01, defense_halt: true }
+ 
+   - name: charge
+     note: Need to use attack right before charge.
+@@ -121,14 +122,21 @@ abilities:
+         center: Player
+         offset: [0, -1.2]
+         box: [2.8, 3.6]
+-        hitlag: {time: 0.09, scale: 0.01}
++        hitlag: { time: 0.09, scale: 0.01 }
+ 
+       - name: CA-Gracious-Rebuke
+         shape: Box
+         center: Player
+         offset: [0, -0.8]
+         box: [4, 5]
+-        hitlag: {time: 0.12, scale: 0.03}
++        hitlag: { time: 0.12, scale: 0.03 }
++
++      - name: CA-Luster-Vaulting-Fist
++        shape: Box
++        center: Player
++        offset: [0, -0.8]
++        box: [4, 5]
++        hitlag: { time: 0.12, scale: 0.03 }
+ 
+   - name: plunge
+     hitbox:
+@@ -170,7 +178,7 @@ abilities:
+         shape: Box
+         center: Player
+         box: [10, 16]
+-        hitlag: {time: 0.03, scale: 0.01}
++        hitlag: { time: 0.03, scale: 0.01 }
+ 
+   - name: cons
+     hitbox:
+@@ -179,4 +187,4 @@ abilities:
+         center: Player
+         offset: [0, -0.8]
+         box: [4, 5]
+-        hitlag: {time: 0.12, scale: 0.03}
++        hitlag: { time: 0.12, scale: 0.03 }
+diff --git a/internal/characters/wriothesley/cons.go b/internal/characters/wriothesley/cons.go
+index 18510174d..0675e9562 100644
+--- a/internal/characters/wriothesley/cons.go
++++ b/internal/characters/wriothesley/cons.go
+@@ -1,6 +1,9 @@
+ package wriothesley
+ 
+ import (
++	"slices"
++
++	"github.com/genshinsim/gcsim/pkg/core/attacks"
+ 	"github.com/genshinsim/gcsim/pkg/core/attributes"
+ 	"github.com/genshinsim/gcsim/pkg/core/event"
+ 	"github.com/genshinsim/gcsim/pkg/core/glog"
+@@ -65,31 +68,47 @@ func (c *char) c1(ai *info.AttackInfo, snap *info.Snapshot) (info.AttackCBFunc,
+ 		c.AddStatus(c1ICDKey, c1ICD, true)
+ 
+ 		// E extension
+-		if !c.c1SkillExtensionProc && c.StatusIsActive(skillKey) {
+-			c.ExtendStatus(skillKey, c1SkillExtension)
+-			c.c1SkillExtensionProc = true
+-			c.Core.Log.NewEvent("c1: skill duration is extended", glog.LogCharacterEvent, c.Index())
+-		}
++		c.c1SkillExtension()
+ 
+ 		// heal
+ 		c.Core.Player.Heal(info.HealInfo{
+ 			Caller:  c.Index(),
+ 			Target:  c.Index(),
+-			Message: "There Shall Be a Plea for Justice",
+-			Src:     c.caHeal * c.MaxHP(),
++			Message: a1HealName,
++			Src:     c.rebukeHeal * c.MaxHP(),
+ 			Bonus:   c.Stat(attributes.Heal),
+ 		})
+ 	}, c.Base.Cons >= 6
+ }
+ 
+-func (c *char) makeC1N5CB() info.AttackCBFunc {
+-	if c.Base.Cons < 1 || c.NormalCounter != 4 {
++func (c *char) makeC1N5CB(naCounter int) info.AttackCBFunc {
++	if c.Base.Cons < 1 {
+ 		return nil
+ 	}
++
++	if naCounter != 4 {
++		return nil
++	}
++
+ 	return func(a info.AttackCB) {
+ 		if a.Target.Type() != info.TargettableEnemy {
+ 			return
+ 		}
++		if c.a1StellarEnabled() && c.skillBuffActive() {
++			c.AddReactBonusMod(character.ReactBonusMod{
++				Base: modifier.NewBaseWithHitlag(c1Status+"-revelation-ca", 5*60),
++				Amount: func(ai info.AttackInfo) float64 {
++					if slices.Contains(ai.AdditionalTags, attacks.AttackTagWrioSSCCA) {
++						c.Core.Tasks.Add(func() {
++							c.DeleteReactBonusMod(c1Status + "-revelation-ca")
++						}, 0)
++						return 0.5
++					}
++					return 0
++				},
++			})
++			return
++		}
+ 		// check if E active
+ 		if !c.StatusIsActive(skillKey) {
+ 			return
+@@ -103,6 +122,48 @@ func (c *char) makeC1N5CB() info.AttackCBFunc {
+ 	}
+ }
+ 
++// Radiance: Stellar-Conduct:
++// After a Luster: Vaulting Fist attack hits an opponent, the next fifth attack of Repelling Fist
++// enhanced by Chilling Penalty that hits within the next 5s deals 50% increased Stellar-Conduct DMG.
++// After the fifth attack of Repelling Fist enhanced by Chilling Penalty hits an opponent, Luster:
++// Vaulting Fists that hit within the next 5s deal 50% increased DMG.
++// If Luster: Vaulting Fist hits an opponent while Wriothesley is in the Chilling Penalty state,
++// that state's duration is extended by 4s.
++func (c *char) c1StellarCACB(a info.AttackCB) {
++	if c.Base.Cons < 1 {
++		return
++	}
++	if a.Target.Type() != info.TargettableEnemy {
++		return
++	}
++	if !c.a1StellarEnabled() {
++		return
++	}
++
++	c.AddReactBonusMod(character.ReactBonusMod{
++		Base: modifier.NewBaseWithHitlag(c1Status+"-revelation-n5", 5*60),
++		Amount: func(ai info.AttackInfo) float64 {
++			if slices.Contains(ai.AdditionalTags, attacks.AttackTagWrioSSCN5) {
++				c.Core.Tasks.Add(func() {
++					c.DeleteReactBonusMod(c1Status + "-revelation-n5")
++				}, 0)
++				return 0.5
++			}
++			return 0
++		},
++	})
++
++	c.c1SkillExtension()
++}
++
++func (c *char) c1SkillExtension() {
++	if !c.c1SkillExtensionProc && c.StatusIsActive(skillKey) {
++		c.ExtendStatus(skillKey, c1SkillExtension)
++		c.c1SkillExtensionProc = true
++		c.Core.Log.NewEvent("c1: skill duration is extended", glog.LogCharacterEvent, c.Index())
++	}
++}
++
+ func (c *char) resetC1SkillExtension() {
+ 	if c.Base.Cons < 1 {
+ 		return
+@@ -129,20 +190,116 @@ func (c *char) c2(snap *info.Snapshot) {
+ 	c.Core.Log.NewEvent("adding c2", glog.LogCharacterEvent, c.Index()).Write("dmg%", dmg)
+ }
+ 
++// Additionally, when the Prosecution Edict stack reaches 5, if Wriothesley:
++// · Is in the Radiance: Stellar-Conduct state: The Talent "There Shall Be an Unveiling for
++// Injustice" will be enhanced, so that the third and fifth strikes of Repelling Fist, when enhanced
++// by Chilling Penalty, deal 90% or 120% of their original Cryo DMG respectively, while Luster:
++// Vaulting Fist will deal 150% of its original AoE Cryo DMG. The aforementioned DMG is considered
++// Stellar-Conduct DMG.
++// You must first unlock the Ascension Talent "There Shall Be a Reckoning for Sin."
++func (c *char) c2RevelationSSCMult() float64 {
++	// the math works out that all the SSC stuff just does +0.5x when buffed
++	if c.Base.Cons < 2 {
++		return 0
++	}
++
++	if !c.revelation {
++		return 0
++	}
++
++	if c.Base.Ascension < 4 {
++		return 0
++	}
++
++	if c.a4Stack < 5 {
++		return 0
++	}
++
++	if !c.skillBuffActive() {
++		return 0
++	}
++
++	if !c.isStellarRadiance() {
++		return 0
++	}
++
++	return 0.5
++}
++
++// Additionally, when the Prosecution Edict stack reaches 5, if Wriothesley:
++// · Is not in the Radiance: Stellar-Conduct state: Normal Attacks and Charged
++// Attacks will deal 125% or 130% of their original DMG respectively.
++// You must first unlock the Ascension Talent "There Shall Be a Reckoning for Sin."
++func (c *char) c2RevelationNAMult() float64 {
++	if c.Base.Cons < 2 {
++		return 0
++	}
++
++	if !c.revelation {
++		return 0
++	}
++
++	if c.Base.Ascension < 4 {
++		return 0
++	}
++
++	if !c.skillBuffActive() {
++		return 0
++	}
++
++	if c.isStellarRadiance() {
++		return 0
++	}
++
++	return 0.25
++}
++
++func (c *char) c2RevelationCAMult() float64 {
++	if c.Base.Cons < 2 {
++		return 0
++	}
++
++	if !c.revelation {
++		return 0
++	}
++
++	if c.Base.Ascension < 4 {
++		return 0
++	}
++
++	if !c.skillBuffActive() {
++		return 0
++	}
++
++	if c.isStellarRadiance() {
++		return 0
++	}
++
++	return 0.3
++}
++
+ // The HP restored to Wriothesley through Rebuke: Vaulting Fist will be increased to 50%
+ // of his Max HP. You must first unlock the Passive Talent "There Shall Be a Plea for Justice."
+ // Additionally, when Wriothesley is healed, if the amount of healing overflows, the following
+ // effects will occur depending on whether his is on the field or not. If he is on the field,
+ // his ATK SPD will be increased by 20% for 4s. If he is off-field, all party members' ATK SPD
+ // will be increased by 10% for 6s. These two ATK SPD increasing methods cannot stack.
+-func (c *char) c4() {
++//
++// Radiance: Stellar-Conduct: The aforementioned effect is changed to:
++// Wriothesley takes 25% less DMG, and his ATK SPD is increased by 20%. Other nearby party members'
++// ATK SPD is increased by 10%.
++func (c *char) c4Init() {
+ 	if c.Base.Cons < 4 {
+-		c.caHeal = 0.3
++		c.rebukeHeal = 0.3
+ 		return
+ 	}
+-	c.caHeal = 0.5
++	c.rebukeHeal = 0.5
+ 
++	m := make([]float64, attributes.EndStatType)
+ 	c.Core.Events.Subscribe(event.OnHeal, func(args ...any) {
++		if c.revelation && c.isStellarRadiance() {
++			return
++		}
+ 		index := args[1].(int)
+ 		amount := args[2].(float64)
+ 		overheal := args[3].(float64)
+@@ -157,7 +314,6 @@ func (c *char) c4() {
+ 		}
+ 
+ 		chars := c.Core.Player.Chars()
+-		m := make([]float64, attributes.EndStatType)
+ 
+ 		// remove old buffs
+ 		for _, char := range chars {
+@@ -165,30 +321,66 @@ func (c *char) c4() {
+ 		}
+ 
+ 		if c.Core.Player.Active() == c.Index() {
+-			m[attributes.AtkSpd] = 0.2
+ 			c.AddStatMod(character.StatMod{
+ 				Base:         modifier.NewBaseWithHitlag(c4Status, 4*60),
+ 				AffectedStat: attributes.AtkSpd,
+ 				Amount: func() []float64 {
++					m[attributes.AtkSpd] = 0.2
+ 					return m
+ 				},
+ 			})
+ 		} else {
+-			m[attributes.AtkSpd] = 0.1
+ 			for _, char := range chars {
+ 				char.AddStatMod(character.StatMod{
+ 					Base:         modifier.NewBaseWithHitlag(c4Status, 6*60),
+ 					AffectedStat: attributes.AtkSpd,
+ 					Amount: func() []float64 {
++						m[attributes.AtkSpd] = 0.1
+ 						return m
+ 					},
+ 				})
+ 			}
+ 		}
+ 	}, "wriothesley-c4-heal")
++
++	if !c.revelation {
++		return
++	}
++
++	// TODO: take 25% less damage
++
++	for _, ch := range c.Core.Player.Chars() {
++		amt := 0.1
++		if ch.Index() == c.Index() {
++			amt = 0.2
++		}
++
++		ch.AddStatMod(character.StatMod{
++			Base:         modifier.NewBase(c4Status+"-revelation", -1),
++			AffectedStat: attributes.AtkSpd,
++			Amount: func() []float64 {
++				if ch.StatusIsActive(c4Status) {
++					return nil
++				}
++				if !c.isStellarRadiance() {
++					return nil
++				}
++				m[attributes.AtkSpd] = amt
++				return m
++			},
++		})
++	}
+ }
+ 
+-// The CRIT Rate of Rebuke: Vaulting Fist will be increased by 10%, and its CRIT DMG by 80%.
++// The CRIT Rate of Rebuke: Vaulting Fist will be increased by 10%, and its CRIT DMG by 80%. When
++// unleashed, it will also create an additional icicle that deals 100% of Rebuke: Vaulting Fist's
++// original DMG as Cryo DMG. DMG dealt this way is regarded as Charged Attack DMG.
++//
++// Radiance: Stellar-Conduct: The aforementioned effect is changed to:
++// The Repelling Fist enhanced by Chilling Penalty, as well as Luster: Vaulting Fist, gain a 10%
++// CRIT Rate and 80% CRIT DMG boost. In addition, the fifth attack of Repelling Fists enhanced by
++// Chilling Penalty, as well as Luster: Vaulting Fist, will each generate an additional icicle that
++// deals Cryo DMG at 60% of its original DMG. This DMG will be considered Stellar-Conduct DMG.
+ func (c *char) addC6Buff(snap *info.Snapshot) {
+ 	if c.Base.Cons < 6 {
+ 		return
+@@ -199,3 +391,43 @@ func (c *char) addC6Buff(snap *info.Snapshot) {
+ 	snap.Stats[attributes.CD] += cd
+ 	c.Core.Log.NewEvent("adding c6", glog.LogCharacterEvent, c.Index()).Write("cr", cr).Write("cd", cd)
+ }
++
++func (c *char) c6OnN5(ai *info.AttackInfo, snap *info.Snapshot, ap *info.AttackPattern) {
++	if c.Base.Cons < 6 {
++		return
++	}
++	if !c.revelation {
++		return
++	}
++	if !c.skillBuffActive() {
++		return
++	}
++	if !c.a1StellarEnabled() {
++		return
++	}
++
++	ai.Abil = "Normal 5 (Enhanced) (C6)" + stellarConductText
++	ai.Mult *= 0.6
++	ai.IsDeployable = true
++	c.Core.QueueAttackWithSnap(*ai, *snap, *ap, 0, c.particleCB)
++}
++
++func (c *char) c6OnStellarCA(ai *info.AttackInfo, snap *info.Snapshot, ap *info.AttackPattern) {
++	if c.Base.Cons < 6 {
++		return
++	}
++	if !c.revelation {
++		return
++	}
++	if !c.skillBuffActive() {
++		return
++	}
++	if !c.a1StellarEnabled() {
++		return
++	}
++
++	ai.Abil = "Luster: Vaulting Fist (C6)" + stellarConductText
++	ai.Mult *= 0.6
++	ai.IsDeployable = true
++	c.Core.QueueAttackWithSnap(*ai, *snap, *ap, 0)
++}
+diff --git a/internal/characters/wriothesley/stellar.go b/internal/characters/wriothesley/stellar.go
+new file mode 100644
+index 000000000..f8ff11337
+--- /dev/null
++++ b/internal/characters/wriothesley/stellar.go
+@@ -0,0 +1,131 @@
++package wriothesley
++
++import (
++	"github.com/genshinsim/gcsim/internal/frames"
++	"github.com/genshinsim/gcsim/pkg/core/action"
++	"github.com/genshinsim/gcsim/pkg/core/attacks"
++	"github.com/genshinsim/gcsim/pkg/core/attributes"
++	"github.com/genshinsim/gcsim/pkg/core/combat"
++	"github.com/genshinsim/gcsim/pkg/core/info"
++	"github.com/genshinsim/gcsim/pkg/core/player/character"
++	"github.com/genshinsim/gcsim/pkg/modifier"
++	"github.com/genshinsim/gcsim/pkg/reactable"
++)
++
++const (
++	stellarConductText  = " (Stellar-Conduct)"
++	a1StellarKey        = "wriothesley-a1-stellar"
++	a1StellarHealICDKey = "wriothesley-a1-stellar-icd"
++)
++
++func (c *char) isStellarRadiance() bool {
++	return c.StatusIsActive(reactable.PolestarFieldKey)
++}
++
++func (c *char) a1StellarEnabled() bool {
++	if !c.revelation {
++		return false
++	}
++	return c.isStellarRadiance()
++}
++
++// Radiance: Stellar-Conduct: The Ascension Talent "There Shall Be a Plea for Justice" is changed to
++// the following:
++//
++// When Wriothesley's HP is less than 60%, he will obtain a "Gracious Rebuke: Unveiling." This
++// enhances the next Charged Attack of his Normal Attack: Forceful Fists of Frost into Luster:
++// Vaulting Fist, which will not consume Stamina and restores 30% Max HP to Wriothesley upon hit.
++// Wriothesley can gain HP in this way once every 2s.
++//
++// Additionally, the third and fifth strikes of Repelling Fist enhanced by Chilling Penalty will
++// deal 60% and 80% of their original Cryo DMG respectively, while Luster: Vaulting Fist will deal
++// 100% of its original AoE Cryo DMG. The aforementioned DMG is considered as Stellar-Conduct DMG,
++// and Wriothesley deals 30% increased Stellar-Conduct DMG.
++//
++// Additionally, when inside a Polestar Field, Wriothesley will enter the Radiance: Stellar-Conduct
++// state.
++func (c *char) stellarInit() {
++	if !c.revelation {
++		return
++	}
++	c.AddReactBonusMod(character.ReactBonusMod{
++		Base: modifier.NewBase(a1StellarKey, -1),
++		Amount: func(ai info.AttackInfo) float64 {
++			if ai.AttackTag != attacks.AttackTagDirectStellarConduct {
++				return 0
++			}
++			return 0.3
++		},
++	})
++}
++
++func (c *char) a1StellarCAReady() bool {
++	if c.Base.Ascension < 1 {
++		return false
++	}
++
++	if !c.revelation {
++		return false
++	}
++
++	if !c.isStellarRadiance() {
++		return false
++	}
++
++	return c.CurrentHPRatio() < 0.6
++}
++
++func (c *char) a1StellarCA() action.Info {
++	ai := info.AttackInfo{
++		ActorIndex:       c.Index(),
++		Abil:             "Luster: Vaulting Fist" + stellarConductText,
++		AttackTag:        attacks.AttackTagDirectStellarConduct,
++		AdditionalTags:   []attacks.AttackTag{attacks.AttackTagWrioSSCCA},
++		StrikeType:       attacks.StrikeTypeBlunt,
++		PoiseDMG:         110,
++		Element:          attributes.Cryo,
++		IgnoreDefPercent: 1,
++		Mult:             charge[c.TalentLvlAttack()] * (1 + c.c2RevelationSSCMult()),
++		HitlagFactor:     0.01,
++		HitlagHaltFrames: 0.12 * 60,
++	}
++
++	// TODO: snapshot timing
++	snap := c.Snapshot(&ai)
++	c.addC6Buff(&snap)
++
++	ap := combat.NewBoxHitOnTarget(c.Core.Combat.Player(), info.Point{Y: -0.8}, 4, 5)
++
++	c.QueueCharTask(func() {
++		c.Core.QueueAttackWithSnap(ai, snap, ap, 0, c.a1StellarCACB, c.c1StellarCACB)
++		c.c6OnStellarCA(&ai, &snap, &ap)
++	}, chargeHitmark)
++
++	return action.Info{
++		Frames:          frames.NewAbilFunc(chargeFrames),
++		AnimationLength: chargeFrames[action.InvalidAction],
++		CanQueueAfter:   chargeHitmark,
++		State:           action.ChargeAttackState,
++	}
++}
++
++func (c *char) a1StellarCACB(a info.AttackCB) {
++	if a.Target.Type() != info.TargettableEnemy {
++		return
++	}
++	// do not proc if a1 not active
++	if c.StatusIsActive(a1StellarHealICDKey) {
++		return
++	}
++
++	c.AddStatus(a1StellarHealICDKey, 2*60, true)
++
++	// heal
++	c.Core.Player.Heal(info.HealInfo{
++		Caller:  c.Index(),
++		Target:  c.Index(),
++		Message: a1HealName,
++		Src:     0.3 * c.MaxHP(),
++		Bonus:   c.Stat(attributes.Heal),
++	})
++}
+diff --git a/internal/characters/wriothesley/wriothesley.go b/internal/characters/wriothesley/wriothesley.go
+index dc85d1dec..fe75aea86 100644
+--- a/internal/characters/wriothesley/wriothesley.go
++++ b/internal/characters/wriothesley/wriothesley.go
+@@ -4,7 +4,6 @@ import (
+ 	tmpl "github.com/genshinsim/gcsim/internal/template/character"
+ 	"github.com/genshinsim/gcsim/pkg/core"
+ 	"github.com/genshinsim/gcsim/pkg/core/action"
+-	"github.com/genshinsim/gcsim/pkg/core/attacks"
+ 	"github.com/genshinsim/gcsim/pkg/core/info"
+ 	"github.com/genshinsim/gcsim/pkg/core/keys"
+ 	"github.com/genshinsim/gcsim/pkg/core/player"
+@@ -13,14 +12,15 @@ import (
+ 
+ type char struct {
+ 	*tmpl.Character
++	revelation           bool
+ 	savedNormalCounter   int
+-	caHeal               float64
++	rebukeHeal           float64
+ 	a4Stack              int
+ 	c1N5Proc             bool
+ 	c1SkillExtensionProc bool
+ }
+ 
+-func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) error {
++func NewChar(s *core.Core, w *character.CharWrapper, p info.CharacterProfile) error {
+ 	c := char{}
+ 	c.Character = tmpl.NewWithWrapper(s, w)
+ 
+@@ -30,6 +30,12 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
+ 	c.BurstCon = 5
+ 	c.HasArkhe = true
+ 
++	revelation, ok := p.Params["revelation"]
++	if !ok {
++		revelation = 1
++	}
++	c.revelation = revelation > 0
++
+ 	w.Character = &c
+ 
+ 	return nil
+@@ -37,24 +43,13 @@ func NewChar(s *core.Core, w *character.CharWrapper, _ info.CharacterProfile) er
+ 
+ func (c *char) Init() error {
+ 	c.onExit()
+-
+-	c.a4()
+-	c.c4()
++	c.stellarInit()
++	c.a4Init()
++	c.c4Init()
+ 
+ 	return nil
+ }
+ 
+-func (c *char) Snapshot(ai *info.AttackInfo) info.Snapshot {
+-	ds := c.Character.Snapshot(ai)
+-
+-	// apply skill multiplier
+-	if c.skillBuffActive() && ai.AttackTag == attacks.AttackTagNormal {
+-		ai.Mult *= skill[c.TalentLvlSkill()]
+-	}
+-
+-	return ds
+-}
+-
+ func (c *char) graciousRebukeReady() bool {
+ 	if c.Base.Ascension < 1 {
+ 		return false
+@@ -66,7 +61,7 @@ func (c *char) graciousRebukeReady() bool {
+ }
+ 
+ func (c *char) ActionStam(a action.Action, p map[string]int) float64 {
+-	if a == action.ActionCharge && c.graciousRebukeReady() {
++	if a == action.ActionCharge && (c.graciousRebukeReady() || c.a1StellarCAReady()) {
+ 		return 0
+ 	}
+ 	return c.Character.ActionStam(a, p)
+@@ -76,6 +71,8 @@ func (c *char) Condition(fields []string) (any, error) {
+ 	switch fields[0] {
+ 	case "gracious-rebuke":
+ 		return c.graciousRebukeReady(), nil
++	case "gracious-rebuke-unveiling":
++		return c.a1StellarCAReady(), nil
+ 	default:
+ 		return c.Character.Condition(fields)
+ 	}
+diff --git a/pkg/core/attacks/attack.go b/pkg/core/attacks/attack.go
+index 4f636f51f..537bea7a2 100644
+--- a/pkg/core/attacks/attack.go
++++ b/pkg/core/attacks/attack.go
+@@ -22,6 +22,8 @@ const (
+ 	AttackTagVarkaSpecial
+ 	AttackTagSandroneBeam
+ 	AttackTagValeriySpecial
++	AttackTagWrioSSCN5
++	AttackTagWrioSSCCA
+ 
+ 	AttackTagNoneStat // ignore attacker stats delim
+ 
+diff --git a/ui/packages/docs/src/components/AoE/character.dm.json b/ui/packages/docs/src/components/AoE/character.dm.json
+index 6065c4a6e..c649b0b4b 100644
+--- a/ui/packages/docs/src/components/AoE/character.dm.json
++++ b/ui/packages/docs/src/components/AoE/character.dm.json
+@@ -13327,6 +13327,15 @@
+       "box_x": 4,
+       "box_y": 5
+     },
++    {
++      "ability": "charge",
++      "name": "CA-Luster-Vaulting-Fist",
++      "shape": "Box",
++      "center": "Player",
++      "offset_y": -0.8,
++      "box_x": 4,
++      "box_y": 5
++    },
+     {
+       "ability": "plunge",
+       "name": "Plunge",
+diff --git a/ui/packages/docs/src/components/Fields/character.dm.json b/ui/packages/docs/src/components/Fields/character.dm.json
+index 5fbe5e6df..5a2e71348 100644
+--- a/ui/packages/docs/src/components/Fields/character.dm.json
++++ b/ui/packages/docs/src/components/Fields/character.dm.json
+@@ -277,6 +277,10 @@
+     {
+       "field": ".wriothesley.gracious-rebuke",
+       "desc": "Whether Wriothesley currently has a Gracious Rebuke or not."
++    },
++    {
++      "field": ".wriothesley.gracious-rebuke-unveiling",
++      "desc": "Whether Wriothesley currently has Gracious Rebuke: Unveiling or not."
+     }
+   ],
+   "xianyun": [
+diff --git a/ui/packages/docs/src/components/Hitlag/character.dm.json b/ui/packages/docs/src/components/Hitlag/character.dm.json
+index 07f306233..480557c85 100644
+--- a/ui/packages/docs/src/components/Hitlag/character.dm.json
++++ b/ui/packages/docs/src/components/Hitlag/character.dm.json
+@@ -4694,6 +4694,14 @@
+       "defense_halt": false,
+       "deployable": false
+     },
++    {
++      "ability": "charge",
++      "name": "CA-Luster-Vaulting-Fist",
++      "time": 0.12,
++      "scale": 0.03,
++      "defense_halt": false,
++      "deployable": false
++    },
+     {
+       "ability": "burst",
+       "name": "Q-Surging-Blade",
+-- 
+2.42.0
+

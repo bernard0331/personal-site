@@ -15,19 +15,16 @@ KQM Sim and gcsim are licensed under AGPL-3.0, so this service is too. See
 
 ## The simulator
 
-The service runs KQM Sim as a command-line program. The version is pinned, and
-every result records the version that produced it.
-
-| | |
-| :- | :- |
-| Pinned release | `kqmsim-v7.3.3` (commit `7bdf45f`) |
-| Built with | Go 1.27 |
+The service runs KQM Sim as a command-line program: release `kqmsim-v7.3.3` plus
+a few patches from upstream gcsim that the release does not have yet, such as
+Wriothesley's and Cyno's Stellar-Conduct upgrades. See
+[simulator/README.md](simulator/README.md). Every result records the version that
+produced it.
 
 Build it into `bin/kqmsim` at the repository root:
 
 ```bash
-git clone --depth 1 --branch kqmsim-v7.3.3 https://github.com/KQM-git/kqmsim.git ../kqmsim
-(cd ../kqmsim && go build -o ../personal-site/bin/kqmsim ./cmd/gcsim)
+services/genshin-calc/simulator/build.sh
 ```
 
 Run one config and write the full result as JSON:
