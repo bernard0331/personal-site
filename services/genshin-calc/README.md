@@ -43,9 +43,11 @@ is the damage split by element, which decides the team's element.
 
 | Path | What it is |
 | :- | :- |
-| `main.go` | The command-line program. `inspect FILE` reads a GOOD file and says what it contains. |
+| `main.go` | The command-line program: `inspect` a GOOD file, print the simulator `config` for a player's version of a team, and `check-rotations` in a cached database file. |
 | `catalog/` | Every character, weapon and artifact set the pinned simulator supports, embedded as `catalog.json`. `unreleased.txt` lists characters that are never calculated. |
 | `good/` | Reads and checks a GOOD file. Nothing from the file is trusted: unknown keys and out-of-range values are dropped and reported. |
+| `rotation/` | Splits a rotation file into its script and its example builds, and writes the config for a player's own constellations, levels and weapons. |
+| `rotations/` | Rotations written for this project, for teams the KQM Sim Database lacks. Each names its source. |
 | `tools/gen_catalog.py` | Regenerates `catalog/catalog.json` from a KQM Sim source checkout. Run it when the pinned release changes. |
 
 Run the tests and try it on a scan:

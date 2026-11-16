@@ -66,6 +66,24 @@ def main():
         })
     sets = [field(b, r'Key:\s+"(\w+)"') for b in blocks(sim / "pkg/catalog/artifact.dm.go")]
 
+    # Rotation scripts may call a character, weapon or set by a short name ("bina",
+    # "favlance", "no"). Record every short name with the full key it stands for.
+    def aliases(path, known):
+        out = {}
+        for alias, ident in re.findall(r'^\t"(\w+)":\s+keys\.(\w+),$', (sim / path).read_text(), re.M):
+            key = ident.lower()
+            if key not in known:
+                sys.exit(f"{path}: short name {alias!r} points to {key!r}, which is not in the catalog")
+            if alias != key:
+                out[alias] = key
+        return dict(sorted(out.items()))
+
+    shortcuts = {
+        "characters": aliases("pkg/shortcut/character.dm.go", {c["key"] for c in characters}),
+        "weapons": aliases("pkg/shortcut/weapon.dm.go", {w["key"] for w in weapons}),
+        "artifact_sets": aliases("pkg/shortcut/artifact.dm.go", set(sets)),
+    }
+
     missing = unreleased - {c["key"] for c in characters}
     if missing:
         sys.exit(f"unreleased.txt names characters the simulator does not have: {sorted(missing)}")
@@ -77,6 +95,7 @@ def main():
         "characters": sorted(characters, key=lambda c: c["key"]),
         "weapons": sorted(weapons, key=lambda w: w["key"]),
         "artifact_sets": sorted(sets),
+        "shortcuts": shortcuts,
     }
     (here / "catalog" / "catalog.json").write_text(json.dumps(out, indent=1) + "\n")
     print(f"{len(characters)} characters ({len(unreleased)} unreleased), {len(weapons)} weapons, {len(sets)} artifact sets, engine {tag or commit[:7]}")

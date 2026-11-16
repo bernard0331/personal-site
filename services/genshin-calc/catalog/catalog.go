@@ -43,6 +43,13 @@ type Catalog struct {
 	Characters   []Character `json:"characters"`
 	Weapons      []Weapon    `json:"weapons"`
 	ArtifactSets []string    `json:"artifact_sets"`
+	// Shortcuts are the short names rotation scripts may use, such as "bina"
+	// for columbina or "favlance" for favoniuslance.
+	Shortcuts struct {
+		Characters   map[string]string `json:"characters"`
+		Weapons      map[string]string `json:"weapons"`
+		ArtifactSets map[string]string `json:"artifact_sets"`
+	} `json:"shortcuts"`
 
 	characters map[string]Character
 	weapons    map[string]Weapon
@@ -97,3 +104,26 @@ func (c *Catalog) Weapon(key string) (Weapon, bool) {
 
 // HasArtifactSet reports whether the simulator supports an artifact set.
 func (c *Catalog) HasArtifactSet(key string) bool { return c.sets[key] }
+
+// ResolveCharacter finds a character by the name a rotation script uses for it:
+// the full key or one of the simulator's short names. The Traveler's twins have
+// the same stats, so an "aether" name is treated as its "lumine" twin.
+func (c *Catalog) ResolveCharacter(name string) (Character, bool) {
+	key := strings.ToLower(name)
+	if full, ok := c.Shortcuts.Characters[key]; ok {
+		key = full
+	}
+	if element, ok := strings.CutPrefix(key, "aether"); ok {
+		key = "lumine" + element
+	}
+	return c.Character(key)
+}
+
+// ResolveWeapon finds a weapon by full key or short name.
+func (c *Catalog) ResolveWeapon(name string) (Weapon, bool) {
+	key := strings.ToLower(name)
+	if full, ok := c.Shortcuts.Weapons[key]; ok {
+		key = full
+	}
+	return c.Weapon(key)
+}
