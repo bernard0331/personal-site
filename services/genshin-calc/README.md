@@ -1,0 +1,47 @@
+# genshin-calc
+
+The simulation and solver service of the Genshin team optimizer. Given a player's
+account, it finds the strongest teams with no character and no weapon copy used
+twice: seven teams, one for each element, and ten teams with no element rule.
+
+Team damage comes from [KQM Sim](https://github.com/KQM-git/kqmsim), KeqingMains'
+fork of [gcsim](https://github.com/genshinsim/gcsim). This service writes no damage
+formulas of its own.
+
+## License
+
+KQM Sim and gcsim are licensed under AGPL-3.0, so this service is too. See
+[LICENSE](LICENSE). The rest of the repository is not covered by that file.
+
+## The simulator
+
+The service runs KQM Sim as a command-line program. The version is pinned, and
+every result records the version that produced it.
+
+| | |
+| :- | :- |
+| Pinned release | `kqmsim-v7.3.3` (commit `7bdf45f`) |
+| Built with | Go 1.27 |
+
+Build it into `bin/kqmsim` at the repository root:
+
+```bash
+git clone --depth 1 --branch kqmsim-v7.3.3 https://github.com/KQM-git/kqmsim.git ../kqmsim
+(cd ../kqmsim && go build -o ../personal-site/bin/kqmsim ./cmd/gcsim)
+```
+
+Run one config and write the full result as JSON:
+
+```bash
+./bin/kqmsim -c path/to/config.txt -out path/to/result.json
+```
+
+The result's `statistics.dps.mean` is the team's DPS, and `statistics.element_dps`
+is the damage split by element, which decides the team's element.
+
+## Local data
+
+Account scans, cached rotations and simulator results go in `local/`, which git
+ignores. Rotations fetched from the [KQM Sim Database](https://db.kqm.gg) are
+credited to their submitters and are not committed. Rotations written for this
+project will live in this service's folder with their source credited.

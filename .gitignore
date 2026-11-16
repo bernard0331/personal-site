@@ -25,3 +25,6 @@ crash.log
 .DS_Store
 .idea/
 .vscode/
+
+# Local-only data: account scans, cached rotations and simulator results
+local/

@@ -1,10 +1,12 @@
 # personal-site
 
-A personal website hosted on Google Kubernetes Engine (GKE). Each section of the
-site is its own set of Go services behind one gateway:
+Three websites on one Google Kubernetes Engine (GKE) cluster:
 
-- **Genshin Impact**: damage calculator, team comparison and planning.
-- **Terraforming Mars**: game history and statistics from games played through
+- **A landing page** about me, linking to the other two.
+- **A Genshin Impact team optimizer**: give it your account and it finds your
+  strongest teams with no character or weapon used twice. See
+  [services/genshin-calc](services/genshin-calc).
+- **A Terraforming Mars site** for games played through
   [tfm-cli](https://github.com/bernard0331/tfm-cli).
 
 Cloud resources are managed with Terraform, and what runs in the cluster is
@@ -16,7 +18,8 @@ deployed by Argo CD from this repository.
 
 ## Status
 
-Phase 0 (setup) is done. Next is phase 1: the calculator core.
+Phase 0 (setup) is done. Phase 1, the optimizer core, is in progress: the
+simulator builds and runs locally.
 
 ## Local tools
 
