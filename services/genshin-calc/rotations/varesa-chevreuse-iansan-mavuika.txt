@@ -50,8 +50,16 @@ mavuika add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 
 target lvl=100 resist=0.1 radius=2 pos=0,2.4 hp=999999999;
 energy every interval=480,720 amount=1;
 
+# Iansan's burst buff is 27% of her ATK at 42+ Nightsoul points and less below that; she
+# regains points from the active character's movement, which the simulator only counts when
+# the script reports it. The guide says Varesa's plunges "easily maintain the maximum buff",
+# so each plunge combo (and each of Mavuika's C2D) reports 12m, the least that keeps Iansan
+# at 42+ until her burst ends. Without it her buff fell to under 4% of her ATK.
+let move_m = 12;
+
 fn ecp() {
   varesa skill, attack, high_plunge[collision=1];
+  movement(move_m);
 }
 
 active varesa;
@@ -60,7 +68,8 @@ for let i=0; i<6; i=i+1 {
   if .chevreuse.burst.ready { chevreuse burst; }
   chevreuse skill[hold=1];
   iansan skill, burst;
-  mavuika skill, burst, charge:2, dash, charge:2, dash, charge:2, dash;
+  mavuika skill, burst;
+  for let k=0; k<3; k=k+1 { mavuika charge:2, dash; movement(move_m); }
   for let j=0; j<2; j=j+1 {
     ecp();
     if .varesa.energy >= 30 && .varesa.status.apex-drive { varesa burst; }
