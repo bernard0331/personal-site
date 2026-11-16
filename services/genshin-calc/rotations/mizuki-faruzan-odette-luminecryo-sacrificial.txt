@@ -1,0 +1,78 @@
+# Team: Mizuki, Faruzan, Odette, Cryo Traveler (Mizuki on R4+ Sacrificial Fragments)
+# Written for this project on 2026-11-16. Not from the KQM Sim Database.
+# Source: "The Ultimate Mizuki Guide (Part 1)", https://www.youtube.com/watch?v=Nb_Vbwdm0MI
+#   (team rotations from 1:23:23): one Mizuki cast for one big hit, Sacrificial resets her skill,
+#   Cryo Traveler in between, then a full cast with the pull-out tech (pullout=1).
+#   Her burst is skipped: in the simulator, timing it as the guide describes cost about 10%.
+#
+# The builds below only make the file runnable on its own. The optimizer replaces
+# them with the player's characters, weapons and artifacts.
+
+options swap_delay=12 iteration=1000;
+mizuki char lvl=90/90 cons=2 talent=10,10,10 +params=[pullout=1];
+mizuki add weapon="sacrificialfragments" refine=5 lvl=90/90;
+mizuki add set="gildeddreams" count=2;
+mizuki add set="flowerofparadiselost" count=2;
+mizuki add stats hp=4780 atk=311 em=187 em=187 em=187;
+faruzan char lvl=90/90 cons=6 talent=10,10,10;
+faruzan add weapon="elegyfortheend" refine=1 lvl=90/90;
+faruzan add set="viridescentvenerer" count=4;
+faruzan add stats hp=4780 atk=311 er=0.518 anemo%=0.466 cr=0.311;
+odette char lvl=90/90 cons=0 talent=10,10,10;
+odette add weapon="starcallerswatch" refine=1 lvl=90/90;
+odette add set="heartofthefurnace" count=4;
+odette add stats hp=4780 atk=311 atk%=0.466 cryo%=0.466 cr=0.311;
+luminecryo char lvl=90/90 cons=6 talent=10,10,10;
+luminecryo add weapon="exaiphanesblade" refine=5 lvl=90/90;
+luminecryo add set="gladiatorsfinale" count=2;
+luminecryo add set="shimenawasreminiscence" count=2;
+luminecryo add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622;
+target lvl=100 resist=0.1 radius=2 pos=0,2.4 hp=999999999;
+energy every interval=480,720 amount=1;
+
+
+# Witch's Revelation is armed by a Swirl, which also starts its 2.5s cooldown, and fires on the
+# next skill hit. The cooldown's start is used as the signal: a big hit follows within about
+# 75 frames (the next hit fires within 44 frames and travels for 30).
+
+fn first_cast() {
+  mizuki skill;
+  while !.mizuki.status.mizuki-revelation-icd && .mizuki.status.dreamdrifter-state { wait(1); }
+  wait(80); # the big hit fires and lands; Sacrificial gets its chances on the hits so far
+}
+
+fn main_cast(useburst) {
+  while !.mizuki.skill.ready { wait(1); } # Sacrificial did not proc
+  mizuki skill;
+  let arms = 0;
+  let expiries = 0;
+  let prev = 0;
+  let bursted = 0;
+  while .mizuki.status.dreamdrifter-state {
+    let on = .mizuki.status.mizuki-revelation-icd > 0;
+    if on && !prev { arms = arms + 1; }
+    if prev && !on { expiries = expiries + 1; }
+    prev = on;
+    if arms >= 4 {
+      wait(80); # the fourth big hit fires and lands
+      break;
+    }
+    # Her burst hits 93 frames after the cast: cast it so the hit lands just after the cooldown
+    # that follows the third big hit ends.
+    if useburst && !bursted && arms == 3 && on && .mizuki.status.mizuki-revelation-icd <= 92 && .mizuki.burst.ready {
+      mizuki burst;
+      bursted = 1;
+    } else {
+      wait(1);
+    }
+  }
+}
+
+active faruzan;
+for let i=0; i<6; i=i+1 {
+  if .faruzan.burst.ready { faruzan burst; } else { faruzan skill, aim; }
+  odette skill, skill;
+  first_cast();
+  if i { luminecryo skill, attack, charge, burst; } else { luminecryo skill, attack, charge; }
+  main_cast(0);
+}

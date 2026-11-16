@@ -1,0 +1,100 @@
+From b11823cc976cfbac72fe78e3ca2ed8b19c887b6d Mon Sep 17 00:00:00 2001
+From: bernard0331 <47488073+bernard0331@users.noreply.github.com>
+Date: Mon, 16 Nov 2026 14:03:21 -0500
+Subject: [PATCH] Mizuki: add the pull-out tech as an option
+
++params=[pullout=1] models dashing out of range of her skill after its
+second hit and back in, so the third hit lands just after Witch's
+Revelation's cooldown and re-arms it. Her big hits move from skill hits
+1, 6, 10, 14 to 1, 4, 8, 12, at the cost of one skill hit. It applies
+once per cast; later cycles Swirl on hits whose third hit after does
+not apply Anemo.
+
+Described in "The Ultimate Mizuki Guide (Part 1)",
+https://www.youtube.com/watch?v=Nb_Vbwdm0MI (from 1:15:52).
+
+Off by default, so existing configs are unchanged.
+---
+ internal/characters/mizuki/mizuki.go |  7 ++++++
+ internal/characters/mizuki/skill.go  | 34 +++++++++++++++++++++++++++-
+ 2 files changed, 40 insertions(+), 1 deletion(-)
+
+diff --git a/internal/characters/mizuki/mizuki.go b/internal/characters/mizuki/mizuki.go
+index bd1994931..7fd1839a5 100644
+--- a/internal/characters/mizuki/mizuki.go
++++ b/internal/characters/mizuki/mizuki.go
+@@ -18,6 +18,8 @@ type char struct {
+ 	cloudAttack                     info.AttackInfo
+ 	cloudSnap                       info.Snapshot
+ 	cloudSrc                        int
++	cloudHits                       int // skill hits fired in the current Dreamdrifter state
++	pullOut                         bool
+ 	a4Buff                          []float64
+ 	c1EM                            float64
+ 	c2Buff                          []float64
+@@ -40,6 +42,11 @@ func NewChar(s *core.Core, w *character.CharWrapper, p info.CharacterProfile) er
+ 	}
+ 	c.revelation = revelation > 0
+ 
++	// pullout=1 models the "pull-out tech": after the skill cast, Mizuki dashes
++	// out of range of her own skill and back in, so that her third skill hit
++	// lands just after Witch's Revelation comes off cooldown. See cloudNextTick.
++	c.pullOut = p.Params["pullout"] > 0
++
+ 	w.Character = &c
+ 
+ 	return nil
+diff --git a/internal/characters/mizuki/skill.go b/internal/characters/mizuki/skill.go
+index 2012a1950..662ac6882 100644
+--- a/internal/characters/mizuki/skill.go
++++ b/internal/characters/mizuki/skill.go
+@@ -123,6 +123,7 @@ func (c *char) Skill(p map[string]int) (action.Info, error) {
+ func (c *char) applyDreamDrifterEffect(travel int) {
+ 	c.AddStatus(dreamDrifterStateKey, dreamDrifterBaseDuration, true)
+ 
++	c.cloudHits = 0
+ 	c.startCloudAttacks(travel)
+ 
+ 	if c.Base.Cons >= 1 {
+@@ -246,6 +247,37 @@ func (c *char) cloudTask(travel, src, hitmark int) {
+ 			c.particleCB,
+ 			cb,
+ 		)
+-		c.cloudTask(travel, src, cloudHitInterval)
++		c.cloudHits++
++		c.cloudTask(travel, src, c.cloudNextTick(travel))
+ 	}, hitmark)
+ }
++
++// cloudNextTick returns the frames until the next skill hit fires.
++//
++// Normally that is cloudHitInterval. The skill hits apply Anemo every other hit,
++// and the Swirl on the skill cast arms Witch's Revelation, so by default its big
++// hits land on skill hits 1, 6, 10 and 14: hit 3 Swirls slightly before the
++// passive's 2.5s cooldown has ended, and the next Anemo hit is hit 5.
++//
++// With the pull-out tech the player dashes out of range of the skill after hit 2
++// and back in, so hit 3 lands just after the cooldown ends. It Swirls and re-arms
++// the passive, and the big hits move to 1, 4, 8 and 12. Later cycles Swirl on odd
++// hits whose third hit after is an even, non-Anemo hit, so the tech only works
++// once per cast. The time spent out of range costs one skill hit by the end of
++// the state.
++func (c *char) cloudNextTick(travel int) int {
++	if !c.pullOut || c.cloudHits != 2 || c.StatusIsActive(revelationKey) {
++		return cloudHitInterval
++	}
++	remaining := c.StatusDuration(revelationICDKey)
++	// Hit 3 lands travel frames after it fires; it must land after the last
++	// frame of the cooldown.
++	wait := remaining - travel + 1
++	if wait <= cloudHitInterval || wait > 2*cloudHitInterval {
++		return cloudHitInterval
++	}
++	c.Core.Log.NewEvent("mizuki pull-out: hit 3 delayed", glog.LogCharacterEvent, c.Index()).
++		Write("frames_until_hit", wait).
++		Write("revelation_cd_remaining", remaining)
++	return wait
++}
+-- 
+2.42.0
+
