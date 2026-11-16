@@ -1,0 +1,63 @@
+# Team: Mavuika, Citlali, Iansan, Bennett
+# Written for this project on 2026-11-16. Not from the KQM Sim Database.
+# Source: KQM's Mavuika quick guide, https://keqingmains.com/q/mavuika-quickguide/
+#   Team "Mavuika — Citlali — Xilonen / Iansan / Sucrose / Kazuha — Bennett" (Forward Melt),
+#   sample rotation (Iansan):
+#     Mavuika tE > Bennett EQ > Iansan E N1 Q > Citlali EQ (N1) > Mavuika Q Melt combo
+#   Melt combo: Q J C8, one of the guide's three Melt combos for Citlali as the solo Cryo unit
+#   (J = jump, C = Flamestrider Cyclic Charged Attack). The guide says the three perform about
+#   the same; in the simulator Q J C8 melts the most Cyclic Charged Attacks and is about 10%
+#   above Q C3F D C3F (the guide's first listed) and 5-14% above Q C4J C4.
+#   The guide notes the rotation leaves 1-2s of Mavuika's burst cooldown and says to add 1-2
+#   Normal or Charged Attacks outside her burst; here she uses Normal Attacks until her
+#   burst is ready (about three per rotation).
+#   Citlali's optional (N1) is kept, as in the database's Mavuika/Citlali rotations.
+#   One change from the guide: Citlali and Iansan burst when ready instead of every rotation.
+#   Bursting every rotation waited on energy for about 25s over 6 rotations (Citlali with
+#   KQM-standard substats, Iansan with the owner's gear); bursting when ready was 6-16% higher
+#   and gives 18s rotations.
+#
+# The builds below only make the file runnable on its own (main stats from the guide's
+# recommendations, KQM-standard substats). The optimizer replaces them with the player's own.
+
+options swap_delay=12 iteration=1000;
+
+mavuika char lvl=90/90 cons=1 talent=10,10,10;
+mavuika add weapon="serpentspine" refine=5 lvl=90/90;
+mavuika add set="obsidiancodex" count=4;
+mavuika add stats hp=4780 atk=311 em=187 pyro%=0.466 cd=0.622;
+mavuika add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*4 er=0.0551*2 em=19.82*2 cr=0.0331*10 cd=0.0662*8;
+
+citlali char lvl=90/90 cons=0 talent=10,10,10;
+citlali add weapon="starcallerswatch" refine=1 lvl=90/90;
+citlali add set="scrolloftheheroofcindercity" count=4;
+citlali add stats hp=4780 atk=311 em=187 em=187 em=187;
+citlali add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*8 em=19.82*6 cr=0.0331*2 cd=0.0662*2;
+
+iansan char lvl=90/90 cons=6 talent=10,10,10;
+iansan add weapon="favoniuslance" refine=5 lvl=90/90;
+iansan add set="scrolloftheheroofcindercity" count=4;
+iansan add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 atk%=0.466;
+iansan add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*6 er=0.0551*8 em=19.82*2 cr=0.0331*2 cd=0.0662*2;
+
+bennett char lvl=90/90 cons=6 talent=10,10,10;
+bennett add weapon="mistsplitterreforged" refine=1 lvl=90/90;
+bennett add set="noblesseoblige" count=4;
+bennett add stats hp=4780 atk=311 er=0.518 hp%=0.466 cr=0.311;
+bennett add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*4 atk=16.54*2 atk%=0.0496*2 er=0.0551*8 em=19.82*2 cr=0.0331*2 cd=0.0662*2;
+
+target lvl=100 resist=0.1 radius=2 pos=0,2.4 hp=999999999;
+energy every interval=480,720 amount=1;
+
+active mavuika;
+for let i=0; i<6; i=i+1 {
+  mavuika skill;                         # tap E
+  bennett skill, burst;
+  iansan skill, attack;
+  if .iansan.burst.ready { iansan burst; }
+  citlali skill;
+  if .citlali.burst.ready { citlali burst; }
+  citlali attack;
+  while !.mavuika.burst.ready { mavuika attack; }
+  mavuika burst, jump, charge:8;
+}
