@@ -1,8 +1,8 @@
 {
  "engine": {
   "name": "kqmsim",
-  "release": "kqmsim-v7.3.3+6patches",
-  "commit": "b11823cc976cfbac72fe78e3ca2ed8b19c887b6d"
+  "release": "kqmsim-v7.3.3+7patches",
+  "commit": "e4f802c619e28baec893127a5d95dd6553e7708f"
  },
  "characters": [
   {
@@ -1848,6 +1848,11 @@
    "key": "sharpshootersoath",
    "weapon_type": "bow",
    "rarity": 3
+  },
+  {
+   "key": "silverlight",
+   "weapon_type": "sword",
+   "rarity": 4
   },
   {
    "key": "silvershowerheartstrings",

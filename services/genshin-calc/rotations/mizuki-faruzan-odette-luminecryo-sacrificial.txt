@@ -19,7 +19,7 @@ faruzan add weapon="elegyfortheend" refine=1 lvl=90/90;
 faruzan add set="viridescentvenerer" count=4;
 faruzan add stats hp=4780 atk=311 er=0.518 anemo%=0.466 cr=0.311;
 odette char lvl=90/90 cons=0 talent=10,10,10;
-odette add weapon="starcallerswatch" refine=1 lvl=90/90;
+odette add weapon="silverlight" refine=5 lvl=90/90;
 odette add set="heartofthefurnace" count=4;
 odette add stats hp=4780 atk=311 atk%=0.466 cryo%=0.466 cr=0.311;
 luminecryo char lvl=90/90 cons=6 talent=10,10,10;
@@ -70,7 +70,8 @@ fn main_cast(useburst) {
 
 active faruzan;
 for let i=0; i<6; i=i+1 {
-  if .faruzan.burst.ready { faruzan burst; } else { faruzan skill, aim; }
+  while !.faruzan.burst.ready { wait(1); } # Faruzan bursts every rotation
+  faruzan burst;
   odette skill, skill;
   first_cast();
   if i { luminecryo skill, attack, charge, burst; } else { luminecryo skill, attack, charge; }

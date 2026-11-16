@@ -1,7 +1,8 @@
 # Team: Mizuki, Faruzan, Odette, Cryo Traveler
 # Written for this project on 2026-11-16. Not from the KQM Sim Database.
 # Source: KQM's Mizuki quick guide, https://keqingmains.com/q/mizuki-quickguide/
-#   Odette 2[E] > Faruzan Q / E C > Traveler E N1C Q > Mizuki E, for her full skill duration.
+#   Odette 2[E] > Faruzan Q > Traveler E N1C Q > Mizuki E, for her full skill duration.
+#   The guide allows Faruzan E C when her burst is not ready; here she waits and bursts every rotation.
 #
 # The builds below only make the file runnable on its own. The optimizer replaces
 # them with the player's characters, weapons and artifacts.
@@ -17,7 +18,7 @@ faruzan add weapon="elegyfortheend" refine=1 lvl=90/90;
 faruzan add set="viridescentvenerer" count=4;
 faruzan add stats hp=4780 atk=311 er=0.518 anemo%=0.466 cr=0.311;
 odette char lvl=90/90 cons=0 talent=10,10,10;
-odette add weapon="starcallerswatch" refine=1 lvl=90/90;
+odette add weapon="silverlight" refine=5 lvl=90/90;
 odette add set="heartofthefurnace" count=4;
 odette add stats hp=4780 atk=311 atk%=0.466 cryo%=0.466 cr=0.311;
 luminecryo char lvl=90/90 cons=6 talent=10,10,10;
@@ -31,7 +32,8 @@ energy every interval=480,720 amount=1;
 active odette;
 for let i=0; i<6; i=i+1 {
   odette skill, skill;
-  if .faruzan.burst.ready { faruzan burst; } else { faruzan skill, aim; }
+  while !.faruzan.burst.ready { wait(1); } # Faruzan bursts every rotation
+  faruzan burst;
   if i { luminecryo skill, attack, charge, burst; } else { luminecryo skill; }
   mizuki skill;
   while .mizuki.status.dreamdrifter-state { wait(1); }

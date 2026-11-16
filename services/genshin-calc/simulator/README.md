@@ -12,8 +12,9 @@ KQM Sim follows gcsim, but not immediately. When gcsim has merged a change that
 matters for the optimizer and KQM Sim's latest release does not have it yet, the
 change is applied here as a patch. Patches 0001 to 0005 are gcsim's own commits, unchanged
 except where they had to be fitted to KQM Sim's code; each commit message records
-the original with `cherry picked from commit ...`. Patch 0006 is this project's own
-addition, an opt-in behaviour that changes nothing unless a config asks for it.
+the original with `cherry picked from commit ...`. Patches 0006 and 0007 are this project's own
+additions: an opt-in behaviour that changes nothing unless a config asks for it, and a
+weapon the release lacks.
 
 | Patch | gcsim pull request | What it changes |
 | :- | :- | :- |
@@ -23,6 +24,7 @@ addition, an opt-in behaviour that changes nothing unless a config asks for it.
 | 0004 | #3264 Fix Cyno unable to CA during Q | Fix that came with the upgrade |
 | 0005 | #3266 Prevent Cyno from having simultaneous A1 tickers try 2 | Fix that came with the upgrade |
 | 0006 | Our own | Mizuki's pull-out tech as an option, `+params=[pullout=1]`: her third skill hit lands just after Witch's Revelation's cooldown, moving her big hits from skill hits 1, 6, 10, 14 to 1, 4, 8, 12. From "The Ultimate Mizuki Guide (Part 1)" (YouTube, Nb_Vbwdm0MI). Off by default. |
+| 0007 | Our own | Adds the 4-star sword Silver Light (Odette's weapon in the owner's account). Stats and passive from lunaris.moe, game data 7.2.0. |
 
 The upgrades only take effect inside a Polestar Field, which appears when a
 Stellar character (Odette, Sandrone, Mitya, Danica, Anastasya or the Cryo
