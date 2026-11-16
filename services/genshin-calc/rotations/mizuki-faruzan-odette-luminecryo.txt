@@ -1,8 +1,9 @@
 # Team: Mizuki, Faruzan, Odette, Cryo Traveler
 # Written for this project on 2026-11-16. Not from the KQM Sim Database.
 # Source: KQM's Mizuki quick guide, https://keqingmains.com/q/mizuki-quickguide/
-#   Odette 2[E] > Faruzan Q > Traveler E N1C Q > Mizuki E, for her full skill duration.
-#   The guide allows Faruzan E C when her burst is not ready; here she waits and bursts every rotation.
+#   Odette 2[E] > Faruzan Q / E C > Traveler E N1C Q > Mizuki E, for her full skill duration.
+#   As the guide says, Faruzan bursts when ready and otherwise uses E C, so she bursts every
+#   other rotation and rotations are about 17s.
 #
 # The builds below only make the file runnable on its own (KQM-standard substats from
 # the simulator's optimiser). The optimizer replaces them with the player's own.
@@ -36,8 +37,7 @@ energy every interval=480,720 amount=1;
 active odette;
 for let i=0; i<6; i=i+1 {
   odette skill, skill;
-  while !.faruzan.burst.ready { wait(1); } # Faruzan bursts every rotation
-  faruzan burst;
+  if .faruzan.burst.ready { faruzan burst; } else { faruzan skill, aim; }
   if i { luminecryo skill, attack, charge, burst; } else { luminecryo skill; }
   mizuki skill;
   while .mizuki.status.dreamdrifter-state { wait(1); }
