@@ -1,21 +1,21 @@
 # Team: Mavuika, Citlali, Iansan, Bennett
-# Written for this project on 2026-11-16. Not from the KQM Sim Database.
+# Written for this project on 2026-11-16. Not a KQM Sim Database entry, but its Melt combo is from one (below).
 # Source: KQM's Mavuika quick guide, https://keqingmains.com/q/mavuika-quickguide/
 #   Team "Mavuika — Citlali — Xilonen / Iansan / Sucrose / Kazuha — Bennett" (Forward Melt),
-#   sample rotation (Iansan):
+#   sample rotation (Iansan), followed for the team order:
 #     Mavuika tE > Bennett EQ > Iansan E N1 Q > Citlali EQ (N1) > Mavuika Q Melt combo
-#   Melt combo: Q J C8, one of the guide's three Melt combos for Citlali as the solo Cryo unit
-#   (J = jump, C = Flamestrider Cyclic Charged Attack). The guide says the three perform about
-#   the same; in the simulator Q J C8 melts the most Cyclic Charged Attacks and is about 10%
-#   above Q C3F D C3F (the guide's first listed) and 5-14% above Q C4J C4.
-#   The guide notes the rotation leaves 1-2s of Mavuika's burst cooldown and says to add 1-2
-#   Normal or Charged Attacks outside her burst; here she uses Normal Attacks until her
-#   burst is ready (about three per rotation).
-#   Citlali's optional (N1) is kept, as in the database's Mavuika/Citlali rotations.
+#   Melt combo and its timing: from the KQM Sim Database rotation dB9HJwcjPM6Q
+#   (Mavuika Citlali Xilonen Bennett, submitter 972143886153699328):
+#     Mavuika E N1 > ... > Mavuika Q (wait) 2[C3FD] C1F
+#   F = Final Charged Attack. The wait after the burst (18 frames) lets Citlali's Cryo land
+#   first; without it most of Mavuika's charged attacks did not melt in the simulator (the
+#   guide's Q C3F D C3F and Q J C8 as written gave 90-97k on the owner's gear, this 126k).
+#   About 6 melts per rotation: the burst, about 3 Final and about 2 Cyclic Charged Attacks.
+#   If her burst is not ready she uses Normal Attacks until it is (the guide says to add 1-2).
+#   Citlali's optional (N1) is kept.
 #   One change from the guide: Citlali and Iansan burst when ready instead of every rotation.
 #   Bursting every rotation waited on energy for about 25s over 6 rotations (Citlali with
-#   KQM-standard substats, Iansan with the owner's gear); bursting when ready was 6-16% higher
-#   and gives 18s rotations.
+#   KQM-standard substats, Iansan with the owner's gear).
 #
 # The builds below only make the file runnable on its own (main stats from the guide's
 # recommendations, KQM-standard substats). The optimizer replaces them with the player's own.
@@ -51,7 +51,7 @@ energy every interval=480,720 amount=1;
 
 active mavuika;
 for let i=0; i<6; i=i+1 {
-  mavuika skill;                         # tap E
+  mavuika skill, attack;
   bennett skill, burst;
   iansan skill, attack;
   if .iansan.burst.ready { iansan burst; }
@@ -59,5 +59,9 @@ for let i=0; i<6; i=i+1 {
   if .citlali.burst.ready { citlali burst; }
   citlali attack;
   while !.mavuika.burst.ready { mavuika attack; }
-  mavuika burst, jump, charge:8;
+  mavuika burst;
+  delay(18);                             # wait for Citlali's Cryo
+  mavuika charge:3, charge[hold=6], charge[final=1], dash;
+  mavuika charge:3, charge[hold=6], charge[final=1], dash;
+  mavuika charge, charge[hold=30], charge[final=1];
 }
