@@ -1,0 +1,90 @@
+# Team: Sandrone, Yae Miko, Alyosha, Odette
+# Written for this project on 2026-11-16. Not from the KQM Sim Database.
+# Source: the owner's rotation, for the team KQM's Sandrone quick guide lists as
+#   "Sandrone — Yae Miko — Odette — Escoffier / C6 Qiqi / C6 Alyosha / Sucrose"
+#   (https://keqingmains.com/q/sandrone-quickguide/):
+#     Sandrone E > Yae Miko 3[E] > Alyosha EQ > Odette 2[E] > Sandrone combo
+#   Sandrone's opening E is the last E of her 3[C E] combo moved to the start of the next
+#   rotation (her skill has a 4s cooldown, so E right after her combo's E would wait), so in
+#   this order her field time is C E C E C, with the burst between charged attacks.
+#   The guide's own sample for Alyosha is Yae Miko 3[E] > Odette 2[E] (Q) > Alyosha EQ >
+#   Sandrone combo; set owner_order = 0 below for it.
+#   Odette: as in the guide, her burst is skipped before C4 and used when ready from C4.
+#   Sandrone's combo is the guide's: 3[C E] (Q) at C0, 2[C E] (Q) at C1+, burst between
+#   charged attacks when ready; her charged attack runs until her Decode is full.
+#
+# The builds below only make the file runnable on its own (main stats from the guide's
+# recommendations, KQM-standard substats). The optimizer replaces them with the player's own.
+
+options swap_delay=12 iteration=1000;
+
+sandrone char lvl=90/90 cons=0 talent=10,10,10;
+sandrone add weapon="ateaspoonoftranscendence" refine=1 lvl=90/90;
+sandrone add set="disenchantmentindeepshadow" count=4;
+sandrone add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622;
+sandrone add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*4 em=19.82*2 cr=0.0331*10 cd=0.0662*8;
+
+yaemiko char lvl=90/90 cons=1 talent=10,10,10;
+yaemiko add weapon="kagurasverity" refine=1 lvl=90/90;
+yaemiko add set="disenchantmentindeepshadow" count=4;
+yaemiko add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 cr=0.311;
+yaemiko add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*2 em=19.82*2 cr=0.0331*8 cd=0.0662*12;
+
+alyosha char lvl=90/90 cons=6 talent=10,10,10;
+alyosha add weapon="favoniuslance" refine=5 lvl=90/90;
+alyosha add set="noblesseoblige" count=4;
+alyosha add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 atk%=0.466;
+alyosha add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*4 er=0.0551*10 em=19.82*2 cr=0.0331*4 cd=0.0662*4;
+
+odette char lvl=90/90 cons=0 talent=10,10,10;
+odette add weapon="silverlight" refine=5 lvl=90/90;
+odette add set="heartofthefurnace" count=4;
+odette add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 cr=0.311;
+odette add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*2 em=19.82*2 cr=0.0331*8 cd=0.0662*12;
+
+target lvl=100 resist=0.1 radius=2 pos=0,2.4 hp=999999999;
+energy every interval=480,720 amount=1;
+
+let skip_odette_q = .odette.cons < 4;
+
+fn sandrone_combo() {
+  let n = 3;
+  if .sandrone.cons >= 1 { n = 2; }
+  for let j=0; j<n; j=j+1 {
+    sandrone charge, skill;
+    if j < n - 1 && .sandrone.burst.ready { sandrone burst; }
+  }
+}
+
+let owner_order = 1;
+
+# The combo with its last E carried to the next rotation's start: C E C E C (C1+: C E C).
+fn sandrone_combo_carried() {
+  let n = 3;
+  if .sandrone.cons >= 1 { n = 2; }
+  for let j=0; j<n; j=j+1 {
+    sandrone charge;
+    if j < n - 1 {
+      sandrone skill;
+      if .sandrone.burst.ready { sandrone burst; }
+    }
+  }
+}
+
+active sandrone;
+for let i=0; i<6; i=i+1 {
+  if owner_order {
+    sandrone skill;
+    yaemiko skill:3;
+    alyosha skill, burst;
+    odette skill, skill;
+    if !skip_odette_q && .odette.burst.ready { odette burst; }
+    sandrone_combo_carried();
+  } else {
+    yaemiko skill:3;
+    odette skill, skill;
+    if !skip_odette_q && .odette.burst.ready { odette burst; }
+    alyosha skill, burst;
+    sandrone_combo();
+  }
+}
