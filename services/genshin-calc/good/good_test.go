@@ -139,3 +139,45 @@ func TestFilesThatCannotBeUsed(t *testing.T) {
 		}
 	}
 }
+
+func TestAssumeFourStars(t *testing.T) {
+	acc, _, err := parse(t, `{
+	  "format": "GOOD", "version": 3, "source": "test",
+	  "characters": [],
+	  "weapons": [
+	    {"key": "FavoniusLance", "level": 90, "ascension": 6, "refinement": 5, "location": "", "lock": false},
+	    {"key": "AquilaFavonia", "level": 90, "ascension": 6, "refinement": 1, "location": "", "lock": false}
+	  ],
+	  "artifacts": []
+	}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cat, _ := catalog.Load()
+	fourStars := 0
+	for _, w := range cat.Weapons {
+		if w.Rarity == 4 {
+			fourStars++
+		}
+	}
+	added := acc.AssumeFourStars(cat)
+	if added != fourStars-1 {
+		t.Errorf("added %d weapons, want %d (every 4-star but the Favonius Lance already listed)", added, fourStars-1)
+	}
+	refinements := map[string]int{}
+	for _, w := range acc.Weapons {
+		if r, seen := refinements[w.Key]; seen {
+			t.Errorf("%s listed twice (refinements %d and %d)", w.Key, r, w.Refinement)
+		}
+		refinements[w.Key] = w.Refinement
+	}
+	if refinements["favoniuslance"] != 5 {
+		t.Errorf("the account's own Favonius Lance should keep refinement 5, got %d", refinements["favoniuslance"])
+	}
+	if refinements["sacrificialsword"] != 1 {
+		t.Errorf("an unlisted 4-star should be added at refinement 1, got %d", refinements["sacrificialsword"])
+	}
+	if refinements["aquilafavonia"] != 1 || len(refinements) != fourStars+1 {
+		t.Errorf("5-star weapons should be left as they are and none added: %d weapons", len(refinements))
+	}
+}

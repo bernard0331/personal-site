@@ -69,6 +69,25 @@ type Account struct {
 	Artifacts  []Artifact
 }
 
+// AssumeFourStars adds refinement 1 of every 4-star weapon the simulator
+// supports that the account does not already list, and returns how many it
+// added. It is for players who own (nearly) every 4-star weapon but whose
+// scan leaves many out; copies the account does list keep their refinement.
+func (a *Account) AssumeFourStars(cat *catalog.Catalog) int {
+	listed := map[string]bool{}
+	for _, w := range a.Weapons {
+		listed[w.Key] = true
+	}
+	added := 0
+	for _, w := range cat.Weapons {
+		if w.Rarity == 4 && !listed[w.Key] {
+			a.Weapons = append(a.Weapons, Weapon{Key: w.Key, Refinement: 1})
+			added++
+		}
+	}
+	return added
+}
+
 // Report says what was dropped while reading, so the visitor can be told.
 type Report struct {
 	Problems []string // the first few problems, in file order

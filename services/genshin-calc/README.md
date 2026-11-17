@@ -40,7 +40,7 @@ is the damage split by element, which decides the team's element.
 
 | Path | What it is |
 | :- | :- |
-| `main.go` | The command-line program: `inspect` a GOOD file, print the simulator `config` for a player's version of a team, and `check-rotations` in a cached database file. |
+| `main.go` | The command-line program: `inspect` a GOOD file, print the simulator `config` for a player's version of a team (`-four-stars` assumes R1 of every 4-star weapon the file leaves out, since scans often miss them), and `check-rotations` in a cached database file. |
 | `catalog/` | Every character, weapon and artifact set the pinned simulator supports, embedded as `catalog.json`. `unreleased.txt` lists characters that are never calculated. |
 | `good/` | Reads and checks a GOOD file. Nothing from the file is trusted: unknown keys and out-of-range values are dropped and reported. |
 | `rotation/` | Splits a rotation file into its script and its example builds, and writes the config for a player's own constellations, levels and weapons. |

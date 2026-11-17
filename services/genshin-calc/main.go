@@ -2,7 +2,9 @@
 // optimizer. It is being built up one subcommand at a time:
 //
 //	genshin-calc inspect ACCOUNT             read a GOOD file and say what it contains
-//	genshin-calc config ROTATION ACCOUNT     print the simulator config for a player's version of a team
+//	genshin-calc config [-four-stars] ROTATION ACCOUNT
+//	                                         print the simulator config for a player's version of a team;
+//	                                         -four-stars assumes R1 of every 4-star weapon the file leaves out
 //	genshin-calc check-rotations CACHE       parse every rotation in a cached database file and count failures
 package main
 
@@ -24,11 +26,13 @@ func main() {
 	case len(os.Args) == 3 && os.Args[1] == "inspect":
 		err = inspect(os.Args[2])
 	case len(os.Args) == 4 && os.Args[1] == "config":
-		err = config(os.Args[2], os.Args[3])
+		err = config(os.Args[2], os.Args[3], false)
+	case len(os.Args) == 5 && os.Args[1] == "config" && os.Args[2] == "-four-stars":
+		err = config(os.Args[3], os.Args[4], true)
 	case len(os.Args) == 3 && os.Args[1] == "check-rotations":
 		err = checkRotations(os.Args[2])
 	default:
-		fmt.Fprintln(os.Stderr, "usage: genshin-calc inspect ACCOUNT | config ROTATION ACCOUNT | check-rotations CACHE")
+		fmt.Fprintln(os.Stderr, "usage: genshin-calc inspect ACCOUNT | config [-four-stars] ROTATION ACCOUNT | check-rotations CACHE")
 		os.Exit(2)
 	}
 	if err != nil {
@@ -71,7 +75,9 @@ func inspect(path string) error {
 // Weapons are a stand-in until weapon allocation is written: each member gets
 // the rotation's example weapon if the player owns it, at their best
 // refinement, and otherwise their highest-rarity weapon of the right type.
-func config(rotationPath, accountPath string) error {
+// With fourStars, the account is assumed to hold R1 of every 4-star weapon it
+// does not list (see good.Account.AssumeFourStars).
+func config(rotationPath, accountPath string, fourStars bool) error {
 	cat, err := catalog.Load()
 	if err != nil {
 		return err
@@ -87,6 +93,9 @@ func config(rotationPath, accountPath string) error {
 	acc, _, err := readAccount(accountPath, cat)
 	if err != nil {
 		return err
+	}
+	if fourStars {
+		acc.AssumeFourStars(cat)
 	}
 	owned := map[string]good.Character{}
 	for _, c := range acc.Characters {
