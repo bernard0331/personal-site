@@ -5,7 +5,8 @@
 #     Vodyanitsa E > Prune E Q > Mona E Q N1 > Varka combo.
 #   Varka combo: KQM Sim Database rotation KFq9TgbqjWzL (Varka Prune Durin
 #   Nicole), its combo 3, "3[N1CW] N2sE 3[N1CW] N1sE N1", which its author
-#   measured as the strongest of the three (140.5k there).
+#   measured as the strongest of the three (140.5k there); by default with the
+#   owner's change to the special charged attack in place of each sE.
 #
 # The example builds below are KQM-standard placeholders; the optimizer
 # replaces weapons and substats with each player's own.
@@ -38,20 +39,33 @@ mona add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk
 target lvl=100 resist=0.1 radius=2 pos=0,2.4 hp=999999999; # standard ST target
 energy every interval=480,720 amount=1; # standard Energy drops
 
+# special_ca = 1 (the owner's choice): the special charged attack (Azure
+# Devour) where the database combo uses the special skill (Four Winds'
+# Ascension): 3[N1CW] N2sC 3[N1CW] N1sC N1. Both spend the same special
+# charges; in the simulator, "charge" during Varka's skill is the special
+# charged attack while a charge is available. 0: the combo as the database
+# wrote it, 3[N1CW] N2sE 3[N1CW] N1sE N1.
+let special_ca = 1;
+
+fn special() {
+  if special_ca { varka charge; } else { varka skill; }
+}
+
 active vodyanitsa;
 for let i=0; i<6; i=i+1 {
   vodyanitsa skill;
   prune skill, burst;
   mona skill, burst, attack;
-  # 3[N1CW] N2sE 3[N1CW] N1sE N1
   varka skill,
         attack, charge, walk,
         attack, charge, walk,
         attack, charge, walk,
-        attack:2, skill,
+        attack:2;
+  special();
+  varka attack, charge, walk,
         attack, charge, walk,
         attack, charge, walk,
-        attack, charge, walk,
-        attack, skill,
         attack;
+  special();
+  varka attack;
 }
