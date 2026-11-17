@@ -7,6 +7,9 @@
 //	                                         -four-stars assumes R1 of every 4-star weapon the file leaves out,
 //	                                         -three-stars assumes every 3-star weapon at R5 in unlimited copies
 //	genshin-calc check-rotations CACHE       parse every rotation in a cached database file and count failures
+//	genshin-calc coarse [options] CACHE ACCOUNT
+//	                                         simulate every rotation the account can field and cache the results
+//	                                         (see coarse_cmd.go; -h lists the options)
 package main
 
 import (
@@ -40,8 +43,10 @@ func main() {
 		err = config(fs.Arg(0), fs.Arg(1), opt)
 	case len(os.Args) == 3 && os.Args[1] == "check-rotations":
 		err = checkRotations(os.Args[2])
+	case len(os.Args) >= 2 && os.Args[1] == "coarse":
+		err = coarseCmd(os.Args[2:])
 	default:
-		fmt.Fprintln(os.Stderr, "usage: genshin-calc inspect ACCOUNT | config [-four-stars] [-three-stars] ROTATION ACCOUNT | check-rotations CACHE")
+		fmt.Fprintln(os.Stderr, "usage: genshin-calc inspect ACCOUNT | config [-four-stars] [-three-stars] ROTATION ACCOUNT | check-rotations CACHE | coarse [options] CACHE ACCOUNT")
 		os.Exit(2)
 	}
 	if err != nil {
@@ -86,12 +91,6 @@ func inspect(path string) error {
 }
 
 // config prints the simulator config for the player's version of one team.
-//
-// Weapons are a stand-in until weapon allocation is written: each member gets
-// the rotation's example weapon if the player owns it, at their best
-// refinement, and otherwise their highest-rarity weapon of the right type.
-// opt can add weapons the file leaves out (see good.Account.AssumeFourStars
-// and AssumeThreeStars).
 func config(rotationPath, accountPath string, opt weaponAssumptions) error {
 	cat, err := catalog.Load()
 	if err != nil {
@@ -109,21 +108,47 @@ func config(rotationPath, accountPath string, opt weaponAssumptions) error {
 	if err != nil {
 		return err
 	}
+	opt.apply(acc, cat)
+	cfg, _, err := buildConfig(rot, acc, cat)
+	if err != nil {
+		return err
+	}
+	fmt.Println(cfg)
+	return nil
+}
+
+// apply adds the assumed weapons to the account.
+func (opt weaponAssumptions) apply(acc *good.Account, cat *catalog.Catalog) {
 	if opt.fourStars {
 		acc.AssumeFourStars(cat)
 	}
 	if opt.threeStars {
 		acc.AssumeThreeStars(cat)
 	}
+}
+
+// errMissingCharacter means the account cannot field the team.
+type errMissingCharacter string
+
+func (e errMissingCharacter) Error() string { return "the account does not have " + string(e) }
+
+// buildConfig writes the simulator config for the player's version of a team
+// and lists each member's weapon.
+//
+// Weapons are a stand-in until weapon allocation is written: each member gets
+// the rotation's example weapon if the player owns it, at their best
+// refinement, and otherwise their highest-rarity weapon of the right type.
+func buildConfig(rot *rotation.Rotation, acc *good.Account, cat *catalog.Catalog) (string, []string, error) {
 	owned := map[string]good.Character{}
 	for _, c := range acc.Characters {
 		owned[c.Key] = c
 	}
 	loadout := map[string]rotation.Slot{}
+	var weapons []string
 	for _, m := range rot.Members {
 		c, ok := owned[m.Key]
 		if !ok {
-			return fmt.Errorf("the account does not have %s", m.Key)
+			return "", nil, errMissingCharacter(m.Key)
 		}
 		ch, _ := cat.Character(m.Key)
 		weapon, refinement := "", 0
@@ -142,16 +167,13 @@ func config(rotationPath, accountPath string, opt weaponAssumptions) error {
 			}
 		}
 		if weapon == "" {
-			return fmt.Errorf("the account has no %s for %s", ch.WeaponType, m.Key)
+			return "", nil, fmt.Errorf("the account has no %s for %s", ch.WeaponType, m.Key)
 		}
 		loadout[m.Key] = rotation.Slot{Constellation: c.Constellation, Level: c.Level, Weapon: weapon, Refinement: refinement}
+		weapons = append(weapons, fmt.Sprintf("%s: %s R%d", m.Key, weapon, refinement))
 	}
 	cfg, err := rot.Config(loadout)
-	if err != nil {
-		return err
-	}
-	fmt.Println(cfg)
-	return nil
+	return cfg, weapons, err
 }
 
 // checkRotations parses every entry of a cached rotation database (one JSON

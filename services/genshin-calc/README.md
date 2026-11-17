@@ -40,12 +40,25 @@ is the damage split by element, which decides the team's element.
 
 | Path | What it is |
 | :- | :- |
-| `main.go` | The command-line program: `inspect` a GOOD file, print the simulator `config` for a player's version of a team (`-four-stars` assumes R1 of every 4-star weapon the file leaves out, since scans often miss them; `-three-stars` assumes every 3-star weapon at R5 in unlimited copies), and `check-rotations` in a cached database file. |
+| `main.go` | The command-line program: `inspect` a GOOD file, print the simulator `config` for a player's version of a team (`-four-stars` assumes R1 of every 4-star weapon the file leaves out, since scans often miss them; `-three-stars` assumes every 3-star weapon at R5 in unlimited copies), `check-rotations` in a cached database file, and run the `coarse` pass. |
+| `coarse_cmd.go`, `coarse/` | The coarse pass: simulate every single-target rotation a player can field (KQM Sim Database cache plus `rotations/`) on a pool of worker goroutines, and append each result as a JSON line to a cache. Cached results are skipped, so a stopped run resumes. Results flag rotations that wait for energy or cooldowns, and Iansan rotations that report no movement. |
 | `catalog/` | Every character, weapon and artifact set the pinned simulator supports, embedded as `catalog.json`. `unreleased.txt` lists characters that are never calculated. |
 | `good/` | Reads and checks a GOOD file. Nothing from the file is trusted: unknown keys and out-of-range values are dropped and reported. |
 | `rotation/` | Splits a rotation file into its script and its example builds, and writes the config for a player's own constellations, levels and weapons. |
 | `rotations/` | Rotations written for this project, for teams the KQM Sim Database lacks. Each names its source. |
 | `tools/gen_catalog.py` | Regenerates `catalog/catalog.json` from a KQM Sim source checkout. Run it when the pinned release changes. |
+
+Run the coarse pass on a scan (about 4,600 rotations at 100 iterations; Ctrl-C
+stops it, and running the same command again continues):
+
+```bash
+go build -o bin/genshin-calc ./services/genshin-calc
+bin/genshin-calc coarse -four-stars -three-stars -workers 8 \
+    local/rotations/kqm-db.jsonl path/to/scan.json
+```
+
+`-dry-run` lists what would be simulated, `-limit N` simulates only the first N, and
+`-out` picks the cache file (default `local/coarse/results.jsonl`).
 
 Run the tests and try it on a scan:
 
