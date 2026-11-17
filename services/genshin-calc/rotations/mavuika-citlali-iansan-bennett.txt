@@ -4,15 +4,19 @@
 #   Team "Mavuika — Citlali — Xilonen / Iansan / Sucrose / Kazuha — Bennett" (Forward Melt),
 #   sample rotation (Iansan), followed for the team order:
 #     Mavuika tE > Bennett EQ > Iansan E N1 Q > Citlali EQ (N1) > Mavuika Q Melt combo
-#   Melt combo and its timing: from the KQM Sim Database rotation dB9HJwcjPM6Q
-#   (Mavuika Citlali Xilonen Bennett, submitter 972143886153699328):
-#     Mavuika E N1 > ... > Mavuika Q (wait) 2[C3FD] C1F
-#   F = Final Charged Attack. The wait after the burst (18 frames) lets Citlali's Cryo land
-#   first; without it most of Mavuika's charged attacks did not melt in the simulator (the
-#   guide's Q C3F D C3F and Q J C8 as written gave 90-97k on the owner's gear, this 126k).
-#   About 6 melts per rotation: the burst, about 3 Final and about 2 Cyclic Charged Attacks.
-#   If her burst is not ready she uses Normal Attacks until it is (the guide says to add 1-2).
-#   Citlali's optional (N1) is kept.
+#   (team and order kept; Mavuika's own actions are the database combo below)
+#   Melt combo and its timing: from the KQM Sim Database rotation kNgftcWMgtfT
+#   (Mavuika Citlali Xilonen Bennett, submitter 972143886153699328), Iansan in Xilonen's place:
+#     Mavuika hE D > Bennett N1 EQ > Iansan E N1 (Q) > Citlali EQ N1 > Mavuika hE C1 Q C1F 4[D*C1F]
+#   (hE hold skill, D dash, D* dash that cancels a charged attack, C Cyclic and F Final Charged
+#   Attack). Of the solo-Cryo Citlali/Bennett database combos tried with the owner's akasha
+#   Melt build, this one simulated highest (207k; Q (wait) 2[C3FD] C1F 198k, Q C3F 3[D*C1F]
+#   182k, hE C1 Q C1 D*C3F 3[D*C1F] D 204k). It melts the burst and every Final Charged
+#   Attack, about 7 per rotation; the Cyclic hits between them do not melt.
+#   Mavuika's melts depend on her hits lining up with Citlali's Cryo ticks, so the rotation
+#   must keep the same shape: when Iansan's burst is not ready she waits about as long
+#   (delay(30)). Without that, every other rotation dropped to 2 melts.
+#   If Mavuika's burst is not ready she uses Normal Attacks until it is (the guide says to add 1-2).
 #   One change from the guide: Citlali and Iansan burst when ready instead of every rotation.
 #   Bursting every rotation waited on energy for about 25s over 6 rotations (Citlali with
 #   KQM-standard substats, Iansan with the owner's gear).
@@ -64,24 +68,34 @@ fn mv() {
   last_f = f();
 }
 
+fn dc() {   # D*: dash that cancels a charged attack, as mav_dc_cancel(6) in the database rotations
+  while !.mavuika.dash.ready { wait(1); }
+  if .mavuika.nightsoul.points > 16 || .mavuika.status.mavuika-burst {
+    mavuika dash[charge_cancel=1, travel=6], charge;
+  } else {
+    mavuika jump;
+  }
+}
+
 active mavuika;
 for let i=0; i<6; i=i+1 {
-  mavuika skill, attack;
-  bennett skill, burst;
+  mavuika skill[hold=1], dash;
+  bennett attack, skill, burst;
   iansan skill, attack;
-  if .iansan.burst.ready { iansan burst; }
+  if .iansan.burst.ready { iansan burst; } else { delay(30); }
   last_f = f();
   citlali skill;
   if .citlali.burst.ready { citlali burst; }
   citlali attack;
+  mavuika swap;
+  # recast E (hE C1) while still in Nightsoul; the database script has no skill.ready check,
+  # but here her skill can come off cooldown first, and a recast is then not allowed
+  if .mavuika.nightsoul.points && !.mavuika.skill.ready { mavuika skill[recast=1]; mavuika charge; }
   while !.mavuika.burst.ready { mavuika attack; }
-  mavuika burst;
-  mv();
-  delay(18);                             # wait for Citlali's Cryo
-  mavuika charge:3, charge[hold=6], charge[final=1], dash;
-  mv();
-  mavuika charge:3, charge[hold=6], charge[final=1], dash;
-  mv();
-  mavuika charge, charge[hold=30], charge[final=1];
-  mv();
+  mavuika burst; mv();
+  mavuika charge, charge[final=1]; mv();
+  dc(); mavuika charge[final=1]; mv();
+  dc(); mavuika charge[final=1]; mv();
+  dc(); mavuika charge[final=1]; mv();
+  dc(); mavuika charge[hold=40], charge[final=1]; mv();
 }
