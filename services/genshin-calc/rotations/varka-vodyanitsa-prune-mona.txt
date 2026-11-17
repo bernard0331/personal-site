@@ -51,16 +51,26 @@ fn special() {
   if special_ca { varka charge; } else { varka skill; }
 }
 
+# combo 2 (the owner's): N1CW N4 sC 3[N1CW] N1sC N1.
+# combo 1: the database's 3[N1CW] N2s 3[N1CW] N1s N1.
+let combo = 2;
+
 active vodyanitsa;
 for let i=0; i<6; i=i+1 {
   vodyanitsa skill;
   prune skill, burst;
   mona skill, burst, attack;
-  varka skill,
-        attack, charge, walk,
-        attack, charge, walk,
-        attack, charge, walk,
-        attack:2;
+  if combo == 2 {
+    varka skill,
+          attack, charge, walk,
+          attack:4;
+  } else {
+    varka skill,
+          attack, charge, walk,
+          attack, charge, walk,
+          attack, charge, walk,
+          attack:2;
+  }
   special();
   varka attack, charge, walk,
         attack, charge, walk,
