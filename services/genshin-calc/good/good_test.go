@@ -181,3 +181,40 @@ func TestAssumeFourStars(t *testing.T) {
 		t.Errorf("5-star weapons should be left as they are and none added: %d weapons", len(refinements))
 	}
 }
+
+func TestAssumeThreeStars(t *testing.T) {
+	acc, _, err := parse(t, `{
+	  "format": "GOOD", "version": 3, "source": "test",
+	  "characters": [],
+	  "weapons": [
+	    {"key": "ThrillingTalesOfDragonSlayers", "level": 90, "ascension": 6, "refinement": 2, "location": "", "lock": false},
+	    {"key": "FavoniusLance", "level": 90, "ascension": 6, "refinement": 3, "location": "", "lock": false}
+	  ],
+	  "artifacts": []
+	}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cat, _ := catalog.Load()
+	threeStars := 0
+	for _, w := range cat.Weapons {
+		if w.Rarity == 3 {
+			threeStars++
+		}
+	}
+	if added := acc.AssumeThreeStars(cat); added != threeStars-1 {
+		t.Errorf("added %d weapons, want %d", added, threeStars-1)
+	}
+	for _, w := range acc.Weapons {
+		entry, _ := cat.Weapon(w.Key)
+		switch {
+		case entry.Rarity == 3 && w.Refinement != 5:
+			t.Errorf("%s at refinement %d, want 5", w.Key, w.Refinement)
+		case w.Key == "favoniuslance" && w.Refinement != 3:
+			t.Errorf("a 4-star weapon's refinement changed to %d", w.Refinement)
+		}
+	}
+	if !acc.Unlimited["thrillingtalesofdragonslayers"] || !acc.Unlimited["slingshot"] || acc.Unlimited["favoniuslance"] {
+		t.Errorf("3-star weapons, and only they, should be unlimited: %v", acc.Unlimited)
+	}
+}

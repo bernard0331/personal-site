@@ -67,6 +67,11 @@ type Account struct {
 	Characters []Character
 	Weapons    []Weapon
 	Artifacts  []Artifact
+
+	// Unlimited lists weapons the player is assumed to have as many copies of
+	// as needed, so the rule that no weapon copy is used twice does not apply
+	// to them. Set by AssumeThreeStars.
+	Unlimited map[string]bool
 }
 
 // AssumeFourStars adds refinement 1 of every 4-star weapon the simulator
@@ -82,6 +87,38 @@ func (a *Account) AssumeFourStars(cat *catalog.Catalog) int {
 	for _, w := range cat.Weapons {
 		if w.Rarity == 4 && !listed[w.Key] {
 			a.Weapons = append(a.Weapons, Weapon{Key: w.Key, Refinement: 1})
+			added++
+		}
+	}
+	return added
+}
+
+// AssumeThreeStars treats every 3-star weapon the simulator supports as owned
+// at refinement 5 in unlimited copies: they are cheap to get and refine, so a
+// player can give one to every character who wants it. Listed copies are
+// raised to refinement 5. It returns how many weapons it added to the list.
+func (a *Account) AssumeThreeStars(cat *catalog.Catalog) int {
+	if a.Unlimited == nil {
+		a.Unlimited = map[string]bool{}
+	}
+	threeStar := map[string]bool{}
+	for _, w := range cat.Weapons {
+		if w.Rarity == 3 {
+			threeStar[w.Key] = true
+			a.Unlimited[w.Key] = true
+		}
+	}
+	listed := map[string]bool{}
+	for i, w := range a.Weapons {
+		if threeStar[w.Key] {
+			a.Weapons[i].Refinement = 5
+			listed[w.Key] = true
+		}
+	}
+	added := 0
+	for _, w := range cat.Weapons {
+		if w.Rarity == 3 && !listed[w.Key] {
+			a.Weapons = append(a.Weapons, Weapon{Key: w.Key, Refinement: 5})
 			added++
 		}
 	}
