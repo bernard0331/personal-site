@@ -319,3 +319,114 @@ func Score(dps []map[string]float64) []Choice {
 	})
 	return out
 }
+
+// Variant is a team's weapons with the estimated change in team DPS against
+// the weapons it was simulated with (1 for those).
+type Variant struct {
+	Weapons []string
+	Factor  float64
+}
+
+// Alternatives lists other ways to arm a simulated team, so a solver that
+// shares the player's weapon copies between teams is not stuck with each
+// team's first choice: Bennett can give up Azurelight for Mistsplitter at a
+// cost of under 1% if another team needs it more.
+//
+// Each member may swap to any ranked weapon whose score is within `within`
+// (a fraction) of the current weapon's; the team's DPS is estimated by
+// multiplying the score ratios, since the trials measured each weapon's
+// effect on team DPS. Members marked fixed, and characters the trials did not
+// rank, keep their weapons. Variants that need more copies than the player
+// has are dropped, as are variants beaten by another that is at least as
+// strong and uses no limited weapon copy the other does not. At most max
+// variants are returned, strongest first; the first is always the simulated
+// weapons.
+func Alternatives(members, current []string, fixed []bool, ranking Ranking, inv *Inventory, within float64, max int) []Variant {
+	type option struct {
+		weapon string
+		factor float64
+	}
+	opts := make([][]option, len(members))
+	for i, c := range members {
+		opts[i] = []option{{current[i], 1}}
+		if fixed[i] {
+			continue
+		}
+		cur := 0.0
+		for _, ch := range ranking[c] {
+			if ch.Weapon == current[i] {
+				cur = ch.Score
+			}
+		}
+		if cur <= 0 {
+			continue
+		}
+		for _, ch := range ranking[c] {
+			if ch.Weapon != current[i] && inv.Owns(ch.Weapon) && ch.Score/cur >= 1-within {
+				opts[i] = append(opts[i], option{ch.Weapon, ch.Score / cur})
+			}
+		}
+	}
+	var all []Variant
+	pick := make([]string, len(members))
+	var walk func(i int, f float64)
+	walk = func(i int, f float64) {
+		if i == len(members) {
+			need := map[string]int{}
+			for _, w := range pick {
+				need[w]++
+			}
+			for w, n := range need {
+				if c := inv.Copies(w); c >= 0 && n > c {
+					return
+				}
+			}
+			all = append(all, Variant{Weapons: append([]string(nil), pick...), Factor: f})
+			return
+		}
+		for _, o := range opts[i] {
+			pick[i] = o.weapon
+			walk(i+1, f*o.factor)
+		}
+	}
+	walk(0, 1)
+	// The simulated weapons first, then by estimated strength.
+	sort.SliceStable(all[1:], func(a, b int) bool { return all[1+a].Factor > all[1+b].Factor })
+
+	limited := func(v Variant) map[string]int {
+		m := map[string]int{}
+		for _, w := range v.Weapons {
+			if inv.Copies(w) >= 0 {
+				m[w]++
+			}
+		}
+		return m
+	}
+	subset := func(a, b map[string]int) bool {
+		for w, n := range a {
+			if b[w] < n {
+				return false
+			}
+		}
+		return true
+	}
+	var out []Variant
+	for i, v := range all {
+		lv := limited(v)
+		beaten := false
+		for j, o := range all {
+			if j != i && j != 0 && o.Factor >= v.Factor && subset(limited(o), lv) &&
+				(o.Factor > v.Factor || len(limited(o)) < len(lv)) {
+				beaten = true
+				break
+			}
+		}
+		if i == 0 || !beaten {
+			out = append(out, v)
+		}
+		if len(out) == max {
+			break
+		}
+	}
+	return out
+}

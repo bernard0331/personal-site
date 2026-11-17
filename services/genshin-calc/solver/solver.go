@@ -12,6 +12,7 @@ import (
 	"math"
 	"sort"
 	"strings"
+	"time"
 )
 
 // Team is one candidate team.
@@ -46,7 +47,9 @@ type Problem struct {
 	Copies map[string]int
 	// MaxSteps bounds each search (0: no bound). A search that reaches it
 	// returns the best answer found so far and sets Exhausted.
-	MaxSteps  int
+	MaxSteps int
+	// Deadline, if set, also stops a search, the same way.
+	Deadline  time.Time
 	Exhausted bool
 	steps     int
 }
@@ -54,7 +57,11 @@ type Problem struct {
 // step counts one search step and reports whether the budget is spent.
 func (p *Problem) step() bool {
 	p.steps++
-	if p.MaxSteps > 0 && p.steps > p.MaxSteps {
+	if p.Exhausted {
+		return true
+	}
+	if (p.MaxSteps > 0 && p.steps > p.MaxSteps) ||
+		(!p.Deadline.IsZero() && p.steps%1024 == 0 && time.Now().After(p.Deadline)) {
 		p.Exhausted = true
 		return true
 	}
@@ -381,89 +388,46 @@ func lagrangePrices(ts []Team, res [][]int, capacity []int, k int, weight func(T
 
 // ByElement picks one team for each of the given elements, maximising the
 // objective. If not every element can have a team, it covers as many
-// elements as possible first. The result is in the order of elements; an
-// element without a team has a zero Team.
+// elements as possible. The result is in the order of elements; an element
+// without a team has a zero Team.
+//
+// It is Best with one more kind of resource: each element, with one copy, so
+// no two chosen teams share an element.
 func (p *Problem) ByElement(elements []string, o Objective) []Team {
-	groups := make([][]Team, len(elements))
-	for i, e := range elements {
-		for _, t := range p.Teams {
-			if t.Element == e {
-				groups[i] = append(groups[i], t)
-			}
-		}
-		groups[i] = sorted(groups[i])
+	want := map[string]bool{}
+	for _, e := range elements {
+		want[e] = true
 	}
-	// Search the elements with the fewest teams first: they constrain most.
-	order := make([]int, len(elements))
-	for i := range order {
-		order[i] = i
+	q := &Problem{Copies: map[string]int{}, MaxSteps: p.MaxSteps, Deadline: p.Deadline}
+	for w, c := range p.Copies {
+		q.Copies[w] = c
 	}
-	sort.SliceStable(order, func(a, b int) bool { return len(groups[order[a]]) < len(groups[order[b]]) })
-
-	u := newUsage(p.Copies)
-	pick := make([]int, len(elements)) // index into the group, or -1
-	best := make([]int, len(elements))
-	for i := range pick {
-		pick[i], best[i] = -1, -1
+	for _, e := range elements {
+		q.Copies[elementResource+e] = 1
 	}
-	bestCovered, bestScore := -1, -1.0
-	var dfs func(d, covered int, sum, low float64)
-	dfs = func(d, covered int, sum, low float64) {
-		if p.step() {
-			return
+	for _, t := range p.Teams {
+		if want[t.Element] {
+			t.Weapons = append(append([]string(nil), t.Weapons...), elementResource+t.Element)
+			q.Teams = append(q.Teams, t)
 		}
-		if d == len(order) {
-			s := sum
-			if o == Min {
-				s = low
-			}
-			if covered > bestCovered || (covered == bestCovered && s > bestScore) {
-				bestCovered, bestScore = covered, s
-				copy(best, pick)
-			}
-			return
-		}
-		// Bound: every remaining element gets its best team.
-		maxCovered, bSum, bLow := covered, sum, low
-		for _, e := range order[d:] {
-			if len(groups[e]) > 0 {
-				maxCovered++
-				bSum += groups[e][0].DPS
-				bLow = min(bLow, groups[e][0].DPS)
-			}
-		}
-		bound := bSum
-		if o == Min {
-			bound = bLow
-		}
-		if maxCovered < bestCovered || (maxCovered == bestCovered && bound <= bestScore) {
-			return
-		}
-		e := order[d]
-		for j := range groups[e] {
-			t := &groups[e][j]
-			if !u.fits(t) {
-				continue
-			}
-			u.add(t, 1)
-			pick[e] = j
-			dfs(d+1, covered+1, sum+t.DPS, min(low, t.DPS))
-			u.add(t, -1)
-		}
-		pick[e] = -1
-		dfs(d+1, covered, sum, low)
 	}
-	inf := 1e18
-	p.steps, p.Exhausted = 0, false
-	dfs(0, 0, 0, inf)
+	got := q.Best(len(elements), o)
+	p.Exhausted = q.Exhausted
 	out := make([]Team, len(elements))
-	for i, j := range best {
-		if j >= 0 {
-			out[i] = groups[i][j]
+	for _, t := range got {
+		for i, e := range elements {
+			if t.Element == e {
+				t.Weapons = t.Weapons[:len(t.Weapons)-1]
+				out[i] = t
+			}
 		}
 	}
 	return out
 }
+
+// elementResource marks the per-element resource ByElement adds; no weapon
+// key contains a colon.
+const elementResource = "element:"
 
 // resources lists what a team uses up: each member (capacity 1) and each
 // limited weapon copy (capacity: the copies owned). Unlimited weapons are not

@@ -72,3 +72,30 @@ func TestScore(t *testing.T) {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }
+
+func TestAlternatives(t *testing.T) {
+	in := inv([]string{"tt"},
+		good.Weapon{Key: "azure", Refinement: 1}, good.Weapon{Key: "mist", Refinement: 1},
+		good.Weapon{Key: "alley", Refinement: 2}, good.Weapon{Key: "fav", Refinement: 5},
+		good.Weapon{Key: "tt", Refinement: 5})
+	ranking := Ranking{
+		"bennett": {{"azure", 1}, {"mist", 0.99}, {"alley", 0.975}, {"fav", 0.80}},
+		"sucrose": {{"tt", 1}},
+	}
+	got := Alternatives([]string{"bennett", "sucrose"}, []string{"azure", "tt"}, []bool{false, false}, ranking, in, 0.05, 10)
+	var desc []string
+	for _, v := range got {
+		desc = append(desc, v.Weapons[0])
+	}
+	// fav is 20% worse: out. mist and alley are near: in, strongest first.
+	if want := []string{"azure", "mist", "alley"}; !reflect.DeepEqual(desc, want) {
+		t.Errorf("got %v, want %v", desc, want)
+	}
+	if got[1].Factor != 0.99 {
+		t.Errorf("factor %v", got[1].Factor)
+	}
+	fixed := Alternatives([]string{"bennett", "sucrose"}, []string{"azure", "tt"}, []bool{true, false}, ranking, in, 0.05, 10)
+	if len(fixed) != 1 {
+		t.Errorf("a fixed member keeps the weapon: %v", fixed)
+	}
+}
