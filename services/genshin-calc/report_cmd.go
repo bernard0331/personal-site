@@ -36,7 +36,8 @@ func reportCmd(args []string) error {
 	fs.IntVar(&picks.Top, "top", 100, "candidates: the best N teams overall")
 	fs.IntVar(&picks.PerElement, "per-element", 20, "candidates: the best N teams of each main element")
 	fs.IntVar(&picks.PerCharacter, "per-character", 3, "candidates: the best N teams each character is in")
-	maxTime := fs.Duration("max-time", time.Minute, "time per breakdown's search before settling for the best found (0: no limit)")
+	maxTime := fs.Duration("max-time", 5*time.Minute, "time per search before settling for the best found (0: no limit)")
+	python := fs.String("highs", defaultHiGHS(), "a Python with highspy, to solve with HiGHS (empty: this package's slower branch and bound)")
 	elementPicks := coarse.Picks{Top: 100, PerElement: 60, PerCharacter: 5}
 	fs.Usage = func() { fmt.Fprintln(os.Stderr, reportUsage); fs.PrintDefaults() }
 	fs.Parse(args)
@@ -69,39 +70,85 @@ func reportCmd(args []string) error {
 	// One team per element is fast on every team. Any N teams is not: it
 	// runs on the candidates the full pass would pick.
 	alt := alternatives{rule: rule, within: *within, max: *variants}
-	// The searches run on candidates: the full pass's picks for any N teams,
-	// and a wider set for one per element.
+	start := time.Now()
+	took := func() {
+		fmt.Fprintf(os.Stderr, "search took %s\n", time.Since(start).Round(time.Millisecond))
+		start = time.Now()
+	}
+	notProven := func() {
+		fmt.Println("\n*The search reached its limit: this is the best found, not proven best.*")
+	}
+
+	if *python != "" {
+		// HiGHS proves its answers best, over every team and weapon option.
+		h := &solver.HiGHS{Python: *python, TimeLimit: *maxTime}
+		all, byID := problem(usable, alt)
+		fmt.Printf("# Best teams\n\nFrom %s: %d teams, %d team options with weapon variants, solved with HiGHS.\n",
+			fs.Arg(0), coarse.Teams(asJobs(usable)), len(all.Teams))
+		for _, o := range []solver.Objective{solver.Min, solver.Sum} {
+			fmt.Printf("\n## One team per element, %s\n", o)
+			r, err := all.ByElementHiGHS(h, elements, o)
+			if err != nil {
+				return err
+			}
+			printTeams(os.Stdout, r.Teams, byID, *stats)
+			if took(); !r.Optimal {
+				notProven()
+			}
+		}
+		for _, o := range []solver.Objective{solver.Min, solver.Sum} {
+			fmt.Printf("\n## %d teams, any element, %s\n", *n, o)
+			r, err := all.BestHiGHS(h, *n, o)
+			if err != nil {
+				return err
+			}
+			printTeams(os.Stdout, r.Teams, byID, *stats)
+			if took(); !r.Optimal {
+				notProven()
+			}
+		}
+		return nil
+	}
+
+	// Without HiGHS: this package's branch and bound, on candidates (it is
+	// too slow on every team): the full pass's picks for any N teams, and a
+	// wider set for one per element.
 	all, byID := problem(coarse.Select(usable, elementPicks), alt)
 	candidates, _ := problem(coarse.Select(usable, picks), alt)
 	fmt.Printf("# Best teams\n\nFrom %s: %d teams; %d and %d team options (weapon variants included) searched.\n",
 		fs.Arg(0), coarse.Teams(asJobs(usable)), len(all.Teams), len(candidates.Teams))
-	start := time.Now()
-	note := func(p *solver.Problem) {
-		fmt.Fprintf(os.Stderr, "search took %s\n", time.Since(start).Round(time.Millisecond))
-		start = time.Now()
-		if p.Exhausted {
-			fmt.Println("\n*The search reached its limit: this is the best found, not proven best.*")
-		}
-	}
-	deadline := func(p *solver.Problem) *solver.Problem {
+	deadline := func(p *solver.Problem) {
 		if *maxTime > 0 {
 			p.Deadline = time.Now().Add(*maxTime)
 		}
-		return p
 	}
 	for _, o := range []solver.Objective{solver.Min, solver.Sum} {
 		deadline(all)
 		fmt.Printf("\n## One team per element, %s\n", o)
 		printTeams(os.Stdout, all.ByElement(elements, o), byID, *stats)
-		note(all)
+		if took(); all.Exhausted {
+			notProven()
+		}
 	}
 	for _, o := range []solver.Objective{solver.Min, solver.Sum} {
 		deadline(candidates)
 		fmt.Printf("\n## %d teams, any element, %s\n", *n, o)
 		printTeams(os.Stdout, candidates.Best(*n, o), byID, *stats)
-		note(candidates)
+		if took(); candidates.Exhausted {
+			notProven()
+		}
 	}
 	return nil
+}
+
+// defaultHiGHS is the project's HiGHS Python (local/highs-venv, see the
+// README) if it exists, else none.
+func defaultHiGHS() string {
+	const venv = "local/highs-venv/bin/python"
+	if _, err := os.Stat(venv); err == nil {
+		return venv
+	}
+	return ""
 }
 
 // asJobs keeps only the teams of results, for counting them.

@@ -44,7 +44,7 @@ is the damage split by element, which decides the team's element.
 | `coarse_cmd.go`, `coarse/` | The coarse pass: simulate every single-target rotation a player can field (KQM Sim Database cache plus `rotations/`) on a pool of worker goroutines, and append each result as a JSON line to a cache. Cached results are skipped, so a stopped run resumes. Results flag rotations that wait for energy or cooldowns, and Iansan rotations that report no movement. |
 | `full_cmd.go`, `coarse/full.go` | The full pass: take the most promising teams from the coarse pass (best overall, best per main element, best per character, so the solver has teams for everyone), let KQM Sim's substat optimiser choose their substats (KQM standard or top 1%), and simulate the result with 1,000 iterations. Results keep the chosen substat lines. |
 | `weapons_cmd.go`, `weapons/` | Weapon allocation. The weapon trials try each character's candidate weapons (every owned 5-star of the type, the weapons the rotations give that character most often, and the rotation's own) in two of the character's most common teams, and rank them by team DPS. The passes then give each member their best-ranked free copy; members compete for a copy by how much they would lose without it. |
-| `solver/` | Chooses the best set of teams with no character or weapon copy used twice: one team per element, or any N teams, each by best weakest team or highest average. Exact branch and bound; tests check it against brute force. |
+| `solver/` | Chooses the best set of teams with no character or weapon copy used twice: one team per element, or any N teams, each by best weakest team or highest average. The main solver is HiGHS, an open-source integer programming solver (MIT licence), run through `highs_solve.py` (embedded in the binary); it proves its answers best over every team and weapon option in about a minute each. A slower branch and bound in Go, checked against brute force, is the fallback without HiGHS and the reference the HiGHS tests compare against. |
 | `report_cmd.go` | Runs the solver on a pass's results and prints both breakdowns as Markdown, with each team's DPS per member, weapons, rotation and flags (`-stats` adds the optimised substats). |
 | `catalog/` | Every character, weapon and artifact set the pinned simulator supports, embedded as `catalog.json`. `unreleased.txt` lists characters that are never calculated. |
 | `good/` | Reads and checks a GOOD file. Nothing from the file is trusted: unknown keys and out-of-range values are dropped and reported. |
@@ -62,7 +62,14 @@ DB=local/rotations/kqm-db.jsonl
 bin/genshin-calc weapons -four-stars -three-stars $DB path/to/scan.json  # ~2,100 trials, ~12 min
 bin/genshin-calc coarse $A -workers 4 $DB path/to/scan.json             # ~4,600 rotations, 100 iterations
 bin/genshin-calc full $A $DB path/to/scan.json                          # ~300 teams, ~40 s each
-bin/genshin-calc report -four-stars -three-stars local/full/kqm.jsonl path/to/scan.json
+bin/genshin-calc report $A local/full/kqm.jsonl path/to/scan.json
+```
+
+The report solves with HiGHS when `local/highs-venv` exists. Set it up once
+(HiGHS's official Python package; Homebrew does not build HiGHS on macOS 15):
+
+```bash
+python3 -m venv local/highs-venv && local/highs-venv/bin/pip install highspy
 ```
 
 The weapon options must be the same for `coarse` and `full`, because `full`
