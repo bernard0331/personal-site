@@ -31,7 +31,8 @@ func weaponsCmd(args []string) error {
 	sim := fs.String("sim", "bin/kqmsim", "simulator binary")
 	own := fs.String("own", "services/genshin-calc/rotations", "directory of this project's own rotation files (empty for none)")
 	iterations := fs.Int("iterations", 100, "simulator iterations per trial")
-	workers := fs.Int("workers", 4, "simulations to run at once")
+	cpus := cpuFlag(fs)
+	workers := fs.Int("workers", 0, "simulations to run at once (default: one per core in -cpus)")
 	teams := fs.Int("teams", 2, "trial teams per character")
 	frequent := fs.Int("frequent", 3, "also try the N weapons the rotations give a character most often")
 	only := fs.String("only", "", "comma-separated characters to try (default: all)")
@@ -175,7 +176,7 @@ func weaponsCmd(args []string) error {
 	if err != nil {
 		return fmt.Errorf("simulator: %w", err)
 	}
-	if err := runJobs(jobs, bin, *workers, *cache, 50); err != nil {
+	if err := runJobs(jobs, bin, share(bin, *cpus, *workers), *cache, 50); err != nil {
 		return err
 	}
 

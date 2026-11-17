@@ -17,7 +17,12 @@ import (
 
 // Binary runs the simulator program, one process per config.
 type Binary struct {
-	Path        string
+	Path string
+	// Threads caps how many cores each simulator process uses (GOMAXPROCS);
+	// 0 leaves it to the simulator, which uses every core. Running several
+	// uncapped processes at once oversubscribes the machine badly enough to
+	// freeze it.
+	Threads     int
 	fingerprint string
 }
 
@@ -54,13 +59,22 @@ func (b *Binary) Run(ctx context.Context, config string) ([]byte, error) {
 	if err := os.WriteFile(cfg, []byte(config), 0o600); err != nil {
 		return nil, err
 	}
-	cmd := exec.CommandContext(ctx, b.Path, "-c", cfg, "-out", out)
-	cmd.Dir = dir
+	cmd := b.command(ctx, dir, "-c", cfg, "-out", out)
 	log, err := cmd.CombinedOutput()
 	if err != nil {
 		return nil, fmt.Errorf("simulator failed: %s", lastLine(log, err))
 	}
 	return os.ReadFile(out)
+}
+
+// command prepares a simulator process in dir, with the thread cap.
+func (b *Binary) command(ctx context.Context, dir string, args ...string) *exec.Cmd {
+	cmd := exec.CommandContext(ctx, b.Path, args...)
+	cmd.Dir = dir
+	if b.Threads > 0 {
+		cmd.Env = append(os.Environ(), fmt.Sprintf("GOMAXPROCS=%d", b.Threads))
+	}
+	return cmd
 }
 
 // lastLine is the simulator's last line of output, which holds its error message.

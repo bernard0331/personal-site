@@ -10,8 +10,10 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/bernard0331/personal-site/services/genshin-calc/catalog"
@@ -34,7 +36,8 @@ func coarseCmd(args []string) error {
 	sim := fs.String("sim", "bin/kqmsim", "simulator binary")
 	own := fs.String("own", "services/genshin-calc/rotations", "directory of this project's own rotation files (empty for none)")
 	iterations := fs.Int("iterations", 100, "simulator iterations per rotation")
-	workers := fs.Int("workers", 4, "simulations to run at once")
+	cpus := cpuFlag(fs)
+	workers := fs.Int("workers", 0, "simulations to run at once (default: one per core in -cpus)")
 	limit := fs.Int("limit", 0, "simulate at most this many rotations (0 for all), for trying things out")
 	dryRun := fs.Bool("dry-run", false, "list what would be simulated and stop")
 	fs.Usage = func() { fmt.Fprintln(os.Stderr, coarseUsage); fs.PrintDefaults() }
@@ -81,7 +84,25 @@ func coarseCmd(args []string) error {
 	if err != nil {
 		return fmt.Errorf("simulator: %w", err)
 	}
-	return runJobs(jobs, bin, *workers, *out, 25)
+	n := share(bin, *cpus, *workers)
+	return runJobs(jobs, bin, n, *out, 25)
+}
+
+// cpuFlag registers -cpus: how many cores a run may use in all.
+func cpuFlag(fs *flag.FlagSet) *int {
+	return fs.Int("cpus", max(1, runtime.NumCPU()-2), "cores to use in all (default: all but two)")
+}
+
+// share splits cpus cores between workers simulations at once (0 workers: one
+// per core) and caps each simulator process to its share. It returns the
+// number of workers.
+func share(bin *coarse.Binary, cpus, workers int) int {
+	cpus = max(1, cpus)
+	if workers <= 0 {
+		workers = cpus
+	}
+	bin.Threads = max(1, cpus/workers)
+	return workers
 }
 
 // runJobs simulates jobs not already in the results cache at out, appending
@@ -110,7 +131,10 @@ func runJobs(jobs []coarse.Job, sim coarse.Simulator, workers int, out string, e
 		return w.Flush() // one line at a time, so a stopped run keeps what it finished
 	}
 
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	// Below normal priority, so the machine stays usable during a long run;
+	// the simulator processes inherit it.
+	_ = syscall.Setpriority(syscall.PRIO_PROCESS, 0, 10)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	start := time.Now()
 	report := func(p coarse.Progress) {

@@ -31,7 +31,8 @@ func fullCmd(args []string) error {
 	own := fs.String("own", "services/genshin-calc/rotations", "directory of this project's own rotation files (as in the quick pass)")
 	mode := fs.String("mode", "kqm", "substats: kqm (KQM standard) or top1 (top 1% of builds)")
 	iterations := fs.Int("iterations", 1000, "simulator iterations per team")
-	workers := fs.Int("workers", 1, "teams to optimise at once (the optimiser already uses most cores)")
+	cpus := cpuFlag(fs)
+	workers := fs.Int("workers", 1, "teams to optimise at once; the -cpus cores are shared between them")
 	var picks coarse.Picks
 	fs.IntVar(&picks.Top, "top", 100, "take the best N teams overall")
 	fs.IntVar(&picks.PerElement, "per-element", 20, "take the best N teams of each main element")
@@ -123,7 +124,8 @@ func fullCmd(args []string) error {
 		printElementCounts(chosen)
 		return nil
 	}
-	return runJobs(jobs, &coarse.Optimiser{Bin: bin, Options: options}, *workers, *out, 1)
+	n := share(bin, *cpus, *workers)
+	return runJobs(jobs, &coarse.Optimiser{Bin: bin, Options: options}, n, *out, 1)
 }
 
 // printElementCounts says how many chosen teams have each main element.

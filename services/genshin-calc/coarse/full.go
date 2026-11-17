@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -57,8 +56,7 @@ func (o *Optimiser) Run(ctx context.Context, config string) ([]byte, error) {
 	if o.Options != "" {
 		args = append(args, "-options="+o.Options)
 	}
-	cmd := exec.CommandContext(ctx, o.Bin.Path, args...)
-	cmd.Dir = dir
+	cmd := o.Bin.command(ctx, dir, args...)
 	if log, err := cmd.CombinedOutput(); err != nil {
 		return nil, fmt.Errorf("substat optimiser failed: %s", lastLine(log, err))
 	}
