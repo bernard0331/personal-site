@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/bernard0331/personal-site/services/genshin-calc/catalog"
 	"github.com/bernard0331/personal-site/services/genshin-calc/coarse"
@@ -30,6 +31,11 @@ func reportCmd(args []string) error {
 	n := fs.Int("n", 10, "teams in the breakdown without an element rule")
 	stats := fs.Bool("stats", false, "print each team's artifact stat lines (the full pass keeps the optimised substats)")
 	skipFlagged := fs.Bool("skip-flagged", false, "leave out results flagged as waiting for energy or cooldowns")
+	var picks coarse.Picks
+	fs.IntVar(&picks.Top, "top", 100, "candidates: the best N teams overall")
+	fs.IntVar(&picks.PerElement, "per-element", 20, "candidates: the best N teams of each main element")
+	fs.IntVar(&picks.PerCharacter, "per-character", 3, "candidates: the best N teams each character is in")
+	maxSteps := fs.Int("max-steps", 50_000_000, "search steps per breakdown before settling for the best found (0: no limit)")
 	fs.Usage = func() { fmt.Fprintln(os.Stderr, reportUsage); fs.PrintDefaults() }
 	fs.Parse(args)
 	if fs.NArg() != 2 {
@@ -52,15 +58,36 @@ func reportCmd(args []string) error {
 	if err != nil {
 		return err
 	}
-	p, byID := problem(results, rule.inv, *skipFlagged)
-	fmt.Printf("# Best teams\n\nFrom %s: %d teams.\n", fs.Arg(0), len(p.Teams))
+	var usable []coarse.Result
+	for _, r := range results {
+		if r.Error == "" && (!*skipFlagged || len(r.Flags) == 0) {
+			usable = append(usable, r)
+		}
+	}
+	// One team per element is fast on every team. Any N teams is not: it
+	// runs on the candidates the full pass would pick.
+	all, byID := problem(usable, rule.inv, false)
+	candidates, _ := problem(coarse.Select(usable, picks), rule.inv, false)
+	all.MaxSteps, candidates.MaxSteps = *maxSteps, *maxSteps
+	fmt.Printf("# Best teams\n\nFrom %s: %d teams (%d candidates for the any-element breakdown).\n",
+		fs.Arg(0), len(all.Teams), len(candidates.Teams))
+	start := time.Now()
+	note := func(p *solver.Problem) {
+		fmt.Fprintf(os.Stderr, "search took %s\n", time.Since(start).Round(time.Millisecond))
+		start = time.Now()
+		if p.Exhausted {
+			fmt.Println("\n*The search stopped at its step limit: this is the best found, not proven best.*")
+		}
+	}
 	for _, o := range []solver.Objective{solver.Min, solver.Sum} {
 		fmt.Printf("\n## One team per element, %s\n", o)
-		printTeams(os.Stdout, p.ByElement(elements, o), byID, *stats)
+		printTeams(os.Stdout, all.ByElement(elements, o), byID, *stats)
+		note(all)
 	}
 	for _, o := range []solver.Objective{solver.Min, solver.Sum} {
 		fmt.Printf("\n## %d teams, any element, %s\n", *n, o)
-		printTeams(os.Stdout, p.Best(*n, o), byID, *stats)
+		printTeams(os.Stdout, candidates.Best(*n, o), byID, *stats)
+		note(candidates)
 	}
 	return nil
 }

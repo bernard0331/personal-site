@@ -9,7 +9,9 @@
 package solver
 
 import (
+	"math"
 	"sort"
+	"strings"
 )
 
 // Team is one candidate team.
@@ -42,6 +44,21 @@ type Problem struct {
 	// Copies is how many copies of each weapon the player has; a weapon
 	// missing from the map, or with a negative count, is unlimited.
 	Copies map[string]int
+	// MaxSteps bounds each search (0: no bound). A search that reaches it
+	// returns the best answer found so far and sets Exhausted.
+	MaxSteps  int
+	Exhausted bool
+	steps     int
+}
+
+// step counts one search step and reports whether the budget is spent.
+func (p *Problem) step() bool {
+	p.steps++
+	if p.MaxSteps > 0 && p.steps > p.MaxSteps {
+		p.Exhausted = true
+		return true
+	}
+	return false
 }
 
 // usage keeps track of what the chosen teams use.
@@ -102,13 +119,19 @@ func score(o Objective, dps []float64) float64 {
 }
 
 // Best picks n teams maximising the objective, ignoring elements. It returns
-// fewer than n only if no n teams fit together.
+// fewer than n only if no n teams fit together. For the best weakest team,
+// ties are broken by the highest average.
 func (p *Problem) Best(n int, o Objective) []Team {
 	teams := sorted(p.Teams)
-	// Fewer teams than asked are only better than none: first find the
-	// largest count that fits, then optimise at that count.
-	for k := n; k > 0; k-- {
-		if best := p.search(teams, k, o); best != nil {
+	p.steps, p.Exhausted = 0, false
+	for k := n; k > 0; k-- { // fewer teams only if n cannot fit together
+		var best []Team
+		if o == Min {
+			best = p.bestMin(teams, k)
+		} else {
+			best = p.bestSum(teams, k)
+		}
+		if best != nil || p.Exhausted {
 			return best
 		}
 	}
@@ -121,62 +144,239 @@ func sorted(ts []Team) []Team {
 	return out
 }
 
-// search finds exactly k fitting teams with the best objective, or nil.
-func (p *Problem) search(teams []Team, k int, o Objective) []Team {
+// bestMin: the weakest team of the answer is teams[L-1] for the smallest L
+// such that k of teams[:L] fit together. Feasibility only grows with L, so L
+// is found by binary search, starting from the highest-average answer (which
+// fits, so its weakest team bounds L). Then the best average among teams[:L].
+// If the step budget runs out, the best answer known so far is returned.
+func (p *Problem) bestMin(teams []Team, k int) []Team {
+	known := p.bestSum(teams, k)
+	if known == nil {
+		return nil
+	}
+	weakest := known[len(known)-1].DPS
+	hi := 0
+	for hi < len(teams) && teams[hi].DPS >= weakest {
+		hi++
+	}
+	one := func(Team) float64 { return 1 }
+	lo := k
+	for lo < hi && !p.Exhausted {
+		mid := (lo + hi) / 2
+		got, _ := p.pack(teams[:mid], k, one, true)
+		switch {
+		case got != nil:
+			hi, known = mid, got
+		case !p.Exhausted:
+			lo = mid + 1
+		}
+	}
+	if p.Exhausted {
+		return sorted(known)
+	}
+	// Every team as strong as teams[hi-1] may be used: equal DPS ties.
+	for hi < len(teams) && teams[hi].DPS == teams[hi-1].DPS {
+		hi++
+	}
+	if best := p.bestSum(teams[:hi], k); best != nil {
+		return best
+	}
+	return sorted(known)
+}
+
+func (p *Problem) bestSum(teams []Team, k int) []Team {
+	got, _ := p.pack(teams, k, func(t Team) float64 { return t.DPS }, false)
+	return got
+}
+
+// pack finds k teams of ts (sorted by DPS) that fit together, maximising the
+// total weight; with anyFit it stops at the first k that fit. Branch and
+// bound: take the strongest remaining team or leave it out, where the
+// remaining teams are always only those that fit with the ones taken.
+//
+// The bound is a Lagrangian relaxation of the fitting rules. Each resource
+// (a character, capacity 1; a limited weapon, capacity the copies owned) gets
+// a price; a team's reduced weight is its weight less the prices of what it
+// uses. No k fitting teams can weigh more than the remaining capacity of each
+// resource times its price, plus the k best reduced weights. Any prices give
+// a valid bound; good ones (found once at the root, below) a tight one.
+func (p *Problem) pack(ts []Team, k int, weight func(Team) float64, anyFit bool) ([]Team, float64) {
+	if len(ts) < k {
+		return nil, 0
+	}
+	// Number the resources and list each team's.
+	id := map[string]int{}
+	var capacity []int
+	res := make([][]int, len(ts))
+	for i := range ts {
+		for _, r := range p.resources(&ts[i]) {
+			j, ok := id[r]
+			if !ok {
+				j = len(capacity)
+				id[r] = j
+				capacity = append(capacity, p.capacity(r))
+			}
+			res[i] = append(res[i], j)
+		}
+	}
+	price := lagrangePrices(ts, res, capacity, k, weight, anyFit)
+	reduced := make([]float64, len(ts))
+	for i := range ts {
+		reduced[i] = weight(ts[i])
+		for _, j := range res[i] {
+			reduced[i] -= price[j]
+		}
+	}
+	used := make([]int, len(capacity))
 	u := newUsage(p.Copies)
-	var chosen []int
-	var best []int
-	bestScore := -1.0
-	var dfs func(i int, sum float64)
-	dfs = func(i int, sum float64) {
+	var chosen, best []int
+	bestW := math.Inf(-1)
+	found := false
+	buf := make([]float64, 0, len(ts))
+	seen := make([]bool, len(capacity))
+	var touched []int
+	var dfs func(rem []int, w float64)
+	dfs = func(rem []int, w float64) {
+		if found || p.step() {
+			return
+		}
 		need := k - len(chosen)
 		if need == 0 {
-			var s float64
-			if o == Min {
-				s = teams[chosen[len(chosen)-1]].DPS // sorted: the last is the weakest
-			} else {
-				s = sum
-			}
-			if s > bestScore {
-				bestScore, best = s, append([]int(nil), chosen...)
+			if w > bestW {
+				bestW, best = w, append([]int(nil), chosen...)
+				found = anyFit
 			}
 			return
 		}
-		if len(teams)-i < need {
+		if len(rem) < need {
 			return
 		}
-		// Bound: the next `need` teams are the best that could still be added.
-		if o == Min {
-			if teams[i+need-1].DPS <= bestScore {
+		// Bound.
+		bound := w
+		buf, touched = buf[:0], touched[:0]
+		for _, i := range rem {
+			buf = append(buf, reduced[i])
+			for _, j := range res[i] {
+				if !seen[j] {
+					seen[j] = true
+					touched = append(touched, j)
+					bound += float64(capacity[j]-used[j]) * price[j]
+				}
+			}
+		}
+		for _, j := range touched {
+			seen[j] = false
+		}
+		if anyFit {
+			// How many more teams could fit at most: every team with a
+			// positive reduced weight counts. Prune if that is below need.
+			for _, r := range buf {
+				bound += max(0, r)
+			}
+			if bound-w < float64(need)-1e-9 {
 				return
 			}
 		} else {
-			b := sum
-			for j := i; j < i+need; j++ {
-				b += teams[j].DPS
+			sort.Sort(sort.Reverse(sort.Float64Slice(buf)))
+			for _, r := range buf[:need] {
+				bound += r
 			}
-			if b <= bestScore {
+			if bound <= bestW+1e-9 {
 				return
 			}
 		}
-		if u.fits(&teams[i]) {
-			u.add(&teams[i], 1)
-			chosen = append(chosen, i)
-			dfs(i+1, sum+teams[i].DPS)
-			chosen = chosen[:len(chosen)-1]
-			u.add(&teams[i], -1)
+		first := rem[0]
+		u.add(&ts[first], 1)
+		for _, j := range res[first] {
+			used[j]++
 		}
-		dfs(i+1, sum)
+		chosen = append(chosen, first)
+		var next []int
+		for _, i := range rem[1:] {
+			if u.fits(&ts[i]) {
+				next = append(next, i)
+			}
+		}
+		dfs(next, w+weight(ts[first]))
+		chosen = chosen[:len(chosen)-1]
+		for _, j := range res[first] {
+			used[j]--
+		}
+		u.add(&ts[first], -1)
+		dfs(rem[1:], w)
 	}
-	dfs(0, 0)
+	all := make([]int, len(ts))
+	for i := range all {
+		all[i] = i
+	}
+	dfs(all, 0)
 	if best == nil {
-		return nil
+		return nil, 0
 	}
 	out := make([]Team, len(best))
 	for i, j := range best {
-		out[i] = teams[j]
+		out[i] = ts[j]
 	}
-	return out
+	return out, bestW
+}
+
+// lagrangePrices chooses resource prices that make the bound tight, by
+// subgradient descent on the bound at the root. The bound at prices λ is
+// sum(capacity·λ) + the k best reduced weights (with free count: every
+// positive reduced weight); its subgradient for a resource is its capacity
+// minus how many of the counted teams use it.
+func lagrangePrices(ts []Team, res [][]int, capacity []int, k int, weight func(Team) float64, freeCount bool) []float64 {
+	price := make([]float64, len(capacity))
+	best := make([]float64, len(capacity))
+	bestBound := math.Inf(1)
+	scale := 0.0
+	for _, t := range ts {
+		scale = max(scale, weight(t))
+	}
+	type rw struct {
+		i int
+		r float64
+	}
+	rs := make([]rw, len(ts))
+	use := make([]int, len(capacity))
+	for iter := 0; iter < 500; iter++ {
+		bound := 0.0
+		for j, v := range price {
+			bound += float64(capacity[j]) * v
+		}
+		for i, t := range ts {
+			r := weight(t)
+			for _, j := range res[i] {
+				r -= price[j]
+			}
+			rs[i] = rw{i, r}
+		}
+		sort.Slice(rs, func(a, b int) bool { return rs[a].r > rs[b].r })
+		clear(use)
+		counted := rs[:k]
+		if freeCount {
+			n := 0
+			for n < len(rs) && rs[n].r > 0 {
+				n++
+			}
+			counted = rs[:n]
+		}
+		for _, x := range counted {
+			bound += x.r
+			for _, j := range res[x.i] {
+				use[j]++
+			}
+		}
+		if bound < bestBound {
+			bestBound = bound
+			copy(best, price)
+		}
+		step := scale / 4 / float64(iter+2)
+		for j := range price {
+			price[j] = max(0, price[j]-step*float64(capacity[j]-use[j]))
+		}
+	}
+	return best
 }
 
 // ByElement picks one team for each of the given elements, maximising the
@@ -209,6 +409,9 @@ func (p *Problem) ByElement(elements []string, o Objective) []Team {
 	bestCovered, bestScore := -1, -1.0
 	var dfs func(d, covered int, sum, low float64)
 	dfs = func(d, covered int, sum, low float64) {
+		if p.step() {
+			return
+		}
 		if d == len(order) {
 			s := sum
 			if o == Min {
@@ -251,6 +454,7 @@ func (p *Problem) ByElement(elements []string, o Objective) []Team {
 		dfs(d+1, covered, sum, low)
 	}
 	inf := 1e18
+	p.steps, p.Exhausted = 0, false
 	dfs(0, 0, 0, inf)
 	out := make([]Team, len(elements))
 	for i, j := range best {
@@ -259,4 +463,28 @@ func (p *Problem) ByElement(elements []string, o Objective) []Team {
 		}
 	}
 	return out
+}
+
+// resources lists what a team uses up: each member (capacity 1) and each
+// limited weapon copy (capacity: the copies owned). Unlimited weapons are not
+// resources.
+func (p *Problem) resources(t *Team) []string {
+	var rs []string
+	for _, c := range t.Members {
+		rs = append(rs, "c:"+c)
+	}
+	for _, w := range t.Weapons {
+		if c, ok := p.Copies[w]; ok && c >= 0 {
+			rs = append(rs, "w:"+w)
+		}
+	}
+	return rs
+}
+
+// capacity of a resource.
+func (p *Problem) capacity(r string) int {
+	if w, ok := strings.CutPrefix(r, "w:"); ok {
+		return p.Copies[w]
+	}
+	return 1
 }
