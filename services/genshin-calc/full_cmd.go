@@ -24,8 +24,7 @@ const fullUsage = "usage: genshin-calc full [options] DATABASE_CACHE ACCOUNT"
 func fullCmd(args []string) error {
 	fs := flag.NewFlagSet("full", flag.ExitOnError)
 	var opt weaponAssumptions
-	fs.BoolVar(&opt.fourStars, "four-stars", false, "assume R1 of every 4-star weapon the file leaves out (as in the quick pass)")
-	fs.BoolVar(&opt.threeStars, "three-stars", false, "assume every 3-star weapon at R5, unlimited copies (as in the quick pass)")
+	opt.flags(fs)
 	quick := fs.String("coarse", "local/coarse/results.jsonl", "the quick pass's results")
 	out := fs.String("out", "", "results cache (JSON lines, appended to); default local/full/<mode>.jsonl")
 	sim := fs.String("sim", "bin/kqmsim", "simulator binary")
@@ -87,12 +86,15 @@ func fullCmd(args []string) error {
 	if err != nil {
 		return err
 	}
-	opt.apply(acc, cat)
+	rule, err := opt.rule(acc, cat)
+	if err != nil {
+		return err
+	}
 	sources, err := readRotations(fs.Arg(0), *own)
 	if err != nil {
 		return err
 	}
-	fieldable, _ := makeJobs(sources, acc, cat, *iterations)
+	fieldable, _ := makeJobs(sources, acc, cat, rule, *iterations)
 	byID := map[string]coarse.Job{}
 	for _, j := range fieldable {
 		byID[j.Source+"/"+j.ID] = j

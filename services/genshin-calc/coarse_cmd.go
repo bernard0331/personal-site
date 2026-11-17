@@ -29,8 +29,7 @@ const coarseUsage = "usage: genshin-calc coarse [options] DATABASE_CACHE ACCOUNT
 func coarseCmd(args []string) error {
 	fs := flag.NewFlagSet("coarse", flag.ExitOnError)
 	var opt weaponAssumptions
-	fs.BoolVar(&opt.fourStars, "four-stars", false, "assume R1 of every 4-star weapon the file leaves out")
-	fs.BoolVar(&opt.threeStars, "three-stars", false, "assume every 3-star weapon at R5, unlimited copies")
+	opt.flags(fs)
 	out := fs.String("out", "local/coarse/results.jsonl", "results cache (JSON lines, appended to)")
 	sim := fs.String("sim", "bin/kqmsim", "simulator binary")
 	own := fs.String("own", "services/genshin-calc/rotations", "directory of this project's own rotation files (empty for none)")
@@ -53,13 +52,16 @@ func coarseCmd(args []string) error {
 	if err != nil {
 		return err
 	}
-	opt.apply(acc, cat)
+	rule, err := opt.rule(acc, cat)
+	if err != nil {
+		return err
+	}
 
 	sources, err := readRotations(fs.Arg(0), *own)
 	if err != nil {
 		return err
 	}
-	jobs, skipped := makeJobs(sources, acc, cat, *iterations)
+	jobs, skipped := makeJobs(sources, acc, cat, rule, *iterations)
 	fmt.Fprintf(os.Stderr, "%d rotations read; %d can be fielded (%d distinct teams)\n",
 		len(sources), len(jobs), coarse.Teams(jobs))
 	for _, s := range skipped {
@@ -186,7 +188,7 @@ type skipReason struct {
 
 // makeJobs keeps the single-target rotations the account can field and writes
 // each one's config. It also says how many were left out, and why.
-func makeJobs(sources []source, acc *good.Account, cat *catalog.Catalog, iterations int) ([]coarse.Job, []skipReason) {
+func makeJobs(sources []source, acc *good.Account, cat *catalog.Catalog, rule *weaponRule, iterations int) ([]coarse.Job, []skipReason) {
 	var jobs []coarse.Job
 	reasons := map[string]int{}
 	for _, s := range sources {
@@ -199,7 +201,7 @@ func makeJobs(sources []source, acc *good.Account, cat *catalog.Catalog, iterati
 			reasons["cannot be read: "+err.Error()]++
 			continue
 		}
-		cfg, weapons, err := buildConfig(rot, acc, cat)
+		cfg, weapons, err := buildConfig(rot, acc, cat, rule)
 		var missing errMissingCharacter
 		switch {
 		case errors.As(err, &missing):

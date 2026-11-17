@@ -43,35 +43,34 @@ is the damage split by element, which decides the team's element.
 | `main.go` | The command-line program: `inspect` a GOOD file, print the simulator `config` for a player's version of a team (`-four-stars` assumes R1 of every 4-star weapon the file leaves out, since scans often miss them; `-three-stars` assumes every 3-star weapon at R5 in unlimited copies), `check-rotations` in a cached database file, and run the `coarse` pass. |
 | `coarse_cmd.go`, `coarse/` | The coarse pass: simulate every single-target rotation a player can field (KQM Sim Database cache plus `rotations/`) on a pool of worker goroutines, and append each result as a JSON line to a cache. Cached results are skipped, so a stopped run resumes. Results flag rotations that wait for energy or cooldowns, and Iansan rotations that report no movement. |
 | `full_cmd.go`, `coarse/full.go` | The full pass: take the most promising teams from the coarse pass (best overall, best per main element, best per character, so the solver has teams for everyone), let KQM Sim's substat optimiser choose their substats (KQM standard or top 1%), and simulate the result with 1,000 iterations. Results keep the chosen substat lines. |
+| `weapons_cmd.go`, `weapons/` | Weapon allocation. The weapon trials try each character's candidate weapons (every owned 5-star of the type, the weapons the rotations give that character most often, and the rotation's own) in two of the character's most common teams, and rank them by team DPS. The passes then give each member their best-ranked free copy; members compete for a copy by how much they would lose without it. |
+| `solver/` | Chooses the best set of teams with no character or weapon copy used twice: one team per element, or any N teams, each by best weakest team or highest average. Exact branch and bound; tests check it against brute force. |
+| `report_cmd.go` | Runs the solver on a pass's results and prints both breakdowns as Markdown, with each team's DPS per member, weapons, rotation and flags (`-stats` adds the optimised substats). |
 | `catalog/` | Every character, weapon and artifact set the pinned simulator supports, embedded as `catalog.json`. `unreleased.txt` lists characters that are never calculated. |
 | `good/` | Reads and checks a GOOD file. Nothing from the file is trusted: unknown keys and out-of-range values are dropped and reported. |
 | `rotation/` | Splits a rotation file into its script and its example builds, and writes the config for a player's own constellations, levels and weapons. |
 | `rotations/` | Rotations written for this project, for teams the KQM Sim Database lacks. Each names its source. |
 | `tools/gen_catalog.py` | Regenerates `catalog/catalog.json` from a KQM Sim source checkout. Run it when the pinned release changes. |
 
-Run the coarse pass on a scan (about 4,600 rotations at 100 iterations; Ctrl-C
-stops it, and running the same command again continues):
+The whole pipeline on a scan (run from the repository root; every step caches its
+simulations, so Ctrl-C stops it and running the same command again continues):
 
 ```bash
 go build -o bin/genshin-calc ./services/genshin-calc
-bin/genshin-calc coarse -four-stars -three-stars -workers 8 \
-    local/rotations/kqm-db.jsonl path/to/scan.json
+A="-four-stars -three-stars -weapons local/weapons/ranking.json"
+DB=local/rotations/kqm-db.jsonl
+bin/genshin-calc weapons -four-stars -three-stars $DB path/to/scan.json  # ~2,100 trials, ~12 min
+bin/genshin-calc coarse $A -workers 4 $DB path/to/scan.json             # ~4,600 rotations, 100 iterations
+bin/genshin-calc full $A $DB path/to/scan.json                          # ~300 teams, ~40 s each
+bin/genshin-calc report -four-stars -three-stars local/full/kqm.jsonl path/to/scan.json
 ```
 
-`-dry-run` lists what would be simulated, `-limit N` simulates only the first N, and
-`-out` picks the cache file (default `local/coarse/results.jsonl`).
-
-Then the full pass, with the same weapon options (the configs are rebuilt and
-must match). The optimiser takes about 45 s per team and uses most cores, so it
-runs one team at a time:
-
-```bash
-bin/genshin-calc full -four-stars -three-stars local/rotations/kqm-db.jsonl path/to/scan.json
-```
-
-`-mode top1` uses top-1% substats instead of KQM standard; `-top`, `-per-element` and
-`-per-character` set how many teams are chosen (defaults 100, 20, 3); `-dry-run` lists
-them. Results go to `local/full/<mode>.jsonl`.
+The weapon options must be the same for `coarse` and `full`, because `full`
+rebuilds the configs. `-dry-run` lists what a step would simulate. In `full`,
+`-mode top1` uses top-1% substats instead of KQM standard; `-top`,
+`-per-element` and `-per-character` set how many teams it takes (defaults 100,
+20, 3). The report can also read the coarse results, to see a breakdown before
+the full pass.
 
 Run the tests and try it on a scan:
 
