@@ -38,6 +38,7 @@ func fullCmd(args []string) error {
 	fs.IntVar(&picks.Top, "top", 100, "take the best N teams overall")
 	fs.IntVar(&picks.PerElement, "per-element", 20, "take the best N teams of each main element")
 	fs.IntVar(&picks.PerCharacter, "per-character", 3, "take the best N teams each character is in")
+	include := fs.String("include", "", "also take the teams listed in this file (one per line, members joined by commas; e.g. the report's -teams-out)")
 	limit := fs.Int("limit", 0, "simulate at most this many teams (0 for all), for trying things out")
 	dryRun := fs.Bool("dry-run", false, "list the chosen teams and stop")
 	fs.Usage = func() { fmt.Fprintln(os.Stderr, fullUsage); fs.PrintDefaults() }
@@ -77,6 +78,34 @@ func fullCmd(args []string) error {
 		fmt.Fprintf(os.Stderr, "ignoring %d quick-pass results from other simulator builds\n", old)
 	}
 	chosen := coarse.Select(results, picks)
+	if *include != "" {
+		text, err := os.ReadFile(*include)
+		if err != nil {
+			return err
+		}
+		want := map[string]bool{}
+		for _, l := range strings.Split(string(text), "\n") {
+			if l = strings.TrimSpace(l); l != "" {
+				want[coarse.TeamKey(strings.Split(l, ","))] = true
+			}
+		}
+		have := map[string]bool{}
+		for _, r := range chosen {
+			have[coarse.TeamKey(r.Team)] = true
+		}
+		// Each included team's best quick-pass rotation.
+		best := map[string]coarse.Result{}
+		for _, r := range results {
+			k := coarse.TeamKey(r.Team)
+			if want[k] && !have[k] && r.Error == "" && r.DPS > best[k].DPS {
+				best[k] = r
+			}
+		}
+		for _, r := range best {
+			chosen = append(chosen, r)
+		}
+		fmt.Fprintf(os.Stderr, "%d more teams from %s\n", len(best), *include)
+	}
 	fmt.Fprintf(os.Stderr, "%d quick-pass results, %d teams chosen for the full pass\n", len(results), len(chosen))
 
 	// Rebuild each chosen rotation's config for the account.

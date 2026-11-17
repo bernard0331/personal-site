@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -36,6 +37,7 @@ func reportCmd(args []string) error {
 	fs.IntVar(&picks.Top, "top", 100, "candidates: the best N teams overall")
 	fs.IntVar(&picks.PerElement, "per-element", 20, "candidates: the best N teams of each main element")
 	fs.IntVar(&picks.PerCharacter, "per-character", 3, "candidates: the best N teams each character is in")
+	teamsOut := fs.String("teams-out", "", "also write the chosen teams here, one per line (for the full pass's -include)")
 	maxTime := fs.Duration("max-time", 5*time.Minute, "time per search before settling for the best found (0: no limit)")
 	python := fs.String("highs", defaultHiGHS(), "a Python with highspy, to solve with HiGHS (empty: this package's slower branch and bound)")
 	elementPicks := coarse.Picks{Top: 100, PerElement: 60, PerCharacter: 5}
@@ -70,6 +72,28 @@ func reportCmd(args []string) error {
 	// One team per element is fast on every team. Any N teams is not: it
 	// runs on the candidates the full pass would pick.
 	alt := alternatives{rule: rule, within: *within, max: *variants}
+	chosenTeams := map[string]bool{}
+	show := func(ts []solver.Team, byID map[string]coarse.Result) {
+		for _, t := range ts {
+			if t.ID != "" {
+				chosenTeams[coarse.TeamKey(t.Members)] = true
+			}
+		}
+		printTeams(os.Stdout, ts, byID, *stats)
+	}
+	defer func() {
+		if *teamsOut == "" {
+			return
+		}
+		var lines []string
+		for k := range chosenTeams {
+			lines = append(lines, k)
+		}
+		sort.Strings(lines)
+		if err := os.WriteFile(*teamsOut, []byte(strings.Join(lines, "\n")+"\n"), 0o644); err != nil {
+			fmt.Fprintln(os.Stderr, "writing chosen teams:", err)
+		}
+	}()
 	start := time.Now()
 	took := func() {
 		fmt.Fprintf(os.Stderr, "search took %s\n", time.Since(start).Round(time.Millisecond))
@@ -91,7 +115,7 @@ func reportCmd(args []string) error {
 			if err != nil {
 				return err
 			}
-			printTeams(os.Stdout, r.Teams, byID, *stats)
+			show(r.Teams, byID)
 			if took(); !r.Optimal {
 				notProven()
 			}
@@ -102,7 +126,7 @@ func reportCmd(args []string) error {
 			if err != nil {
 				return err
 			}
-			printTeams(os.Stdout, r.Teams, byID, *stats)
+			show(r.Teams, byID)
 			if took(); !r.Optimal {
 				notProven()
 			}
@@ -125,7 +149,7 @@ func reportCmd(args []string) error {
 	for _, o := range []solver.Objective{solver.Min, solver.Sum} {
 		deadline(all)
 		fmt.Printf("\n## One team per element, %s\n", o)
-		printTeams(os.Stdout, all.ByElement(elements, o), byID, *stats)
+		show(all.ByElement(elements, o), byID)
 		if took(); all.Exhausted {
 			notProven()
 		}
@@ -133,7 +157,7 @@ func reportCmd(args []string) error {
 	for _, o := range []solver.Objective{solver.Min, solver.Sum} {
 		deadline(candidates)
 		fmt.Printf("\n## %d teams, any element, %s\n", *n, o)
-		printTeams(os.Stdout, candidates.Best(*n, o), byID, *stats)
+		show(candidates.Best(*n, o), byID)
 		if took(); candidates.Exhausted {
 			notProven()
 		}
