@@ -72,9 +72,10 @@ func main() {
 // weaponAssumptions are weapons to assume the player owns beyond those in the
 // file, and the weapon trials' ranking to allocate them by.
 type weaponAssumptions struct {
-	fourStars  bool   // R1 of every 4-star weapon
-	threeStars bool   // R5 of every 3-star weapon, unlimited copies
-	ranking    string // weapon trials' ranking file; "" for stand-in weapons
+	fourStars  bool    // R1 of every 4-star weapon
+	threeStars bool    // R5 of every 3-star weapon, unlimited copies
+	ranking    string  // weapon trials' ranking file; "" for stand-in weapons
+	energyRate float64 // how many times as often flat energy drops come (1: KQM standard)
 }
 
 // flags registers the weapon options on a subcommand.
@@ -82,6 +83,12 @@ func (opt *weaponAssumptions) flags(fs *flag.FlagSet) {
 	fs.BoolVar(&opt.fourStars, "four-stars", false, "assume R1 of every 4-star weapon the file leaves out")
 	fs.BoolVar(&opt.threeStars, "three-stars", false, "assume every 3-star weapon at R5, unlimited copies")
 	fs.StringVar(&opt.ranking, "weapons", "", "the weapon trials' ranking (from the weapons subcommand); empty for stand-in weapons")
+	energyFlag(fs, &opt.energyRate)
+}
+
+// energyFlag registers -energy-rate.
+func energyFlag(fs *flag.FlagSet, rate *float64) {
+	fs.Float64Var(rate, "energy-rate", 1, "flat energy drops come this many times as often as KQM standard (a particle every 8-12 s); 2 matches the owner's dummy tests")
 }
 
 func readAccount(path string, cat *catalog.Catalog) (*good.Account, *good.Report, error) {
@@ -158,7 +165,9 @@ func (opt weaponAssumptions) rule(acc *good.Account, cat *catalog.Catalog) (*wea
 			return nil, err
 		}
 	}
-	return newWeaponRule(acc, ranking), nil
+	rule := newWeaponRule(acc, ranking)
+	rule.energy = opt.energyRate
+	return rule, nil
 }
 
 // errMissingCharacter means the account cannot field the team.
@@ -171,6 +180,7 @@ type weaponRule struct {
 	inv     *weapons.Inventory
 	ranking weapons.Ranking   // from the weapon trials; nil ranks nothing
 	force   map[string]string // character -> weapon to wield regardless (the trials use it)
+	energy  float64           // flat energy drop rate, as a multiple of KQM standard
 }
 
 func newWeaponRule(acc *good.Account, ranking weapons.Ranking) *weaponRule {
@@ -238,7 +248,7 @@ func buildConfig(rot *rotation.Rotation, acc *good.Account, cat *catalog.Catalog
 		list = append(list, fmt.Sprintf("%s: %s R%d", m.Key, picks[i].Weapon, picks[i].Refinement))
 	}
 	cfg, err := rot.Config(loadout)
-	return cfg, list, err
+	return rotation.ScaleEnergy(cfg, rule.energy), list, err
 }
 
 // checkRotations parses every entry of a cached rotation database (one JSON

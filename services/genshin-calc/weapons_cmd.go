@@ -27,6 +27,7 @@ func weaponsCmd(args []string) error {
 	var opt weaponAssumptions
 	fs.BoolVar(&opt.fourStars, "four-stars", false, "assume R1 of every 4-star weapon the file leaves out")
 	fs.BoolVar(&opt.threeStars, "three-stars", false, "assume every 3-star weapon at R5, unlimited copies")
+	energyFlag(fs, &opt.energyRate)
 	out := fs.String("out", "local/weapons/ranking.json", "where to write the ranking")
 	cache := fs.String("cache", "local/weapons/trials.jsonl", "trial results cache (JSON lines, appended to)")
 	sim := fs.String("sim", "bin/kqmsim", "simulator binary")

@@ -10,6 +10,7 @@ package rotation
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/bernard0331/personal-site/services/genshin-calc/catalog"
@@ -180,3 +181,29 @@ func (r *Rotation) Config(loadout map[string]Slot) (string, error) {
 // plainKey is what a catalog key looks like. Config refuses anything else, so
 // that no text other than a known key can ever be written into a config.
 var plainKey = regexp.MustCompile(`^[a-z0-9]+$`)
+
+// energyLine is the config's flat energy drops, KQM standard being
+// "energy every interval=480,720 amount=1;" (a particle every 8 to 12 s).
+var energyLine = regexp.MustCompile(`(energy\s+every\s+interval\s*=\s*)(\d+)(?:\s*,\s*(\d+))?`)
+
+// ScaleEnergy makes a config's flat energy drops come rate times as often
+// (rate 2: a particle every 4 to 6 s instead of 8 to 12). KQM's standard is
+// deliberately stingy; real fights drop more. Configs without the line are
+// left as their authors wrote them.
+func ScaleEnergy(config string, rate float64) string {
+	if rate <= 0 || rate == 1 {
+		return config
+	}
+	return energyLine.ReplaceAllStringFunc(config, func(s string) string {
+		m := energyLine.FindStringSubmatch(s)
+		scale := func(v string) string {
+			n, _ := strconv.Atoi(v)
+			return strconv.Itoa(max(1, int(float64(n)/rate+0.5)))
+		}
+		out := m[1] + scale(m[2])
+		if m[3] != "" {
+			out += "," + scale(m[3])
+		}
+		return out
+	})
+}

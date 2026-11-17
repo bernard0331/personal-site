@@ -184,3 +184,14 @@ while !.bennett.mods.favonius-cd { bennett attack; }
 		t.Errorf("only bennett's script check counts (comments do not): %v", locked)
 	}
 }
+
+func TestScaleEnergy(t *testing.T) {
+	in := "x;\nenergy every interval=480,720 amount=1; # standard\nenergy every interval=600 amount=2;\n"
+	want := "x;\nenergy every interval=240,360 amount=1; # standard\nenergy every interval=300 amount=2;\n"
+	if got := ScaleEnergy(in, 2); got != want {
+		t.Errorf("got %q", got)
+	}
+	if got := ScaleEnergy(in, 1); got != in {
+		t.Errorf("rate 1 must not change the config")
+	}
+}
