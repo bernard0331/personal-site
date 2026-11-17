@@ -158,3 +158,29 @@ skirk add weapon="notaweapon" refine=1 lvl=90/90;`,
 		}
 	}
 }
+
+func TestWeaponLockedWhenTheScriptWaitsOnIt(t *testing.T) {
+	cat, _ := catalog.Load()
+	text := `bennett char lvl=90/90 cons=6 talent=9,9,9;
+bennett add weapon="favoniussword" refine=3 lvl=90/90;
+xiangling char lvl=90/90 cons=6 talent=9,9,9;
+xiangling add weapon="thecatch" refine=5 lvl=90/90;
+xingqiu char lvl=90/90 cons=6 talent=9,9,9;
+xingqiu add weapon="sacrificialsword" refine=5 lvl=90/90;
+sucrose char lvl=90/90 cons=6 talent=9,9,9;
+sucrose add weapon="favoniuscodex" refine=5 lvl=90/90;
+while !.bennett.mods.favonius-cd { bennett attack; }
+# while !.sucrose.mods.favonius-cd { sucrose attack; }
+`
+	r, err := Parse(text, cat)
+	if err != nil {
+		t.Fatal(err)
+	}
+	locked := map[string]bool{}
+	for _, m := range r.Members {
+		locked[m.Key] = m.WeaponLocked
+	}
+	if !locked["bennett"] || locked["xiangling"] || locked["xingqiu"] || locked["sucrose"] {
+		t.Errorf("only bennett's script check counts (comments do not): %v", locked)
+	}
+}

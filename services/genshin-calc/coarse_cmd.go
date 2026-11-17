@@ -36,7 +36,7 @@ func coarseCmd(args []string) error {
 	sim := fs.String("sim", "bin/kqmsim", "simulator binary")
 	own := fs.String("own", "services/genshin-calc/rotations", "directory of this project's own rotation files (empty for none)")
 	iterations := fs.Int("iterations", 100, "simulator iterations per rotation")
-	cpus := cpuFlag(fs)
+	lim := limitFlags(fs, 2*time.Minute)
 	workers := fs.Int("workers", 0, "simulations to run at once (default: one per core in -cpus)")
 	limit := fs.Int("limit", 0, "simulate at most this many rotations (0 for all), for trying things out")
 	dryRun := fs.Bool("dry-run", false, "list what would be simulated and stop")
@@ -84,20 +84,34 @@ func coarseCmd(args []string) error {
 	if err != nil {
 		return fmt.Errorf("simulator: %w", err)
 	}
-	n := share(bin, *cpus, *workers)
+	n := share(bin, lim, *workers)
 	return runJobs(jobs, bin, n, *out, 25)
 }
 
-// cpuFlag registers -cpus: how many cores a run may use in all.
-func cpuFlag(fs *flag.FlagSet) *int {
-	return fs.Int("cpus", max(1, runtime.NumCPU()-2), "cores to use in all (default: all but two)")
+// limits are the resources a run may use.
+type limits struct {
+	cpus      *int
+	timeout   *time.Duration
+	maxMemory *int
 }
 
-// share splits cpus cores between workers simulations at once (0 workers: one
-// per core) and caps each simulator process to its share. It returns the
-// number of workers.
-func share(bin *coarse.Binary, cpus, workers int) int {
-	cpus = max(1, cpus)
+// limitFlags registers -cpus, -timeout and -max-memory. timeout is the
+// default time limit for one simulation.
+func limitFlags(fs *flag.FlagSet, timeout time.Duration) limits {
+	return limits{
+		cpus:      fs.Int("cpus", max(1, runtime.NumCPU()-2), "cores to use in all (default: all but two)"),
+		timeout:   fs.Duration("timeout", timeout, "stop a simulation that runs longer than this"),
+		maxMemory: fs.Int("max-memory", 400, "stop a simulation that uses more than this many MB"),
+	}
+}
+
+// share splits the cores between workers simulations at once (0 workers: one
+// per core), caps each simulator process to its share and sets the limits.
+// It returns the number of workers. With every worker at its memory limit,
+// the run stays within workers x max-memory.
+func share(bin *coarse.Binary, l limits, workers int) int {
+	bin.Timeout, bin.MaxMemoryMB = *l.timeout, *l.maxMemory
+	cpus := max(1, *l.cpus)
 	if workers <= 0 {
 		workers = cpus
 	}
@@ -227,9 +241,13 @@ func makeJobs(sources []source, acc *good.Account, cat *catalog.Catalog, rule *w
 		}
 		cfg, weapons, err := buildConfig(rot, acc, cat, rule)
 		var missing errMissingCharacter
+		var locked errLockedWeapon
 		switch {
 		case errors.As(err, &missing):
 			reasons["account lacks a member"]++
+			continue
+		case errors.As(err, &locked):
+			reasons["account lacks a weapon the script depends on"]++
 			continue
 		case err != nil:
 			reasons[err.Error()]++

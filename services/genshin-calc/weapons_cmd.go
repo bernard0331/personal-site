@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/bernard0331/personal-site/services/genshin-calc/catalog"
 	"github.com/bernard0331/personal-site/services/genshin-calc/coarse"
@@ -31,7 +32,7 @@ func weaponsCmd(args []string) error {
 	sim := fs.String("sim", "bin/kqmsim", "simulator binary")
 	own := fs.String("own", "services/genshin-calc/rotations", "directory of this project's own rotation files (empty for none)")
 	iterations := fs.Int("iterations", 100, "simulator iterations per trial")
-	cpus := cpuFlag(fs)
+	lim := limitFlags(fs, 2*time.Minute)
 	workers := fs.Int("workers", 0, "simulations to run at once (default: one per core in -cpus)")
 	teams := fs.Int("teams", 2, "trial teams per character")
 	frequent := fs.Int("frequent", 3, "also try the N weapons the rotations give a character most often")
@@ -113,6 +114,9 @@ func weaponsCmd(args []string) error {
 	for _, p := range fieldable {
 		tk := coarse.TeamKey(p.rot.Team())
 		for _, m := range p.rot.Members {
+			if m.WeaponLocked {
+				continue // the script depends on this member's weapon: no trial here
+			}
 			if (len(wanted) > 0 && !wanted[m.Key]) || len(trialTeams[m.Key]) >= *teams {
 				continue
 			}
@@ -176,7 +180,7 @@ func weaponsCmd(args []string) error {
 	if err != nil {
 		return fmt.Errorf("simulator: %w", err)
 	}
-	if err := runJobs(jobs, bin, share(bin, *cpus, *workers), *cache, 50); err != nil {
+	if err := runJobs(jobs, bin, share(bin, lim, *workers), *cache, 50); err != nil {
 		return err
 	}
 

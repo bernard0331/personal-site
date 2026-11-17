@@ -6,6 +6,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/bernard0331/personal-site/services/genshin-calc/catalog"
 	"github.com/bernard0331/personal-site/services/genshin-calc/coarse"
@@ -31,7 +32,7 @@ func fullCmd(args []string) error {
 	own := fs.String("own", "services/genshin-calc/rotations", "directory of this project's own rotation files (as in the quick pass)")
 	mode := fs.String("mode", "kqm", "substats: kqm (KQM standard) or top1 (top 1% of builds)")
 	iterations := fs.Int("iterations", 1000, "simulator iterations per team")
-	cpus := cpuFlag(fs)
+	lim := limitFlags(fs, 20*time.Minute)
 	workers := fs.Int("workers", 1, "teams to optimise at once; the -cpus cores are shared between them")
 	var picks coarse.Picks
 	fs.IntVar(&picks.Top, "top", 100, "take the best N teams overall")
@@ -124,7 +125,7 @@ func fullCmd(args []string) error {
 		printElementCounts(chosen)
 		return nil
 	}
-	n := share(bin, *cpus, *workers)
+	n := share(bin, lim, *workers)
 	return runJobs(jobs, &coarse.Optimiser{Bin: bin, Options: options}, n, *out, 1)
 }
 

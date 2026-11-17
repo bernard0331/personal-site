@@ -14,6 +14,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"regexp"
 	"sort"
@@ -52,6 +53,7 @@ type Result struct {
 	Flags      []string           `json:"flags,omitempty"` // reasons to distrust the number
 	Stats      []string           `json:"stats,omitempty"` // the config's "add stats" lines, when the job asks for them
 	Error      string             `json:"error,omitempty"` // set when the simulation failed
+	Final      bool               `json:"final,omitempty"` // the failure would repeat (a limit was exceeded): do not retry
 }
 
 // Simulator runs one config and returns the simulator's JSON result.
@@ -238,7 +240,9 @@ func simulate(ctx context.Context, j Job, sim Simulator, fp string) Result {
 		r, err = Summarise(j, raw)
 	}
 	if err != nil {
-		r = Result{ID: j.ID, Source: j.Source, Team: j.Team, Weapons: j.Weapons, Error: err.Error()}
+		var limit LimitError
+		r = Result{ID: j.ID, Source: j.Source, Team: j.Team, Weapons: j.Weapons, Error: err.Error(),
+			Final: errors.As(err, &limit)}
 	}
 	r.Key, r.SimBinary = Key(j.Config, fp), fp
 	return r

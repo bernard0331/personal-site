@@ -17,9 +17,13 @@ import (
 
 // Member is one of the team's characters as the rotation file describes it.
 type Member struct {
-	Name         string // the name the script uses, which may be a short name
-	Key          string // the catalog key
-	Weapon       string // catalog key of the example weapon
+	Name   string // the name the script uses, which may be a short name
+	Key    string // the catalog key
+	Weapon string // catalog key of the example weapon
+	// WeaponLocked means the script depends on the example weapon, e.g. it
+	// waits for ".jean.mods.favonius-cd", which never appears with another
+	// weapon, so the loop never ends. Such a member must keep the weapon.
+	WeaponLocked bool
 	params       string // character settings the rotation relies on, e.g. starting energy
 	weaponParams string
 	gear         []string // the example artifact set and stat lines, kept as written
@@ -46,6 +50,9 @@ var (
 	addLine    = regexp.MustCompile(`^\s*(\w+)\s+add\s+(weapon|set|stats)\b([^;]*);`)
 	weaponName = regexp.MustCompile(`weapon=\s*"(\w+)"`)
 	paramsPart = regexp.MustCompile(`\+params=\[[^\]]*\]`)
+	// ".jean.mods.favonius-cd": a script checking a weapon's own cooldown
+	// (including the database's "favnoius" typo).
+	weaponCheck = regexp.MustCompile(`\.(\w+)\.mods\.(fav\w*|sacrificial)-cd`)
 )
 
 // Parse reads a rotation file. Every character and weapon it names must be in
@@ -104,6 +111,18 @@ func Parse(text string, cat *catalog.Catalog) (*Rotation, error) {
 	for _, m := range r.Members {
 		if m.Weapon == "" {
 			return nil, fmt.Errorf("rotation gives %q no weapon", m.Name)
+		}
+	}
+	for _, line := range r.rest {
+		if t := strings.TrimSpace(line); strings.HasPrefix(t, "#") || strings.HasPrefix(t, "//") {
+			continue
+		}
+		for _, m := range weaponCheck.FindAllStringSubmatch(line, -1) {
+			if ch, ok := cat.ResolveCharacter(m[1]); ok {
+				if i, ok := index[ch.Key]; ok {
+					r.Members[i].WeaponLocked = true
+				}
+			}
 		}
 	}
 	return r, nil

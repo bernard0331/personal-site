@@ -56,9 +56,12 @@ func (o *Optimiser) Run(ctx context.Context, config string) ([]byte, error) {
 	if o.Options != "" {
 		args = append(args, "-options="+o.Options)
 	}
-	cmd := o.Bin.command(ctx, dir, args...)
-	if log, err := cmd.CombinedOutput(); err != nil {
-		return nil, fmt.Errorf("substat optimiser failed: %s", lastLine(log, err))
+	if _, err := o.Bin.run(ctx, dir, args...); err != nil {
+		var limit LimitError
+		if errors.As(err, &limit) {
+			return nil, err
+		}
+		return nil, fmt.Errorf("substat optimiser: %w", err)
 	}
 	optimised, err := os.ReadFile(opt)
 	if err != nil {

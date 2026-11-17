@@ -177,6 +177,13 @@ func newWeaponRule(acc *good.Account, ranking weapons.Ranking) *weaponRule {
 	return &weaponRule{inv: weapons.NewInventory(acc), ranking: ranking}
 }
 
+// errLockedWeapon means the rotation needs a weapon the account lacks.
+type errLockedWeapon struct{ character, weapon string }
+
+func (e errLockedWeapon) Error() string {
+	return fmt.Sprintf("the rotation needs %s on %s", e.weapon, e.character)
+}
+
 // buildConfig writes the simulator config for the player's version of a team
 // and lists each member's weapon as "key: weapon Rn".
 //
@@ -199,6 +206,15 @@ func buildConfig(rot *rotation.Rotation, acc *good.Account, cat *catalog.Catalog
 		fallback[i] = weapons.Fallback(ch, cat, rule.inv, m.Weapon)
 		if len(fallback[i]) == 0 {
 			return "", nil, fmt.Errorf("the account has no %s for %s", ch.WeaponType, m.Key)
+		}
+		if m.WeaponLocked {
+			// The script waits on this weapon's own effect; any other weapon
+			// would make it loop forever.
+			if !rule.inv.Owns(m.Weapon) {
+				return "", nil, errLockedWeapon{m.Key, m.Weapon}
+			}
+			wants[i], fallback[i] = []weapons.Choice{{Weapon: m.Weapon, Score: 1}}, []string{m.Weapon}
+			continue
 		}
 		if w, ok := rule.force[m.Key]; ok {
 			wants[i] = []weapons.Choice{{Weapon: w, Score: 1}}
