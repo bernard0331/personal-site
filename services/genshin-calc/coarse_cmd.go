@@ -79,14 +79,22 @@ func coarseCmd(args []string) error {
 	if err != nil {
 		return fmt.Errorf("simulator: %w", err)
 	}
-	cached, err := coarse.ReadCache(*out)
+	return runJobs(jobs, bin, *workers, *out, 25)
+}
+
+// runJobs simulates jobs not already in the results cache at out, appending
+// each result as it finishes, and reports progress every `every` results.
+// Ctrl-C stops it; the results so far stay in the cache, so running the same
+// command again continues.
+func runJobs(jobs []coarse.Job, sim coarse.Simulator, workers int, out string, every int) error {
+	cached, err := coarse.ReadCache(out)
 	if err != nil {
 		return err
 	}
-	if err := os.MkdirAll(filepath.Dir(*out), 0o755); err != nil {
+	if err := os.MkdirAll(filepath.Dir(out), 0o755); err != nil {
 		return err
 	}
-	f, err := os.OpenFile(*out, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	f, err := os.OpenFile(out, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return err
 	}
@@ -100,13 +108,11 @@ func coarseCmd(args []string) error {
 		return w.Flush() // one line at a time, so a stopped run keeps what it finished
 	}
 
-	// Ctrl-C cancels the context: running simulations are stopped and the
-	// results so far stay in the cache.
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 	start := time.Now()
 	report := func(p coarse.Progress) {
-		if p.Done%25 != 0 && p.Done != p.Total {
+		if p.Done%every != 0 && p.Done != p.Total {
 			return
 		}
 		elapsed := time.Since(start)
@@ -114,8 +120,8 @@ func coarseCmd(args []string) error {
 		fmt.Fprintf(os.Stderr, "%d/%d simulated, %d failed, %s elapsed, about %s left\n",
 			p.Done, p.Total, p.Failed, elapsed.Round(time.Second), left.Round(time.Second))
 	}
-	n, err := coarse.Run(ctx, jobs, bin, *workers, cached, save, report)
-	fmt.Fprintf(os.Stderr, "%d already in %s; simulator build %s\n", n, *out, bin.Fingerprint())
+	n, err := coarse.Run(ctx, jobs, sim, workers, cached, save, report)
+	fmt.Fprintf(os.Stderr, "%d already in %s; simulator build %s\n", n, out, sim.Fingerprint())
 	if errors.Is(err, context.Canceled) {
 		fmt.Fprintln(os.Stderr, "stopped; run the same command again to continue")
 		return nil

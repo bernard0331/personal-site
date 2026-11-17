@@ -28,6 +28,9 @@ type Job struct {
 	Team    []string // the four characters' catalog keys, in the rotation's order
 	Weapons []string // what each member wields, e.g. "bennett: mistsplitterreforged R1"
 	Config  string   // the complete simulator config
+	// KeepStats keeps the config's "add stats" lines in the result: the full
+	// pass needs them, because the substat optimiser chose them.
+	KeepStats bool
 }
 
 // Result is what one simulation produced. It is stored as one JSON line.
@@ -47,6 +50,7 @@ type Result struct {
 	Duration   float64            `json:"duration"`        // simulated fight length in seconds
 	Waits      map[string]float64 `json:"waits,omitempty"` // seconds the team spent waiting, by reason
 	Flags      []string           `json:"flags,omitempty"` // reasons to distrust the number
+	Stats      []string           `json:"stats,omitempty"` // the config's "add stats" lines, when the job asks for them
 	Error      string             `json:"error,omitempty"` // set when the simulation failed
 }
 
@@ -129,6 +133,9 @@ func Summarise(job Job, raw []byte) (Result, error) {
 		r.Flags = append(r.Flags, fmt.Sprintf("waits %.1fs for energy or cooldowns", waited))
 	}
 	r.Flags = append(r.Flags, scriptFlags(job)...)
+	if job.KeepStats {
+		r.Stats = statsLines(raw)
+	}
 	return r, nil
 }
 

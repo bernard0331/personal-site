@@ -10,6 +10,9 @@
 //	genshin-calc coarse [options] CACHE ACCOUNT
 //	                                         simulate every rotation the account can field and cache the results
 //	                                         (see coarse_cmd.go; -h lists the options)
+//	genshin-calc full [options] CACHE ACCOUNT
+//	                                         simulate the quick pass's most promising teams again, with
+//	                                         optimised substats and more iterations (see full_cmd.go)
 package main
 
 import (
@@ -45,8 +48,10 @@ func main() {
 		err = checkRotations(os.Args[2])
 	case len(os.Args) >= 2 && os.Args[1] == "coarse":
 		err = coarseCmd(os.Args[2:])
+	case len(os.Args) >= 2 && os.Args[1] == "full":
+		err = fullCmd(os.Args[2:])
 	default:
-		fmt.Fprintln(os.Stderr, "usage: genshin-calc inspect ACCOUNT | config [-four-stars] [-three-stars] ROTATION ACCOUNT | check-rotations CACHE | coarse [options] CACHE ACCOUNT")
+		fmt.Fprintln(os.Stderr, "usage: genshin-calc inspect ACCOUNT | config [-four-stars] [-three-stars] ROTATION ACCOUNT | check-rotations CACHE | coarse [options] CACHE ACCOUNT | full [options] CACHE ACCOUNT")
 		os.Exit(2)
 	}
 	if err != nil {
