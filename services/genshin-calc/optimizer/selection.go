@@ -49,7 +49,12 @@ func Problem(results []coarse.Result, alt Alternatives) (*solver.Problem, map[st
 			if v > 0 {
 				vid = fmt.Sprintf("%s~%d", id, v)
 				vr.DPS, vr.DPSSD = r.DPS*variant.Factor, r.DPSSD*variant.Factor
-				vr.CharDPS = nil
+				// The split is the simulated one scaled by the estimated change
+				// (a few percent at most): close enough to show, and flagged.
+				vr.CharDPS = make([]float64, len(r.CharDPS))
+				for i, d := range r.CharDPS {
+					vr.CharDPS[i] = d * variant.Factor
+				}
 				vr.Weapons = nil
 				for i, w := range variant.Weapons {
 					vr.Weapons = append(vr.Weapons, fmt.Sprintf("%s: %s R%d", r.Team[i], w, inv.Best(w)))
