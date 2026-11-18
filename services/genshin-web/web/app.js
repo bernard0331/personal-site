@@ -115,6 +115,7 @@ function drawGrid() {
     const t = document.createElement('div');
     t.className = `tile r${c.rarity} ${has ? 'owned' : 'unowned'}`;
     t.style.setProperty('--ring', EL[c.element]);
+    if (c.caveat) t.title = `${c.name} is ${c.caveat}`;
     const cons = draft.chars[c.key];
     t.innerHTML = `<div class="art">${art(c.icon, c.name)}</div><div class="name" title="${c.name}">${c.name}</div>
       <span class="el" style="background:${EL[c.element]}"></span>${has ? `<span class="cons" style="background:${CSCALE[cons]}">C${cons}</span>
@@ -371,7 +372,14 @@ function teamHTML(t, pos) {
   return `<div class="team" style="--ring:${EL[t.element] || 'var(--border-strong)'}"><div class="team-head"><div style="display:flex;gap:10px;align-items:center"><span class="rank">#${pos + 1}</span><span class="etag">${cap(t.element || 'physical')}</span><span class="dps">${Math.round(t.dps / 1000)}k</span><span class="sub">DPS</span></div></div>
     <div class="members">${members}</div>${bar}
     <div class="foot"><span>${known ? t.members.map(m => `${byKey.char[m.key]?.name || m.key} ${Math.round(m.dps / 1000)}k (${Math.round(100 * m.dps / total)}%)`).join(' · ') : ''}</span><span>${source} · ${t.rotation}</span></div>
-    ${t.estimated ? '<span class="flag">Weapons changed after simulating: DPS estimated</span>' : ''}${(t.flags || []).filter(f => !f.startsWith('weapons changed')).map(f => `<span class="flag">${f}</span>`).join('')}</div>`;
+    ${t.estimated ? '<span class="flag">Weapons changed after simulating: DPS estimated</span>' : ''}${(t.flags || []).filter(f => !f.startsWith('weapons changed')).map(f => `<span class="flag">${f}</span>`).join('')}${caveatFlags(t.members)}</div>`;
+}
+
+// One flag per caveat: "Mitya and Valeriy are new: ...".
+function caveatFlags(members) {
+  const by = {};
+  for (const m of members) { const c = byKey.char[m.key]; if (c?.caveat) (by[c.caveat] ||= []).push(c.name); }
+  return Object.entries(by).map(([cav, names]) => `<span class="flag">${names.join(' and ')} ${names.length > 1 ? 'are' : 'is'} ${cav}</span>`).join('');
 }
 
 function wireResults() {

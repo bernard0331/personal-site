@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"sort"
+	"strings"
 
 	"github.com/bernard0331/personal-site/services/genshin-calc/catalog"
 )
@@ -53,6 +54,17 @@ type apiCharacter struct {
 	Element    string `json:"element"`
 	WeaponType string `json:"weapon_type"`
 	Rarity     int    `json:"rarity"`
+	Caveat     string `json:"caveat,omitempty"` // shown on every team with this character
+}
+
+// caveats are warnings about characters whose results are less trustworthy
+// than the rest. The page writes "<Name> is <caveat>" ("<A> and <B> are ..."
+// when a team has several with the same caveat).
+const newCharacter = "new: the simulator's model is recent, and its numbers may not match theorycrafters' calculations. Treat this team's DPS as rough."
+
+var caveats = map[string]string{
+	"mitya":   newCharacter,
+	"valeriy": newCharacter,
 }
 
 type apiWeapon struct {
@@ -89,9 +101,10 @@ func buildCatalog() (*catalogResponse, error) {
 		dc := d.Characters[c.Key]
 		name := dc.Name
 		if name == "" {
-			name = c.Key
+			// Too new for the display data: the key, capitalised, beats nothing.
+			name = strings.ToUpper(c.Key[:1]) + c.Key[1:]
 		}
-		out.Characters = append(out.Characters, apiCharacter{c.Key, name, dc.Icon, c.Element, c.WeaponType, c.Rarity})
+		out.Characters = append(out.Characters, apiCharacter{c.Key, name, dc.Icon, c.Element, c.WeaponType, c.Rarity, caveats[c.Key]})
 	}
 	for _, w := range cat.Weapons {
 		dw := d.Weapons[w.Key]
