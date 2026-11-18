@@ -1,0 +1,1956 @@
+{
+ "artifact_sets": {
+  "adaycarvedfromrisingwinds": {
+   "circlet": "UI_RelicIcon_15044_3",
+   "flower": "UI_RelicIcon_15044_4",
+   "goblet": "UI_RelicIcon_15044_1",
+   "name": "A Day Carved From Rising Winds",
+   "plume": "UI_RelicIcon_15044_2",
+   "sands": "UI_RelicIcon_15044_5"
+  },
+  "archaicpetra": {
+   "circlet": "UI_RelicIcon_15014_3",
+   "flower": "UI_RelicIcon_15014_4",
+   "goblet": "UI_RelicIcon_15014_1",
+   "name": "Archaic Petra",
+   "plume": "UI_RelicIcon_15014_2",
+   "sands": "UI_RelicIcon_15014_5"
+  },
+  "aubadeofmorningstarandmoon": {
+   "circlet": "UI_RelicIcon_15043_3",
+   "flower": "UI_RelicIcon_15043_4",
+   "goblet": "UI_RelicIcon_15043_1",
+   "name": "Aubade of Morningstar and Moon",
+   "plume": "UI_RelicIcon_15043_2",
+   "sands": "UI_RelicIcon_15043_5"
+  },
+  "berserker": {
+   "circlet": "UI_RelicIcon_10005_3",
+   "flower": "UI_RelicIcon_10005_4",
+   "goblet": "UI_RelicIcon_10005_1",
+   "name": "Berserker",
+   "plume": "UI_RelicIcon_10005_2",
+   "sands": "UI_RelicIcon_10005_5"
+  },
+  "blizzardstrayer": {
+   "circlet": "UI_RelicIcon_14001_3",
+   "flower": "UI_RelicIcon_14001_4",
+   "goblet": "UI_RelicIcon_14001_1",
+   "name": "Blizzard Strayer",
+   "plume": "UI_RelicIcon_14001_2",
+   "sands": "UI_RelicIcon_14001_5"
+  },
+  "bloodstainedchivalry": {
+   "circlet": "UI_RelicIcon_15008_3",
+   "flower": "UI_RelicIcon_15008_4",
+   "goblet": "UI_RelicIcon_15008_1",
+   "name": "Bloodstained Chivalry",
+   "plume": "UI_RelicIcon_15008_2",
+   "sands": "UI_RelicIcon_15008_5"
+  },
+  "braveheart": {
+   "circlet": "UI_RelicIcon_10002_3",
+   "flower": "UI_RelicIcon_10002_4",
+   "goblet": "UI_RelicIcon_10002_1",
+   "name": "Brave Heart",
+   "plume": "UI_RelicIcon_10002_2",
+   "sands": "UI_RelicIcon_10002_5"
+  },
+  "celestialgift": {
+   "circlet": "UI_RelicIcon_15045_3",
+   "flower": "UI_RelicIcon_15045_4",
+   "goblet": "UI_RelicIcon_15045_1",
+   "name": "Celestial Gift",
+   "plume": "UI_RelicIcon_15045_2",
+   "sands": "UI_RelicIcon_15045_5"
+  },
+  "crimsonwitchofflames": {
+   "circlet": "UI_RelicIcon_15006_3",
+   "flower": "UI_RelicIcon_15006_4",
+   "goblet": "UI_RelicIcon_15006_1",
+   "name": "Crimson Witch of Flames",
+   "plume": "UI_RelicIcon_15006_2",
+   "sands": "UI_RelicIcon_15006_5"
+  },
+  "deepwoodmemories": {
+   "circlet": "UI_RelicIcon_15025_3",
+   "flower": "UI_RelicIcon_15025_4",
+   "goblet": "UI_RelicIcon_15025_1",
+   "name": "Deepwood Memories",
+   "plume": "UI_RelicIcon_15025_2",
+   "sands": "UI_RelicIcon_15025_5"
+  },
+  "defenderswill": {
+   "circlet": "UI_RelicIcon_10003_3",
+   "flower": "UI_RelicIcon_10003_4",
+   "goblet": "UI_RelicIcon_10003_1",
+   "name": "Defender's Will",
+   "plume": "UI_RelicIcon_10003_2",
+   "sands": "UI_RelicIcon_10003_5"
+  },
+  "desertpavilionchronicle": {
+   "circlet": "UI_RelicIcon_15027_3",
+   "flower": "UI_RelicIcon_15027_4",
+   "goblet": "UI_RelicIcon_15027_1",
+   "name": "Desert Pavilion Chronicle",
+   "plume": "UI_RelicIcon_15027_2",
+   "sands": "UI_RelicIcon_15027_5"
+  },
+  "disenchantmentindeepshadow": {
+   "circlet": "UI_RelicIcon_15046_3",
+   "flower": "UI_RelicIcon_15046_4",
+   "goblet": "UI_RelicIcon_15046_1",
+   "name": "Disenchantment in Deep Shadow",
+   "plume": "UI_RelicIcon_15046_2",
+   "sands": "UI_RelicIcon_15046_5"
+  },
+  "echoesofanoffering": {
+   "circlet": "UI_RelicIcon_15024_3",
+   "flower": "UI_RelicIcon_15024_4",
+   "goblet": "UI_RelicIcon_15024_1",
+   "name": "Echoes of an Offering",
+   "plume": "UI_RelicIcon_15024_2",
+   "sands": "UI_RelicIcon_15024_5"
+  },
+  "emblemofseveredfate": {
+   "circlet": "UI_RelicIcon_15020_3",
+   "flower": "UI_RelicIcon_15020_4",
+   "goblet": "UI_RelicIcon_15020_1",
+   "name": "Emblem of Severed Fate",
+   "plume": "UI_RelicIcon_15020_2",
+   "sands": "UI_RelicIcon_15020_5"
+  },
+  "finaleofthedeepgalleries": {
+   "circlet": "UI_RelicIcon_15040_3",
+   "flower": "UI_RelicIcon_15040_4",
+   "goblet": "UI_RelicIcon_15040_1",
+   "name": "Finale of the Deep Galleries",
+   "plume": "UI_RelicIcon_15040_2",
+   "sands": "UI_RelicIcon_15040_5"
+  },
+  "flowerofparadiselost": {
+   "circlet": "UI_RelicIcon_15028_3",
+   "flower": "UI_RelicIcon_15028_4",
+   "goblet": "UI_RelicIcon_15028_1",
+   "name": "Flower of Paradise Lost",
+   "plume": "UI_RelicIcon_15028_2",
+   "sands": "UI_RelicIcon_15028_5"
+  },
+  "fragmentofharmonicwhimsy": {
+   "circlet": "UI_RelicIcon_15035_3",
+   "flower": "UI_RelicIcon_15035_4",
+   "goblet": "UI_RelicIcon_15035_1",
+   "name": "Fragment of Harmonic Whimsy",
+   "plume": "UI_RelicIcon_15035_2",
+   "sands": "UI_RelicIcon_15035_5"
+  },
+  "gambler": {
+   "circlet": "UI_RelicIcon_10008_3",
+   "flower": "UI_RelicIcon_10008_4",
+   "goblet": "UI_RelicIcon_10008_1",
+   "name": "Gambler",
+   "plume": "UI_RelicIcon_10008_2",
+   "sands": "UI_RelicIcon_10008_5"
+  },
+  "gildeddreams": {
+   "circlet": "UI_RelicIcon_15026_3",
+   "flower": "UI_RelicIcon_15026_4",
+   "goblet": "UI_RelicIcon_15026_1",
+   "name": "Gilded Dreams",
+   "plume": "UI_RelicIcon_15026_2",
+   "sands": "UI_RelicIcon_15026_5"
+  },
+  "gladiatorsfinale": {
+   "circlet": "UI_RelicIcon_15001_3",
+   "flower": "UI_RelicIcon_15001_4",
+   "goblet": "UI_RelicIcon_15001_1",
+   "name": "Gladiator's Finale",
+   "plume": "UI_RelicIcon_15001_2",
+   "sands": "UI_RelicIcon_15001_5"
+  },
+  "goldentroupe": {
+   "circlet": "UI_RelicIcon_15032_3",
+   "flower": "UI_RelicIcon_15032_4",
+   "goblet": "UI_RelicIcon_15032_1",
+   "name": "Golden Troupe",
+   "plume": "UI_RelicIcon_15032_2",
+   "sands": "UI_RelicIcon_15032_5"
+  },
+  "heartofdepth": {
+   "circlet": "UI_RelicIcon_15016_3",
+   "flower": "UI_RelicIcon_15016_4",
+   "goblet": "UI_RelicIcon_15016_1",
+   "name": "Heart of Depth",
+   "plume": "UI_RelicIcon_15016_2",
+   "sands": "UI_RelicIcon_15016_5"
+  },
+  "heartofthefurnace": {
+   "circlet": "UI_RelicIcon_15048_3",
+   "flower": "UI_RelicIcon_15048_4",
+   "goblet": "UI_RelicIcon_15048_1",
+   "name": "Heart of the Furnace",
+   "plume": "UI_RelicIcon_15048_2",
+   "sands": "UI_RelicIcon_15048_5"
+  },
+  "huskofopulentdreams": {
+   "circlet": "UI_RelicIcon_15021_3",
+   "flower": "UI_RelicIcon_15021_4",
+   "goblet": "UI_RelicIcon_15021_1",
+   "name": "Husk of Opulent Dreams",
+   "plume": "UI_RelicIcon_15021_2",
+   "sands": "UI_RelicIcon_15021_5"
+  },
+  "instructor": {
+   "circlet": "UI_RelicIcon_10007_3",
+   "flower": "UI_RelicIcon_10007_4",
+   "goblet": "UI_RelicIcon_10007_1",
+   "name": "Instructor",
+   "plume": "UI_RelicIcon_10007_2",
+   "sands": "UI_RelicIcon_10007_5"
+  },
+  "lavawalker": {
+   "circlet": "UI_RelicIcon_14003_3",
+   "flower": "UI_RelicIcon_14003_4",
+   "goblet": "UI_RelicIcon_14003_1",
+   "name": "Lavawalker",
+   "plume": "UI_RelicIcon_14003_2",
+   "sands": "UI_RelicIcon_14003_5"
+  },
+  "longnightsoath": {
+   "circlet": "UI_RelicIcon_15039_3",
+   "flower": "UI_RelicIcon_15039_4",
+   "goblet": "UI_RelicIcon_15039_1",
+   "name": "Long Night's Oath",
+   "plume": "UI_RelicIcon_15039_2",
+   "sands": "UI_RelicIcon_15039_5"
+  },
+  "maidenbeloved": {
+   "circlet": "UI_RelicIcon_14004_3",
+   "flower": "UI_RelicIcon_14004_4",
+   "goblet": "UI_RelicIcon_14004_1",
+   "name": "Maiden Beloved",
+   "plume": "UI_RelicIcon_14004_2",
+   "sands": "UI_RelicIcon_14004_5"
+  },
+  "marechausseehunter": {
+   "circlet": "UI_RelicIcon_15031_3",
+   "flower": "UI_RelicIcon_15031_4",
+   "goblet": "UI_RelicIcon_15031_1",
+   "name": "Marechaussee Hunter",
+   "plume": "UI_RelicIcon_15031_2",
+   "sands": "UI_RelicIcon_15031_5"
+  },
+  "martialartist": {
+   "circlet": "UI_RelicIcon_10006_3",
+   "flower": "UI_RelicIcon_10006_4",
+   "goblet": "UI_RelicIcon_10006_1",
+   "name": "Martial Artist",
+   "plume": "UI_RelicIcon_10006_2",
+   "sands": "UI_RelicIcon_10006_5"
+  },
+  "nightoftheskysunveiling": {
+   "circlet": "UI_RelicIcon_15041_3",
+   "flower": "UI_RelicIcon_15041_4",
+   "goblet": "UI_RelicIcon_15041_1",
+   "name": "Night of the Sky's Unveiling",
+   "plume": "UI_RelicIcon_15041_2",
+   "sands": "UI_RelicIcon_15041_5"
+  },
+  "nighttimewhispersintheechoingwoods": {
+   "circlet": "UI_RelicIcon_15034_3",
+   "flower": "UI_RelicIcon_15034_4",
+   "goblet": "UI_RelicIcon_15034_1",
+   "name": "Nighttime Whispers in the Echoing Woods",
+   "plume": "UI_RelicIcon_15034_2",
+   "sands": "UI_RelicIcon_15034_5"
+  },
+  "noblesseoblige": {
+   "circlet": "UI_RelicIcon_15007_3",
+   "flower": "UI_RelicIcon_15007_4",
+   "goblet": "UI_RelicIcon_15007_1",
+   "name": "Noblesse Oblige",
+   "plume": "UI_RelicIcon_15007_2",
+   "sands": "UI_RelicIcon_15007_5"
+  },
+  "nymphsdream": {
+   "circlet": "UI_RelicIcon_15029_3",
+   "flower": "UI_RelicIcon_15029_4",
+   "goblet": "UI_RelicIcon_15029_1",
+   "name": "Nymph's Dream",
+   "plume": "UI_RelicIcon_15029_2",
+   "sands": "UI_RelicIcon_15029_5"
+  },
+  "obsidiancodex": {
+   "circlet": "UI_RelicIcon_15038_3",
+   "flower": "UI_RelicIcon_15038_4",
+   "goblet": "UI_RelicIcon_15038_1",
+   "name": "Obsidian Codex",
+   "plume": "UI_RelicIcon_15038_2",
+   "sands": "UI_RelicIcon_15038_5"
+  },
+  "oceanhuedclam": {
+   "circlet": "UI_RelicIcon_15022_3",
+   "flower": "UI_RelicIcon_15022_4",
+   "goblet": "UI_RelicIcon_15022_1",
+   "name": "Ocean-Hued Clam",
+   "plume": "UI_RelicIcon_15022_2",
+   "sands": "UI_RelicIcon_15022_5"
+  },
+  "paleflame": {
+   "circlet": "UI_RelicIcon_15018_3",
+   "flower": "UI_RelicIcon_15018_4",
+   "goblet": "UI_RelicIcon_15018_1",
+   "name": "Pale Flame",
+   "plume": "UI_RelicIcon_15018_2",
+   "sands": "UI_RelicIcon_15018_5"
+  },
+  "resolutionofsojourner": {
+   "circlet": "UI_RelicIcon_10001_3",
+   "flower": "UI_RelicIcon_10001_4",
+   "goblet": "UI_RelicIcon_10001_1",
+   "name": "Resolution of Sojourner",
+   "plume": "UI_RelicIcon_10001_2",
+   "sands": "UI_RelicIcon_10001_5"
+  },
+  "retracingbolide": {
+   "circlet": "UI_RelicIcon_15015_3",
+   "flower": "UI_RelicIcon_15015_4",
+   "goblet": "UI_RelicIcon_15015_1",
+   "name": "Retracing Bolide",
+   "plume": "UI_RelicIcon_15015_2",
+   "sands": "UI_RelicIcon_15015_5"
+  },
+  "scarletproof": {
+   "circlet": "UI_RelicIcon_15047_3",
+   "flower": "UI_RelicIcon_15047_4",
+   "goblet": "UI_RelicIcon_15047_1",
+   "name": "Scarlet Proof",
+   "plume": "UI_RelicIcon_15047_2",
+   "sands": "UI_RelicIcon_15047_5"
+  },
+  "scholar": {
+   "circlet": "UI_RelicIcon_10012_3",
+   "flower": "UI_RelicIcon_10012_4",
+   "goblet": "UI_RelicIcon_10012_1",
+   "name": "Scholar",
+   "plume": "UI_RelicIcon_10012_2",
+   "sands": "UI_RelicIcon_10012_5"
+  },
+  "scrolloftheheroofcindercity": {
+   "circlet": "UI_RelicIcon_15037_3",
+   "flower": "UI_RelicIcon_15037_4",
+   "goblet": "UI_RelicIcon_15037_1",
+   "name": "Scroll of the Hero of Cinder City",
+   "plume": "UI_RelicIcon_15037_2",
+   "sands": "UI_RelicIcon_15037_5"
+  },
+  "shimenawasreminiscence": {
+   "circlet": "UI_RelicIcon_15019_3",
+   "flower": "UI_RelicIcon_15019_4",
+   "goblet": "UI_RelicIcon_15019_1",
+   "name": "Shimenawa's Reminiscence",
+   "plume": "UI_RelicIcon_15019_2",
+   "sands": "UI_RelicIcon_15019_5"
+  },
+  "silkenmoonsserenade": {
+   "circlet": "UI_RelicIcon_15042_3",
+   "flower": "UI_RelicIcon_15042_4",
+   "goblet": "UI_RelicIcon_15042_1",
+   "name": "Silken Moon's Serenade",
+   "plume": "UI_RelicIcon_15042_2",
+   "sands": "UI_RelicIcon_15042_5"
+  },
+  "songofdayspast": {
+   "circlet": "UI_RelicIcon_15033_3",
+   "flower": "UI_RelicIcon_15033_4",
+   "goblet": "UI_RelicIcon_15033_1",
+   "name": "Song of Days Past",
+   "plume": "UI_RelicIcon_15033_2",
+   "sands": "UI_RelicIcon_15033_5"
+  },
+  "tenacityofthemillelith": {
+   "circlet": "UI_RelicIcon_15017_3",
+   "flower": "UI_RelicIcon_15017_4",
+   "goblet": "UI_RelicIcon_15017_1",
+   "name": "Tenacity of the Millelith",
+   "plume": "UI_RelicIcon_15017_2",
+   "sands": "UI_RelicIcon_15017_5"
+  },
+  "theexile": {
+   "circlet": "UI_RelicIcon_10009_3",
+   "flower": "UI_RelicIcon_10009_4",
+   "goblet": "UI_RelicIcon_10009_1",
+   "name": "The Exile",
+   "plume": "UI_RelicIcon_10009_2",
+   "sands": "UI_RelicIcon_10009_5"
+  },
+  "thunderingfury": {
+   "circlet": "UI_RelicIcon_15005_3",
+   "flower": "UI_RelicIcon_15005_4",
+   "goblet": "UI_RelicIcon_15005_1",
+   "name": "Thundering Fury",
+   "plume": "UI_RelicIcon_15005_2",
+   "sands": "UI_RelicIcon_15005_5"
+  },
+  "thundersoother": {
+   "circlet": "UI_RelicIcon_14002_3",
+   "flower": "UI_RelicIcon_14002_4",
+   "goblet": "UI_RelicIcon_14002_1",
+   "name": "Thundersoother",
+   "plume": "UI_RelicIcon_14002_2",
+   "sands": "UI_RelicIcon_14002_5"
+  },
+  "unfinishedreverie": {
+   "circlet": "UI_RelicIcon_15036_3",
+   "flower": "UI_RelicIcon_15036_4",
+   "goblet": "UI_RelicIcon_15036_1",
+   "name": "Unfinished Reverie",
+   "plume": "UI_RelicIcon_15036_2",
+   "sands": "UI_RelicIcon_15036_5"
+  },
+  "vermillionhereafter": {
+   "circlet": "UI_RelicIcon_15023_3",
+   "flower": "UI_RelicIcon_15023_4",
+   "goblet": "UI_RelicIcon_15023_1",
+   "name": "Vermillion Hereafter",
+   "plume": "UI_RelicIcon_15023_2",
+   "sands": "UI_RelicIcon_15023_5"
+  },
+  "viridescentvenerer": {
+   "circlet": "UI_RelicIcon_15002_3",
+   "flower": "UI_RelicIcon_15002_4",
+   "goblet": "UI_RelicIcon_15002_1",
+   "name": "Viridescent Venerer",
+   "plume": "UI_RelicIcon_15002_2",
+   "sands": "UI_RelicIcon_15002_5"
+  },
+  "vourukashasglow": {
+   "circlet": "UI_RelicIcon_15030_3",
+   "flower": "UI_RelicIcon_15030_4",
+   "goblet": "UI_RelicIcon_15030_1",
+   "name": "Vourukasha's Glow",
+   "plume": "UI_RelicIcon_15030_2",
+   "sands": "UI_RelicIcon_15030_5"
+  },
+  "wandererstroupe": {
+   "circlet": "UI_RelicIcon_15003_3",
+   "flower": "UI_RelicIcon_15003_4",
+   "goblet": "UI_RelicIcon_15003_1",
+   "name": "Wanderer's Troupe",
+   "plume": "UI_RelicIcon_15003_2",
+   "sands": "UI_RelicIcon_15003_5"
+  }
+ },
+ "characters": {
+  "aetheranemo": {
+   "icon": "UI_AvatarIcon_PlayerGirl",
+   "name": "Traveler (Anemo)"
+  },
+  "aethercryo": {
+   "icon": "UI_AvatarIcon_PlayerGirl",
+   "name": "Traveler (Cryo)"
+  },
+  "aetherdendro": {
+   "icon": "UI_AvatarIcon_PlayerGirl",
+   "name": "Traveler (Dendro)"
+  },
+  "aetherelectro": {
+   "icon": "UI_AvatarIcon_PlayerGirl",
+   "name": "Traveler (Electro)"
+  },
+  "aethergeo": {
+   "icon": "UI_AvatarIcon_PlayerGirl",
+   "name": "Traveler (Geo)"
+  },
+  "aetherhydro": {
+   "icon": "UI_AvatarIcon_PlayerGirl",
+   "name": "Traveler (Hydro)"
+  },
+  "aetherpyro": {
+   "icon": "UI_AvatarIcon_PlayerGirl",
+   "name": "Traveler (Pyro)"
+  },
+  "aino": {
+   "icon": "UI_AvatarIcon_Aino",
+   "name": "Aino"
+  },
+  "albedo": {
+   "icon": "UI_AvatarIcon_Albedo",
+   "name": "Albedo"
+  },
+  "alhaitham": {
+   "icon": "UI_AvatarIcon_Alhatham",
+   "name": "Alhaitham"
+  },
+  "aloy": {
+   "icon": "UI_AvatarIcon_Aloy",
+   "name": "Aloy"
+  },
+  "alyosha": {
+   "icon": "UI_AvatarIcon_Alyosha",
+   "name": "Alyosha"
+  },
+  "amber": {
+   "icon": "UI_AvatarIcon_Ambor",
+   "name": "Amber"
+  },
+  "aratakiitto": {
+   "icon": "UI_AvatarIcon_Itto",
+   "name": "Arataki Itto"
+  },
+  "arlecchino": {
+   "icon": "UI_AvatarIcon_Arlecchino",
+   "name": "Arlecchino"
+  },
+  "baizhu": {
+   "icon": "UI_AvatarIcon_Baizhuer",
+   "name": "Baizhu"
+  },
+  "barbara": {
+   "icon": "UI_AvatarIcon_Barbara",
+   "name": "Barbara"
+  },
+  "beidou": {
+   "icon": "UI_AvatarIcon_Beidou",
+   "name": "Beidou"
+  },
+  "bennett": {
+   "icon": "UI_AvatarIcon_Bennett",
+   "name": "Bennett"
+  },
+  "candace": {
+   "icon": "UI_AvatarIcon_Candace",
+   "name": "Candace"
+  },
+  "charlotte": {
+   "icon": "UI_AvatarIcon_Charlotte",
+   "name": "Charlotte"
+  },
+  "chasca": {
+   "icon": "UI_AvatarIcon_Chasca",
+   "name": "Chasca"
+  },
+  "chevreuse": {
+   "icon": "UI_AvatarIcon_Chevreuse",
+   "name": "Chevreuse"
+  },
+  "chiori": {
+   "icon": "UI_AvatarIcon_Chiori",
+   "name": "Chiori"
+  },
+  "chongyun": {
+   "icon": "UI_AvatarIcon_Chongyun",
+   "name": "Chongyun"
+  },
+  "citlali": {
+   "icon": "UI_AvatarIcon_Citlali",
+   "name": "Citlali"
+  },
+  "clorinde": {
+   "icon": "UI_AvatarIcon_Clorinde",
+   "name": "Clorinde"
+  },
+  "collei": {
+   "icon": "UI_AvatarIcon_Collei",
+   "name": "Collei"
+  },
+  "columbina": {
+   "icon": "UI_AvatarIcon_Columbina",
+   "name": "Columbina"
+  },
+  "cyno": {
+   "icon": "UI_AvatarIcon_Cyno",
+   "name": "Cyno"
+  },
+  "dahlia": {
+   "icon": "UI_AvatarIcon_Dahlia",
+   "name": "Dahlia"
+  },
+  "dehya": {
+   "icon": "UI_AvatarIcon_Dehya",
+   "name": "Dehya"
+  },
+  "diluc": {
+   "icon": "UI_AvatarIcon_Diluc",
+   "name": "Diluc"
+  },
+  "diona": {
+   "icon": "UI_AvatarIcon_Diona",
+   "name": "Diona"
+  },
+  "dori": {
+   "icon": "UI_AvatarIcon_Dori",
+   "name": "Dori"
+  },
+  "durin": {
+   "icon": "UI_AvatarIcon_Durin",
+   "name": "Durin"
+  },
+  "emilie": {
+   "icon": "UI_AvatarIcon_Emilie",
+   "name": "Emilie"
+  },
+  "escoffier": {
+   "icon": "UI_AvatarIcon_Escoffier",
+   "name": "Escoffier"
+  },
+  "eula": {
+   "icon": "UI_AvatarIcon_Eula",
+   "name": "Eula"
+  },
+  "faruzan": {
+   "icon": "UI_AvatarIcon_Faruzan",
+   "name": "Faruzan"
+  },
+  "fischl": {
+   "icon": "UI_AvatarIcon_Fischl",
+   "name": "Fischl"
+  },
+  "flins": {
+   "icon": "UI_AvatarIcon_Flins",
+   "name": "Flins"
+  },
+  "freminet": {
+   "icon": "UI_AvatarIcon_Freminet",
+   "name": "Freminet"
+  },
+  "furina": {
+   "icon": "UI_AvatarIcon_Furina",
+   "name": "Furina"
+  },
+  "gaming": {
+   "icon": "UI_AvatarIcon_Gaming",
+   "name": "Gaming"
+  },
+  "ganyu": {
+   "icon": "UI_AvatarIcon_Ganyu",
+   "name": "Ganyu"
+  },
+  "gorou": {
+   "icon": "UI_AvatarIcon_Gorou",
+   "name": "Gorou"
+  },
+  "hutao": {
+   "icon": "UI_AvatarIcon_Hutao",
+   "name": "Hu Tao"
+  },
+  "iansan": {
+   "icon": "UI_AvatarIcon_Iansan",
+   "name": "Iansan"
+  },
+  "ifa": {
+   "icon": "UI_AvatarIcon_Ifa",
+   "name": "Ifa"
+  },
+  "illuga": {
+   "icon": "UI_AvatarIcon_Illuga",
+   "name": "Illuga"
+  },
+  "ineffa": {
+   "icon": "UI_AvatarIcon_Ineffa",
+   "name": "Ineffa"
+  },
+  "jahoda": {
+   "icon": "UI_AvatarIcon_Jahoda",
+   "name": "Jahoda"
+  },
+  "jean": {
+   "icon": "UI_AvatarIcon_Qin",
+   "name": "Jean"
+  },
+  "kaedeharakazuha": {
+   "icon": "UI_AvatarIcon_Kazuha",
+   "name": "Kaedehara Kazuha"
+  },
+  "kaeya": {
+   "icon": "UI_AvatarIcon_Kaeya",
+   "name": "Kaeya"
+  },
+  "kamisatoayaka": {
+   "icon": "UI_AvatarIcon_Ayaka",
+   "name": "Kamisato Ayaka"
+  },
+  "kamisatoayato": {
+   "icon": "UI_AvatarIcon_Ayato",
+   "name": "Kamisato Ayato"
+  },
+  "kaveh": {
+   "icon": "UI_AvatarIcon_Kaveh",
+   "name": "Kaveh"
+  },
+  "keqing": {
+   "icon": "UI_AvatarIcon_Keqing",
+   "name": "Keqing"
+  },
+  "kinich": {
+   "icon": "UI_AvatarIcon_Kinich",
+   "name": "Kinich"
+  },
+  "kirara": {
+   "icon": "UI_AvatarIcon_Momoka",
+   "name": "Kirara"
+  },
+  "klee": {
+   "icon": "UI_AvatarIcon_Klee",
+   "name": "Klee"
+  },
+  "kujousara": {
+   "icon": "UI_AvatarIcon_Sara",
+   "name": "Kujou Sara"
+  },
+  "kukishinobu": {
+   "icon": "UI_AvatarIcon_Shinobu",
+   "name": "Kuki Shinobu"
+  },
+  "lanyan": {
+   "icon": "UI_AvatarIcon_Lanyan",
+   "name": "Lan Yan"
+  },
+  "lauma": {
+   "icon": "UI_AvatarIcon_Lauma",
+   "name": "Lauma"
+  },
+  "layla": {
+   "icon": "UI_AvatarIcon_Layla",
+   "name": "Layla"
+  },
+  "linnea": {
+   "icon": "UI_AvatarIcon_Linnea",
+   "name": "Linnea"
+  },
+  "lisa": {
+   "icon": "UI_AvatarIcon_Lisa",
+   "name": "Lisa"
+  },
+  "lohen": {
+   "icon": "UI_AvatarIcon_Lohen",
+   "name": "Lohen"
+  },
+  "lumineanemo": {
+   "icon": "UI_AvatarIcon_PlayerGirl",
+   "name": "Traveler (Anemo)"
+  },
+  "luminecryo": {
+   "icon": "UI_AvatarIcon_PlayerGirl",
+   "name": "Traveler (Cryo)"
+  },
+  "luminedendro": {
+   "icon": "UI_AvatarIcon_PlayerGirl",
+   "name": "Traveler (Dendro)"
+  },
+  "lumineelectro": {
+   "icon": "UI_AvatarIcon_PlayerGirl",
+   "name": "Traveler (Electro)"
+  },
+  "luminegeo": {
+   "icon": "UI_AvatarIcon_PlayerGirl",
+   "name": "Traveler (Geo)"
+  },
+  "luminehydro": {
+   "icon": "UI_AvatarIcon_PlayerGirl",
+   "name": "Traveler (Hydro)"
+  },
+  "luminepyro": {
+   "icon": "UI_AvatarIcon_PlayerGirl",
+   "name": "Traveler (Pyro)"
+  },
+  "lynette": {
+   "icon": "UI_AvatarIcon_Linette",
+   "name": "Lynette"
+  },
+  "lyney": {
+   "icon": "UI_AvatarIcon_Liney",
+   "name": "Lyney"
+  },
+  "mavuika": {
+   "icon": "UI_AvatarIcon_Mavuika",
+   "name": "Mavuika"
+  },
+  "mika": {
+   "icon": "UI_AvatarIcon_Mika",
+   "name": "Mika"
+  },
+  "mona": {
+   "icon": "UI_AvatarIcon_Mona",
+   "name": "Mona"
+  },
+  "mualani": {
+   "icon": "UI_AvatarIcon_Mualani",
+   "name": "Mualani"
+  },
+  "nahida": {
+   "icon": "UI_AvatarIcon_Nahida",
+   "name": "Nahida"
+  },
+  "navia": {
+   "icon": "UI_AvatarIcon_Navia",
+   "name": "Navia"
+  },
+  "neuvillette": {
+   "icon": "UI_AvatarIcon_Neuvillette",
+   "name": "Neuvillette"
+  },
+  "nicole": {
+   "icon": "UI_AvatarIcon_Nicole",
+   "name": "Nicole"
+  },
+  "nilou": {
+   "icon": "UI_AvatarIcon_Nilou",
+   "name": "Nilou"
+  },
+  "ningguang": {
+   "icon": "UI_AvatarIcon_Ningguang",
+   "name": "Ningguang"
+  },
+  "noelle": {
+   "icon": "UI_AvatarIcon_Noel",
+   "name": "Noelle"
+  },
+  "odette": {
+   "icon": "UI_AvatarIcon_Odette",
+   "name": "Odette"
+  },
+  "ororon": {
+   "icon": "UI_AvatarIcon_Olorun",
+   "name": "Ororon"
+  },
+  "prune": {
+   "icon": "UI_AvatarIcon_Prune",
+   "name": "Prune"
+  },
+  "qiqi": {
+   "icon": "UI_AvatarIcon_Qiqi",
+   "name": "Qiqi"
+  },
+  "raidenshogun": {
+   "icon": "UI_AvatarIcon_Shougun",
+   "name": "Raiden Shogun"
+  },
+  "razor": {
+   "icon": "UI_AvatarIcon_Razor",
+   "name": "Razor"
+  },
+  "rosaria": {
+   "icon": "UI_AvatarIcon_Rosaria",
+   "name": "Rosaria"
+  },
+  "sandrone": {
+   "icon": "UI_AvatarIcon_MarionetteNew",
+   "name": "Sandrone"
+  },
+  "sangonomiyakokomi": {
+   "icon": "UI_AvatarIcon_Kokomi",
+   "name": "Sangonomiya Kokomi"
+  },
+  "sayu": {
+   "icon": "UI_AvatarIcon_Sayu",
+   "name": "Sayu"
+  },
+  "sethos": {
+   "icon": "UI_AvatarIcon_Sethos",
+   "name": "Sethos"
+  },
+  "shenhe": {
+   "icon": "UI_AvatarIcon_Shenhe",
+   "name": "Shenhe"
+  },
+  "shikanoinheizou": {
+   "icon": "UI_AvatarIcon_Heizo",
+   "name": "Shikanoin Heizou"
+  },
+  "sigewinne": {
+   "icon": "UI_AvatarIcon_Sigewinne",
+   "name": "Sigewinne"
+  },
+  "skirk": {
+   "icon": "UI_AvatarIcon_SkirkNew",
+   "name": "Skirk"
+  },
+  "sucrose": {
+   "icon": "UI_AvatarIcon_Sucrose",
+   "name": "Sucrose"
+  },
+  "tartaglia": {
+   "icon": "UI_AvatarIcon_Tartaglia",
+   "name": "Tartaglia"
+  },
+  "thoma": {
+   "icon": "UI_AvatarIcon_Tohma",
+   "name": "Thoma"
+  },
+  "tighnari": {
+   "icon": "UI_AvatarIcon_Tighnari",
+   "name": "Tighnari"
+  },
+  "varesa": {
+   "icon": "UI_AvatarIcon_Varesa",
+   "name": "Varesa"
+  },
+  "varka": {
+   "icon": "UI_AvatarIcon_Varka",
+   "name": "Varka"
+  },
+  "venti": {
+   "icon": "UI_AvatarIcon_Venti",
+   "name": "Venti"
+  },
+  "vesna": {
+   "icon": "UI_AvatarIcon_Vesna",
+   "name": "Vesna"
+  },
+  "vodyanitsa": {
+   "icon": "UI_AvatarIcon_Vodyanitsa",
+   "name": "Vodyanitsa"
+  },
+  "wanderer": {
+   "icon": "UI_AvatarIcon_Wanderer",
+   "name": "Wanderer"
+  },
+  "wriothesley": {
+   "icon": "UI_AvatarIcon_Wriothesley",
+   "name": "Wriothesley"
+  },
+  "xiangling": {
+   "icon": "UI_AvatarIcon_Xiangling",
+   "name": "Xiangling"
+  },
+  "xianyun": {
+   "icon": "UI_AvatarIcon_Liuyun",
+   "name": "Xianyun"
+  },
+  "xiao": {
+   "icon": "UI_AvatarIcon_Xiao",
+   "name": "Xiao"
+  },
+  "xilonen": {
+   "icon": "UI_AvatarIcon_Xilonen",
+   "name": "Xilonen"
+  },
+  "xingqiu": {
+   "icon": "UI_AvatarIcon_Xingqiu",
+   "name": "Xingqiu"
+  },
+  "xinyan": {
+   "icon": "UI_AvatarIcon_Xinyan",
+   "name": "Xinyan"
+  },
+  "yaemiko": {
+   "icon": "UI_AvatarIcon_Yae",
+   "name": "Yae Miko"
+  },
+  "yanfei": {
+   "icon": "UI_AvatarIcon_Feiyan",
+   "name": "Yanfei"
+  },
+  "yaoyao": {
+   "icon": "UI_AvatarIcon_Yaoyao",
+   "name": "Yaoyao"
+  },
+  "yelan": {
+   "icon": "UI_AvatarIcon_Yelan",
+   "name": "Yelan"
+  },
+  "yoimiya": {
+   "icon": "UI_AvatarIcon_Yoimiya",
+   "name": "Yoimiya"
+  },
+  "yumemizukimizuki": {
+   "icon": "UI_AvatarIcon_Mizuki",
+   "name": "Yumemizuki Mizuki"
+  },
+  "yunjin": {
+   "icon": "UI_AvatarIcon_Yunjin",
+   "name": "Yun Jin"
+  },
+  "zhongli": {
+   "icon": "UI_AvatarIcon_Zhongli",
+   "name": "Zhongli"
+  },
+  "zibai": {
+   "icon": "UI_AvatarIcon_Zibai",
+   "name": "Zibai"
+  }
+ },
+ "weapons": {
+  "absolution": {
+   "icon": "UI_EquipIcon_Sword_Estoc",
+   "name": "Absolution"
+  },
+  "akuoumaru": {
+   "icon": "UI_EquipIcon_Claymore_Maria",
+   "name": "Akuoumaru"
+  },
+  "alleyhunter": {
+   "icon": "UI_EquipIcon_Bow_Outlaw",
+   "name": "Alley Hunter"
+  },
+  "amenomakageuchi": {
+   "icon": "UI_EquipIcon_Sword_Bakufu",
+   "name": "Amenoma Kageuchi"
+  },
+  "amosbow": {
+   "icon": "UI_EquipIcon_Bow_Amos",
+   "name": "Amos' Bow"
+  },
+  "angelosheptades": {
+   "icon": "UI_EquipIcon_Catalyst_FairyGarden",
+   "name": "Angelos' Heptades"
+  },
+  "apprenticesnotes": {
+   "icon": "UI_EquipIcon_Catalyst_Apprentice",
+   "name": "Apprentice's Notes"
+  },
+  "aquasimulacra": {
+   "icon": "UI_EquipIcon_Bow_Kirin",
+   "name": "Aqua Simulacra"
+  },
+  "aquilafavonia": {
+   "icon": "UI_EquipIcon_Sword_Falcon",
+   "name": "Aquila Favonia"
+  },
+  "ashgravendrinkinghorn": {
+   "icon": "UI_EquipIcon_Catalyst_ConchSprayer",
+   "name": "Ash-Graven Drinking Horn"
+  },
+  "astralvulturescrimsonplumage": {
+   "icon": "UI_EquipIcon_Bow_Qoyllorsnova",
+   "name": "Astral Vulture's Crimson Plumage"
+  },
+  "ateaspoonoftranscendence": {
+   "icon": "UI_EquipIcon_Claymore_CrystallineSword",
+   "name": "A Teaspoon of Transcendence"
+  },
+  "athameartis": {
+   "icon": "UI_EquipIcon_Sword_Motsognir",
+   "name": "Athame Artis"
+  },
+  "athousandblazingsuns": {
+   "icon": "UI_EquipIcon_Claymore_RadianceSword",
+   "name": "A Thousand Blazing Suns"
+  },
+  "athousandfloatingdreams": {
+   "icon": "UI_EquipIcon_Catalyst_Ayus",
+   "name": "A Thousand Floating Dreams"
+  },
+  "azurelight": {
+   "icon": "UI_EquipIcon_Sword_OuterSword",
+   "name": "Azurelight"
+  },
+  "balladoftheboundlessblue": {
+   "icon": "UI_EquipIcon_Catalyst_DandelionPoem",
+   "name": "Ballad of the Boundless Blue"
+  },
+  "balladofthefjords": {
+   "icon": "UI_EquipIcon_Pole_Shanty",
+   "name": "Ballad of the Fjords"
+  },
+  "beaconofthereedsea": {
+   "icon": "UI_EquipIcon_Claymore_Deshret",
+   "name": "Beacon of the Reed Sea"
+  },
+  "beginnersprotector": {
+   "icon": "UI_EquipIcon_Pole_Gewalt",
+   "name": "Beginner's Protector"
+  },
+  "blackcliffagate": {
+   "icon": "UI_EquipIcon_Catalyst_Blackrock",
+   "name": "Blackcliff Agate"
+  },
+  "blackclifflongsword": {
+   "icon": "UI_EquipIcon_Sword_Blackrock",
+   "name": "Blackcliff Longsword"
+  },
+  "blackcliffpole": {
+   "icon": "UI_EquipIcon_Pole_Blackrock",
+   "name": "Blackcliff Pole"
+  },
+  "blackcliffslasher": {
+   "icon": "UI_EquipIcon_Claymore_Blackrock",
+   "name": "Blackcliff Slasher"
+  },
+  "blackcliffwarbow": {
+   "icon": "UI_EquipIcon_Bow_Blackrock",
+   "name": "Blackcliff Warbow"
+  },
+  "blackmarrowlantern": {
+   "icon": "UI_EquipIcon_Catalyst_Ilmarinen",
+   "name": "Blackmarrow Lantern"
+  },
+  "blacktassel": {
+   "icon": "UI_EquipIcon_Pole_Noire",
+   "name": "Black Tassel"
+  },
+  "bladeofatonement": {
+   "icon": "UI_EquipIcon_Claymore_GlintstoneClaymore",
+   "name": "Blade of Atonement"
+  },
+  "bloodsoakedruins": {
+   "icon": "UI_EquipIcon_Pole_TummaLyhty",
+   "name": "Bloodsoaked Ruins"
+  },
+  "bloodtaintedgreatsword": {
+   "icon": "UI_EquipIcon_Claymore_Siegfry",
+   "name": "Bloodtainted Greatsword"
+  },
+  "calamityofeshu": {
+   "icon": "UI_EquipIcon_Sword_SacrificialNgombe",
+   "name": "Calamity of Eshu"
+  },
+  "calamityqueller": {
+   "icon": "UI_EquipIcon_Pole_Santika",
+   "name": "Calamity Queller"
+  },
+  "cashflowsupervision": {
+   "icon": "UI_EquipIcon_Catalyst_Wheatley",
+   "name": "Cashflow Supervision"
+  },
+  "chainbreaker": {
+   "icon": "UI_EquipIcon_Bow_Isikhulu",
+   "name": "Chain Breaker"
+  },
+  "cinnabarspindle": {
+   "icon": "UI_EquipIcon_Sword_Opus",
+   "name": "Cinnabar Spindle"
+  },
+  "clashofkings": {
+   "icon": "UI_EquipIcon_Catalyst_SandMemoria",
+   "name": "Clash of Kings"
+  },
+  "cloudforged": {
+   "icon": "UI_EquipIcon_Bow_Ultimatum",
+   "name": "Cloudforged"
+  },
+  "compoundbow": {
+   "icon": "UI_EquipIcon_Bow_Exotic",
+   "name": "Compound Bow"
+  },
+  "coolsteel": {
+   "icon": "UI_EquipIcon_Sword_Steel",
+   "name": "Cool Steel"
+  },
+  "covenantoffrostandsnow": {
+   "icon": "UI_EquipIcon_Bow_GlintstoneBow",
+   "name": "Covenant of Frost and Snow"
+  },
+  "cranesechoingcall": {
+   "icon": "UI_EquipIcon_Catalyst_MountainGale",
+   "name": "Crane's Echoing Call"
+  },
+  "crescentpike": {
+   "icon": "UI_EquipIcon_Pole_Exotic",
+   "name": "Crescent Pike"
+  },
+  "crimsonmoonssemblance": {
+   "icon": "UI_EquipIcon_Pole_BloodMoon",
+   "name": "Crimson Moon's Semblance"
+  },
+  "darkironsword": {
+   "icon": "UI_EquipIcon_Sword_Darker",
+   "name": "Dark Iron Sword"
+  },
+  "dawningfrost": {
+   "icon": "UI_EquipIcon_Catalyst_Ziedas",
+   "name": "Dawning Frost"
+  },
+  "deathmatch": {
+   "icon": "UI_EquipIcon_Pole_Gladiator",
+   "name": "Deathmatch"
+  },
+  "debateclub": {
+   "icon": "UI_EquipIcon_Claymore_Reasoning",
+   "name": "Debate Club"
+  },
+  "dialoguesofthedesertsages": {
+   "icon": "UI_EquipIcon_Pole_Caduceus",
+   "name": "Dialogues of the Desert Sages"
+  },
+  "disasterandremorse": {
+   "icon": "UI_EquipIcon_Pole_Carbine",
+   "name": "Disaster and Remorse"
+  },
+  "dodocotales": {
+   "icon": "UI_EquipIcon_Catalyst_Ludiharpastum",
+   "name": "Dodoco Tales"
+  },
+  "dragonsbane": {
+   "icon": "UI_EquipIcon_Pole_Stardust",
+   "name": "Dragon's Bane"
+  },
+  "dragonspinespear": {
+   "icon": "UI_EquipIcon_Pole_Everfrost",
+   "name": "Dragonspine Spear"
+  },
+  "dullblade": {
+   "icon": "UI_EquipIcon_Sword_Blunt",
+   "name": "Dull Blade"
+  },
+  "earthshaker": {
+   "icon": "UI_EquipIcon_Claymore_Isikhulu",
+   "name": "Earth Shaker"
+  },
+  "echoesoftheheart": {
+   "icon": "UI_EquipIcon_Catalyst_GlintstoneCatalyst",
+   "name": "Echoes of the Heart"
+  },
+  "elegyfortheend": {
+   "icon": "UI_EquipIcon_Bow_Widsith",
+   "name": "Elegy for the End"
+  },
+  "emberwell": {
+   "icon": "UI_EquipIcon_Sword_GlintstoneSword",
+   "name": "Emberwell"
+  },
+  "emeraldorb": {
+   "icon": "UI_EquipIcon_Catalyst_Jade",
+   "name": "Emerald Orb"
+  },
+  "endoftheline": {
+   "icon": "UI_EquipIcon_Bow_Fin",
+   "name": "End of the Line"
+  },
+  "engulfinglightning": {
+   "icon": "UI_EquipIcon_Pole_Narukami",
+   "name": "Engulfing Lightning"
+  },
+  "etherlightspindlelute": {
+   "icon": "UI_EquipIcon_Catalyst_SeeliesLute",
+   "name": "Etherlight Spindlelute"
+  },
+  "everlastingmoonglow": {
+   "icon": "UI_EquipIcon_Catalyst_Kaleido",
+   "name": "Everlasting Moonglow"
+  },
+  "exaiphanesblade": {
+   "icon": "UI_EquipIcon_Sword_WeaponQuestSnezhnaya",
+   "name": "Exaiphanes Blade"
+  },
+  "eyeofperception": {
+   "icon": "UI_EquipIcon_Catalyst_Truelens",
+   "name": "Eye of Perception"
+  },
+  "fadingtwilight": {
+   "icon": "UI_EquipIcon_Bow_Fallensun",
+   "name": "Fading Twilight"
+  },
+  "fangofthemountainking": {
+   "icon": "UI_EquipIcon_Claymore_EmeraldSword",
+   "name": "Fang of the Mountain King"
+  },
+  "favoniuscodex": {
+   "icon": "UI_EquipIcon_Catalyst_Zephyrus",
+   "name": "Favonius Codex"
+  },
+  "favoniusgreatsword": {
+   "icon": "UI_EquipIcon_Claymore_Zephyrus",
+   "name": "Favonius Greatsword"
+  },
+  "favoniuslance": {
+   "icon": "UI_EquipIcon_Pole_Zephyrus",
+   "name": "Favonius Lance"
+  },
+  "favoniussword": {
+   "icon": "UI_EquipIcon_Sword_Zephyrus",
+   "name": "Favonius Sword"
+  },
+  "favoniuswarbow": {
+   "icon": "UI_EquipIcon_Bow_Zephyrus",
+   "name": "Favonius Warbow"
+  },
+  "ferrousshadow": {
+   "icon": "UI_EquipIcon_Claymore_Glaive",
+   "name": "Ferrous Shadow"
+  },
+  "festeringdesire": {
+   "icon": "UI_EquipIcon_Sword_Magnum",
+   "name": "Festering Desire"
+  },
+  "filletblade": {
+   "icon": "UI_EquipIcon_Sword_Sashimi",
+   "name": "Fillet Blade"
+  },
+  "finaleofthedeep": {
+   "icon": "UI_EquipIcon_Sword_Vorpal",
+   "name": "Finale of the Deep"
+  },
+  "flameforgedinsight": {
+   "icon": "UI_EquipIcon_Claymore_Polilith",
+   "name": "Flame-Forged Insight"
+  },
+  "fleuvecendreferryman": {
+   "icon": "UI_EquipIcon_Sword_Machination",
+   "name": "Fleuve Cendre Ferryman"
+  },
+  "flowerwreathedfeathers": {
+   "icon": "UI_EquipIcon_Bow_Umpakati",
+   "name": "Flower-Wreathed Feathers"
+  },
+  "flowingpurity": {
+   "icon": "UI_EquipIcon_Catalyst_Vorpal",
+   "name": "Flowing Purity"
+  },
+  "fluteofezpitzal": {
+   "icon": "UI_EquipIcon_Sword_Isikhulu",
+   "name": "Flute of Ezpitzal"
+  },
+  "footprintoftherainbow": {
+   "icon": "UI_EquipIcon_Pole_Isikhulu",
+   "name": "Footprint of the Rainbow"
+  },
+  "forestregalia": {
+   "icon": "UI_EquipIcon_Claymore_Arakalari",
+   "name": "Forest Regalia"
+  },
+  "forgedbythegoldenmelody": {
+   "icon": "UI_EquipIcon_Claymore_EscapeWheel",
+   "name": "Forged by the Golden Melody"
+  },
+  "fracturedhalo": {
+   "icon": "UI_EquipIcon_Pole_Perdix",
+   "name": "Fractured Halo"
+  },
+  "freedomsworn": {
+   "icon": "UI_EquipIcon_Sword_Widsith",
+   "name": "Freedom-Sworn"
+  },
+  "frostbearer": {
+   "icon": "UI_EquipIcon_Catalyst_Everfrost",
+   "name": "Frostbearer"
+  },
+  "frostbreath": {
+   "icon": "UI_EquipIcon_Pole_FaesCrystalle",
+   "name": "Frostbreath"
+  },
+  "fruitfulhook": {
+   "icon": "UI_EquipIcon_Claymore_Umpakati",
+   "name": "Fruitful Hook"
+  },
+  "fruitoffulfillment": {
+   "icon": "UI_EquipIcon_Catalyst_Arakalari",
+   "name": "Fruit of Fulfillment"
+  },
+  "gestofthemightywolf": {
+   "icon": "UI_EquipIcon_Claymore_EnsisAquilonis",
+   "name": "Gest of the Mighty Wolf"
+  },
+  "goldenfrostboundoath": {
+   "icon": "UI_EquipIcon_Bow_Alkonost",
+   "name": "Golden Frostbound Oath"
+  },
+  "hakushinring": {
+   "icon": "UI_EquipIcon_Catalyst_Bakufu",
+   "name": "Hakushin Ring"
+  },
+  "halberd": {
+   "icon": "UI_EquipIcon_Pole_Halberd",
+   "name": "Halberd"
+  },
+  "hamayumi": {
+   "icon": "UI_EquipIcon_Bow_Bakufu",
+   "name": "Hamayumi"
+  },
+  "harangeppakufutsu": {
+   "icon": "UI_EquipIcon_Sword_Amenoma",
+   "name": "Haran Geppaku Futsu"
+  },
+  "harbingerofdawn": {
+   "icon": "UI_EquipIcon_Sword_Dawn",
+   "name": "Harbinger of Dawn"
+  },
+  "huntersbow": {
+   "icon": "UI_EquipIcon_Bow_Hunters",
+   "name": "Hunter's Bow"
+  },
+  "hunterspath": {
+   "icon": "UI_EquipIcon_Bow_Ayus",
+   "name": "Hunter's Path"
+  },
+  "ibispiercer": {
+   "icon": "UI_EquipIcon_Bow_Ibis",
+   "name": "Ibis Piercer"
+  },
+  "ironpoint": {
+   "icon": "UI_EquipIcon_Pole_Rod",
+   "name": "Iron Point"
+  },
+  "ironsting": {
+   "icon": "UI_EquipIcon_Sword_Exotic",
+   "name": "Iron Sting"
+  },
+  "jadefallssplendor": {
+   "icon": "UI_EquipIcon_Catalyst_Morax",
+   "name": "Jadefall's Splendor"
+  },
+  "jadevista": {
+   "icon": "UI_EquipIcon_Bow_ShatteredMirror",
+   "name": "Jade Vista"
+  },
+  "kagotsurubeisshin": {
+   "icon": "UI_EquipIcon_Sword_Youtou",
+   "name": "Kagotsurube Isshin"
+  },
+  "kagurasverity": {
+   "icon": "UI_EquipIcon_Catalyst_Narukami",
+   "name": "Kagura's Verity"
+  },
+  "katsuragikirinagamasa": {
+   "icon": "UI_EquipIcon_Claymore_Bakufu",
+   "name": "Katsuragikiri Nagamasa"
+  },
+  "keyofkhajnisut": {
+   "icon": "UI_EquipIcon_Sword_Deshret",
+   "name": "Key of Khaj-Nisut"
+  },
+  "kingssquire": {
+   "icon": "UI_EquipIcon_Bow_Arakalari",
+   "name": "King's Squire"
+  },
+  "kitaincrossspear": {
+   "icon": "UI_EquipIcon_Pole_Bakufu",
+   "name": "Kitain Cross Spear"
+  },
+  "lightbearingmoonshard": {
+   "icon": "UI_EquipIcon_Sword_SilverwareSaw",
+   "name": "Lightbearing Moonshard"
+  },
+  "lightoffoliarincision": {
+   "icon": "UI_EquipIcon_Sword_Ayus",
+   "name": "Light of Foliar Incision"
+  },
+  "lionsroar": {
+   "icon": "UI_EquipIcon_Sword_Rockkiller",
+   "name": "Lion's Roar"
+  },
+  "lithicblade": {
+   "icon": "UI_EquipIcon_Claymore_Lapis",
+   "name": "Lithic Blade"
+  },
+  "lithicspear": {
+   "icon": "UI_EquipIcon_Pole_Lapis",
+   "name": "Lithic Spear"
+  },
+  "lostprayertothesacredwinds": {
+   "icon": "UI_EquipIcon_Catalyst_Fourwinds",
+   "name": "Lost Prayer to the Sacred Winds"
+  },
+  "lumidouceelegy": {
+   "icon": "UI_EquipIcon_Pole_Muguet",
+   "name": "Lumidouce Elegy"
+  },
+  "luxurioussealord": {
+   "icon": "UI_EquipIcon_Claymore_MillenniaTuna",
+   "name": "Luxurious Sea-Lord"
+  },
+  "magicguide": {
+   "icon": "UI_EquipIcon_Catalyst_Intro",
+   "name": "Magic Guide"
+  },
+  "mailedflower": {
+   "icon": "UI_EquipIcon_Claymore_Fleurfair",
+   "name": "Mailed Flower"
+  },
+  "makhairaaquamarine": {
+   "icon": "UI_EquipIcon_Claymore_Pleroma",
+   "name": "Makhaira Aquamarine"
+  },
+  "mappamare": {
+   "icon": "UI_EquipIcon_Catalyst_Exotic",
+   "name": "Mappa Mare"
+  },
+  "masterkey": {
+   "icon": "UI_EquipIcon_Claymore_Ilmarinen",
+   "name": "Master Key"
+  },
+  "memoryofdust": {
+   "icon": "UI_EquipIcon_Catalyst_Kunwu",
+   "name": "Memory of Dust"
+  },
+  "messenger": {
+   "icon": "UI_EquipIcon_Bow_Msg",
+   "name": "Messenger"
+  },
+  "missivewindspear": {
+   "icon": "UI_EquipIcon_Pole_Windvane",
+   "name": "Missive Windspear"
+  },
+  "mistsplitterreforged": {
+   "icon": "UI_EquipIcon_Sword_Narukami",
+   "name": "Mistsplitter Reforged"
+  },
+  "mitternachtswaltz": {
+   "icon": "UI_EquipIcon_Bow_Nachtblind",
+   "name": "Mitternachts Waltz"
+  },
+  "moonpiercer": {
+   "icon": "UI_EquipIcon_Pole_Arakalari",
+   "name": "Moonpiercer"
+  },
+  "moonweaversdawn": {
+   "icon": "UI_EquipIcon_Sword_Miekka",
+   "name": "Moonweaver's Dawn"
+  },
+  "mountainbracingbolt": {
+   "icon": "UI_EquipIcon_Pole_Umpakati",
+   "name": "Mountain-Bracing Bolt"
+  },
+  "mouunsmoon": {
+   "icon": "UI_EquipIcon_Bow_Maria",
+   "name": "Mouun's Moon"
+  },
+  "nightweaverslookingglass": {
+   "icon": "UI_EquipIcon_Catalyst_MenulisRing",
+   "name": "Nightweaver's Looking Glass"
+  },
+  "nocturnescurtaincall": {
+   "icon": "UI_EquipIcon_Catalyst_Brisingamen",
+   "name": "Nocturne's Curtain Call"
+  },
+  "oathsworneye": {
+   "icon": "UI_EquipIcon_Catalyst_Jyanome",
+   "name": "Oathsworn Eye"
+  },
+  "oldmercspal": {
+   "icon": "UI_EquipIcon_Claymore_Oyaji",
+   "name": "Old Merc's Pal"
+  },
+  "otherworldlystory": {
+   "icon": "UI_EquipIcon_Catalyst_Lightnov",
+   "name": "Otherworldly Story"
+  },
+  "peakpatrolsong": {
+   "icon": "UI_EquipIcon_Sword_XochitlsTube",
+   "name": "Peak Patrol Song"
+  },
+  "pocketgrimoire": {
+   "icon": "UI_EquipIcon_Catalyst_Pocket",
+   "name": "Pocket Grimoire"
+  },
+  "polarstar": {
+   "icon": "UI_EquipIcon_Bow_Worldbane",
+   "name": "Polar Star"
+  },
+  "portablepowersaw": {
+   "icon": "UI_EquipIcon_Claymore_Mechanic",
+   "name": "Portable Power Saw"
+  },
+  "predator": {
+   "icon": "UI_EquipIcon_Bow_Predator",
+   "name": "Predator"
+  },
+  "primordialjadecutter": {
+   "icon": "UI_EquipIcon_Sword_Morax",
+   "name": "Primordial Jade Cutter"
+  },
+  "primordialjadewingedspear": {
+   "icon": "UI_EquipIcon_Pole_Morax",
+   "name": "Primordial Jade Winged-Spear"
+  },
+  "prospectorsdrill": {
+   "icon": "UI_EquipIcon_Pole_Mechanic",
+   "name": "Prospector's Drill"
+  },
+  "prospectorsshovel": {
+   "icon": "UI_EquipIcon_Pole_Ilmarinen",
+   "name": "Prospector's Shovel"
+  },
+  "prototypeamber": {
+   "icon": "UI_EquipIcon_Catalyst_Proto",
+   "name": "Prototype Amber"
+  },
+  "prototypearchaic": {
+   "icon": "UI_EquipIcon_Claymore_Proto",
+   "name": "Prototype Archaic"
+  },
+  "prototypecrescent": {
+   "icon": "UI_EquipIcon_Bow_Proto",
+   "name": "Prototype Crescent"
+  },
+  "prototyperancour": {
+   "icon": "UI_EquipIcon_Sword_Proto",
+   "name": "Prototype Rancour"
+  },
+  "prototypestarglitter": {
+   "icon": "UI_EquipIcon_Pole_Proto",
+   "name": "Prototype Starglitter"
+  },
+  "rainbowserpentsrainbow": {
+   "icon": "UI_EquipIcon_Bow_ElegguaBow",
+   "name": "Rainbow Serpent's Rain Bow"
+  },
+  "rainslasher": {
+   "icon": "UI_EquipIcon_Claymore_Perdue",
+   "name": "Rainslasher"
+  },
+  "rangegauge": {
+   "icon": "UI_EquipIcon_Bow_Mechanic",
+   "name": "Range Gauge"
+  },
+  "ravenbow": {
+   "icon": "UI_EquipIcon_Bow_Crowfeather",
+   "name": "Raven Bow"
+  },
+  "recurvebow": {
+   "icon": "UI_EquipIcon_Bow_Curve",
+   "name": "Recurve Bow"
+  },
+  "redhornstonethresher": {
+   "icon": "UI_EquipIcon_Claymore_Itadorimaru",
+   "name": "Redhorn Stonethresher"
+  },
+  "reliquaryoftruth": {
+   "icon": "UI_EquipIcon_Catalyst_Sistrum",
+   "name": "Reliquary of Truth"
+  },
+  "rightfulreward": {
+   "icon": "UI_EquipIcon_Pole_Vorpal",
+   "name": "Rightful Reward"
+  },
+  "ringofyaxche": {
+   "icon": "UI_EquipIcon_Catalyst_Isikhulu",
+   "name": "Ring of Yaxche"
+  },
+  "royalbow": {
+   "icon": "UI_EquipIcon_Bow_Theocrat",
+   "name": "Royal Bow"
+  },
+  "royalgreatsword": {
+   "icon": "UI_EquipIcon_Claymore_Theocrat",
+   "name": "Royal Greatsword"
+  },
+  "royalgrimoire": {
+   "icon": "UI_EquipIcon_Catalyst_Theocrat",
+   "name": "Royal Grimoire"
+  },
+  "royallongsword": {
+   "icon": "UI_EquipIcon_Sword_Theocrat",
+   "name": "Royal Longsword"
+  },
+  "royalspear": {
+   "icon": "UI_EquipIcon_Pole_Theocrat",
+   "name": "Royal Spear"
+  },
+  "rust": {
+   "icon": "UI_EquipIcon_Bow_Recluse",
+   "name": "Rust"
+  },
+  "sacrificersstaff": {
+   "icon": "UI_EquipIcon_Pole_Krivule",
+   "name": "Sacrificer's Staff"
+  },
+  "sacrificialbow": {
+   "icon": "UI_EquipIcon_Bow_Fossil",
+   "name": "Sacrificial Bow"
+  },
+  "sacrificialfragments": {
+   "icon": "UI_EquipIcon_Catalyst_Fossil",
+   "name": "Sacrificial Fragments"
+  },
+  "sacrificialgreatsword": {
+   "icon": "UI_EquipIcon_Claymore_Fossil",
+   "name": "Sacrificial Greatsword"
+  },
+  "sacrificialjade": {
+   "icon": "UI_EquipIcon_Catalyst_Yue",
+   "name": "Sacrificial Jade"
+  },
+  "sacrificialsword": {
+   "icon": "UI_EquipIcon_Sword_Fossil",
+   "name": "Sacrificial Sword"
+  },
+  "sapwoodblade": {
+   "icon": "UI_EquipIcon_Sword_Arakalari",
+   "name": "Sapwood Blade"
+  },
+  "scionoftheblazingsun": {
+   "icon": "UI_EquipIcon_Bow_Gurabad",
+   "name": "Scion of the Blazing Sun"
+  },
+  "seasonedhuntersbow": {
+   "icon": "UI_EquipIcon_Bow_Old",
+   "name": "Seasoned Hunter's Bow"
+  },
+  "sequenceofsolitude": {
+   "icon": "UI_EquipIcon_Bow_Stinger",
+   "name": "Sequence of Solitude"
+  },
+  "serenityscall": {
+   "icon": "UI_EquipIcon_Sword_Ilmarinen",
+   "name": "Serenity's Call"
+  },
+  "serpentspine": {
+   "icon": "UI_EquipIcon_Claymore_Kione",
+   "name": "Serpent Spine"
+  },
+  "sharpshootersoath": {
+   "icon": "UI_EquipIcon_Bow_Arjuna",
+   "name": "Sharpshooter's Oath"
+  },
+  "silverlight": {
+   "icon": "UI_EquipIcon_Sword_Fajian",
+   "name": "Silver Light"
+  },
+  "silvershowerheartstrings": {
+   "icon": "UI_EquipIcon_Bow_Arcdange",
+   "name": "Silvershower Heartstrings"
+  },
+  "silversword": {
+   "icon": "UI_EquipIcon_Sword_Silver",
+   "name": "Silver Sword"
+  },
+  "skyridergreatsword": {
+   "icon": "UI_EquipIcon_Claymore_Mitsurugi",
+   "name": "Skyrider Greatsword"
+  },
+  "skyridersword": {
+   "icon": "UI_EquipIcon_Sword_Mitsurugi",
+   "name": "Skyrider Sword"
+  },
+  "skywardatlas": {
+   "icon": "UI_EquipIcon_Catalyst_Dvalin",
+   "name": "Skyward Atlas"
+  },
+  "skywardblade": {
+   "icon": "UI_EquipIcon_Sword_Dvalin",
+   "name": "Skyward Blade"
+  },
+  "skywardharp": {
+   "icon": "UI_EquipIcon_Bow_Dvalin",
+   "name": "Skyward Harp"
+  },
+  "skywardpride": {
+   "icon": "UI_EquipIcon_Claymore_Dvalin",
+   "name": "Skyward Pride"
+  },
+  "skywardspine": {
+   "icon": "UI_EquipIcon_Pole_Dvalin",
+   "name": "Skyward Spine"
+  },
+  "slingshot": {
+   "icon": "UI_EquipIcon_Bow_Sling",
+   "name": "Slingshot"
+  },
+  "snarehook": {
+   "icon": "UI_EquipIcon_Bow_Ilmarinen",
+   "name": "Snare Hook"
+  },
+  "snowtombedstarsilver": {
+   "icon": "UI_EquipIcon_Claymore_Dragonfell",
+   "name": "Snow-Tombed Starsilver"
+  },
+  "solarpearl": {
+   "icon": "UI_EquipIcon_Catalyst_Resurrection",
+   "name": "Solar Pearl"
+  },
+  "songofbrokenpines": {
+   "icon": "UI_EquipIcon_Claymore_Widsith",
+   "name": "Song of Broken Pines"
+  },
+  "songofstillness": {
+   "icon": "UI_EquipIcon_Bow_Vorpal",
+   "name": "Song of Stillness"
+  },
+  "songofthevigil": {
+   "icon": "UI_EquipIcon_Pole_GlintstonePolearm",
+   "name": "Song of the Vigil"
+  },
+  "splendoroftranquilwaters": {
+   "icon": "UI_EquipIcon_Sword_Regalis",
+   "name": "Splendor of Tranquil Waters"
+  },
+  "staffofhoma": {
+   "icon": "UI_EquipIcon_Pole_Homa",
+   "name": "Staff of Homa"
+  },
+  "staffofthescarletsands": {
+   "icon": "UI_EquipIcon_Pole_Deshret",
+   "name": "Staff of the Scarlet Sands"
+  },
+  "starcallerswatch": {
+   "icon": "UI_EquipIcon_Catalyst_Figurines",
+   "name": "Starcaller's Watch"
+  },
+  "sturdybone": {
+   "icon": "UI_EquipIcon_Sword_Umpakati",
+   "name": "Sturdy Bone"
+  },
+  "summitshaper": {
+   "icon": "UI_EquipIcon_Sword_Kunwu",
+   "name": "Summit Shaper"
+  },
+  "sunnymorningsleepin": {
+   "icon": "UI_EquipIcon_Catalyst_SakuraFan",
+   "name": "Sunny Morning Sleep-In"
+  },
+  "surfsup": {
+   "icon": "UI_EquipIcon_Catalyst_MechaPufferfish",
+   "name": "Surf's Up"
+  },
+  "swordofdescension": {
+   "icon": "UI_EquipIcon_Sword_Psalmus",
+   "name": "Sword of Descension"
+  },
+  "swordofnarzissenkreuz": {
+   "icon": "UI_EquipIcon_Sword_Purewill",
+   "name": "Sword of Narzissenkreuz"
+  },
+  "symphonistofscents": {
+   "icon": "UI_EquipIcon_Pole_Trident",
+   "name": "Symphonist of Scents"
+  },
+  "talkingstick": {
+   "icon": "UI_EquipIcon_Claymore_BeastTamer",
+   "name": "Talking Stick"
+  },
+  "tamayurateinoohanashi": {
+   "icon": "UI_EquipIcon_Pole_Aoandon",
+   "name": "Tamayuratei no Ohanashi"
+  },
+  "thealleyflash": {
+   "icon": "UI_EquipIcon_Sword_Outlaw",
+   "name": "The Alley Flash"
+  },
+  "thebell": {
+   "icon": "UI_EquipIcon_Claymore_Troupe",
+   "name": "The Bell"
+  },
+  "theblacksword": {
+   "icon": "UI_EquipIcon_Sword_Bloodstained",
+   "name": "The Black Sword"
+  },
+  "thecatch": {
+   "icon": "UI_EquipIcon_Pole_Mori",
+   "name": "\"The Catch\""
+  },
+  "thedaybreakchronicles": {
+   "icon": "UI_EquipIcon_Bow_Arianna",
+   "name": "The Daybreak Chronicles"
+  },
+  "thedockhandsassistant": {
+   "icon": "UI_EquipIcon_Sword_Mechanic",
+   "name": "The Dockhand's Assistant"
+  },
+  "thefirstgreatmagic": {
+   "icon": "UI_EquipIcon_Bow_Pledge",
+   "name": "The First Great Magic"
+  },
+  "theflute": {
+   "icon": "UI_EquipIcon_Sword_Troupe",
+   "name": "The Flute"
+  },
+  "thestringless": {
+   "icon": "UI_EquipIcon_Bow_Troupe",
+   "name": "The Stringless"
+  },
+  "theunforged": {
+   "icon": "UI_EquipIcon_Claymore_Kunwu",
+   "name": "The Unforged"
+  },
+  "theviridescenthunt": {
+   "icon": "UI_EquipIcon_Bow_Viridescent",
+   "name": "The Viridescent Hunt"
+  },
+  "thewidsith": {
+   "icon": "UI_EquipIcon_Catalyst_Troupe",
+   "name": "The Widsith"
+  },
+  "thrillingtalesofdragonslayers": {
+   "icon": "UI_EquipIcon_Catalyst_Pulpfic",
+   "name": "Thrilling Tales of Dragon Slayers"
+  },
+  "thunderingpulse": {
+   "icon": "UI_EquipIcon_Bow_Narukami",
+   "name": "Thundering Pulse"
+  },
+  "tidalshadow": {
+   "icon": "UI_EquipIcon_Claymore_Vorpal",
+   "name": "Tidal Shadow"
+  },
+  "tomeoftheeternalflow": {
+   "icon": "UI_EquipIcon_Catalyst_Iudex",
+   "name": "Tome of the Eternal Flow"
+  },
+  "toukaboushigure": {
+   "icon": "UI_EquipIcon_Sword_Kasabouzu",
+   "name": "Toukabou Shigure"
+  },
+  "travelershandysword": {
+   "icon": "UI_EquipIcon_Sword_Traveler",
+   "name": "Traveler's Handy Sword"
+  },
+  "tulaytullahsremembrance": {
+   "icon": "UI_EquipIcon_Catalyst_Alaya",
+   "name": "Tulaytullah's Remembrance"
+  },
+  "twinnephrite": {
+   "icon": "UI_EquipIcon_Catalyst_Phoney",
+   "name": "Twin Nephrite"
+  },
+  "ultimateoverlordsmegamagicsword": {
+   "icon": "UI_EquipIcon_Claymore_Champion",
+   "name": "\"Ultimate Overlord's Mega Magic Sword\""
+  },
+  "urakumisugiri": {
+   "icon": "UI_EquipIcon_Sword_Needle",
+   "name": "Uraku Misugiri"
+  },
+  "verdict": {
+   "icon": "UI_EquipIcon_Claymore_GoldenVerdict",
+   "name": "Verdict"
+  },
+  "vividnotions": {
+   "icon": "UI_EquipIcon_Catalyst_VaresaTransformer",
+   "name": "Vivid Notions"
+  },
+  "vortexvanquisher": {
+   "icon": "UI_EquipIcon_Pole_Kunwu",
+   "name": "Vortex Vanquisher"
+  },
+  "wanderingevenstar": {
+   "icon": "UI_EquipIcon_Catalyst_Pleroma",
+   "name": "Wandering Evenstar"
+  },
+  "wastergreatsword": {
+   "icon": "UI_EquipIcon_Claymore_Aniki",
+   "name": "Waster Greatsword"
+  },
+  "wavebreakersfin": {
+   "icon": "UI_EquipIcon_Pole_Maria",
+   "name": "Wavebreaker's Fin"
+  },
+  "waveridingwhirl": {
+   "icon": "UI_EquipIcon_Catalyst_Umpakati",
+   "name": "Waveriding Whirl"
+  },
+  "whiteblind": {
+   "icon": "UI_EquipIcon_Claymore_Exotic",
+   "name": "Whiteblind"
+  },
+  "whiteirongreatsword": {
+   "icon": "UI_EquipIcon_Claymore_Tin",
+   "name": "White Iron Greatsword"
+  },
+  "whitetassel": {
+   "icon": "UI_EquipIcon_Pole_Ruby",
+   "name": "White Tassel"
+  },
+  "windblumeode": {
+   "icon": "UI_EquipIcon_Bow_Fleurfair",
+   "name": "Windblume Ode"
+  },
+  "wineandsong": {
+   "icon": "UI_EquipIcon_Catalyst_Outlaw",
+   "name": "Wine and Song"
+  },
+  "wolffang": {
+   "icon": "UI_EquipIcon_Sword_Boreas",
+   "name": "Wolf-Fang"
+  },
+  "wolfsgravestone": {
+   "icon": "UI_EquipIcon_Claymore_Wolfmound",
+   "name": "Wolf's Gravestone"
+  },
+  "xiphosmoonlight": {
+   "icon": "UI_EquipIcon_Sword_Pleroma",
+   "name": "Xiphos' Moonlight"
+  }
+ }
+}
