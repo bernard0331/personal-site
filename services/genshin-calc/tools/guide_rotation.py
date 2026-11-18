@@ -200,8 +200,32 @@ fn mv() {
 """
 
 
+LIB = json.load(open(Path(__file__).parent / "specs/combos.json"))
+
+
+def resolve(spec):
+    """Combos given as "@carry" come from specs/combos.json, with their functions
+    and source credit."""
+    funcs, sources = list(spec.get("functions", [])), []
+    combos = {}
+    for m, c in spec.get("combos", {}).items():
+        if isinstance(c, str) and c.startswith("@"):
+            e = LIB[c[1:]]
+            combos[m] = e["lines"]
+            if e.get("functions") and e["functions"] not in funcs:
+                funcs.append(e["functions"] + "\n")
+            sources.append(e["source"])
+        else:
+            combos[m] = c
+    spec = dict(spec, combos=combos, functions=funcs)
+    if sources and not spec.get("combo_source"):
+        spec["combo_source"] = "; ".join(sources)
+    return spec
+
+
 def write(spec, out_dir):
     global WHEN_READY
+    spec = resolve(spec)
     WHEN_READY = not spec.get("strict_bursts", False)
     body, members = translate(spec["rotation"], spec.get("combos", {}))
     for m in spec.get("extra_members", []):

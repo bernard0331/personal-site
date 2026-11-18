@@ -1,0 +1,69 @@
+{
+ "ifa": {
+  "lines": [
+   "if .ifa.burst.ready { ifa burst; }",
+   "ifa skill;",
+   "while .ifa.nightsoul.points > 10 { ifa charge; }"
+  ],
+  "source": "KQM's Ifa quick guide, standard Q E N13 (held Tonicshots: charged attacks in the simulator)"
+ },
+ "flins": {
+  "lines": [
+   "flins skill, attack, skill;",
+   "if .flins.burst.ready { flins burst; }",
+   "flins attack:4, dash, attack:2, skill, attack;",
+   "if .flins.burst.ready { flins burst; }",
+   "flins attack:4, dash, attack:2, skill, attack;",
+   "if .flins.burst.ready { flins burst; }",
+   "flins attack;"
+  ],
+  "source": "KQM Sim Database rotation Gjb9dqBQkNhp (E N1 E Q 2[N4D N2 E N1 Q] N1), special bursts when ready (the database's is C1 Flins)"
+ },
+ "zibai": {
+  "functions": "# Zibai's combo (our zibai-illuga-linnea-columbina rotation, from KQM's Zibai guide):\n# C1+: EE 4[N4E]. C0: E 4[N4E]. Either way, N1 Q replaces an N4 when Q is ready.\nfn zibai_combo() {\n  zibai skill;\n  if .zibai.cons >= 1 { zibai skill; }\n  for let j=0; j<4; j=j+1 {\n    if .zibai.burst.ready { zibai attack, burst; } else { zibai attack:4; }\n    zibai skill;\n  }\n}\n",
+  "lines": [
+   "zibai_combo();"
+  ],
+  "source": "our zibai-illuga-linnea-columbina rotation (KQM's Zibai guide)"
+ },
+ "sandrone": {
+  "functions": "# Sandrone's combo (our sandrone rotations, from KQM's Sandrone guide): 3[C E] (2 at C1+),\n# bursting between when ready.\nfn sandrone_combo() {\n  let n = 3;\n  if .sandrone.cons >= 1 { n = 2; }\n  for let j=0; j<n; j=j+1 {\n    sandrone charge, skill;\n    if j < n - 1 && .sandrone.burst.ready { sandrone burst; }\n  }\n}\n",
+  "lines": [
+   "sandrone_combo();"
+  ],
+  "source": "our sandrone rotations (KQM's Sandrone guide)"
+ },
+ "arlecchino": {
+  "lines": [
+   "arlecchino charge, attack:3, attack:2, walk, attack:3, dash, attack:3, charge, attack:3, attack:2;"
+  ],
+  "source": "KQM Sim Database rotation t9bFcdPTjBhc (Arlecchino's actions after her skill: C N3 N2W N3D N3C N3 N2)"
+ },
+ "chasca": {
+  "lines": [
+   "chasca skill;",
+   "chasca aim:4;",
+   "if .chasca.burst.ready && .chasca.energy == .chasca.energymax { chasca burst; } else { chasca aim[bullets=4]; }"
+  ],
+  "source": "KQM Sim Database rotation TKqNwq8THggp (E 4[C], then Q when ready with full energy, else a 4-bullet shot)"
+ },
+ "aratakiitto": {
+  "lines": [
+   "aratakiitto attack;",
+   "if .aratakiitto.burst.ready { aratakiitto burst; }",
+   "aratakiitto skill[travel=0];",
+   "while !.aratakiitto.skill.ready { if .aratakiitto.tags.strStack > 0 { aratakiitto charge; } else { aratakiitto attack; } }",
+   "aratakiitto skill[travel=0];",
+   "while .aratakiitto.mods.itto-q { if .aratakiitto.tags.strStack > 0 { aratakiitto charge; } else { aratakiitto attack; } }"
+  ],
+  "source": "KQM Sim Database rotation g6wbFkjbNKLc (N1 Q E, charged attacks on Superlative Superstrength stacks, normal attacks between, until his burst ends); his burst when ready (forcing it waited 45 s for energy)"
+ },
+ "noelle": {
+  "lines": [
+   "noelle skill;",
+   "if .noelle.burst.ready { noelle burst; }",
+   "for let r=0; r<3; r=r+1 { noelle attack:4, dash, attack:2, dash; }"
+  ],
+  "source": "KQM Sim Database rotation jwFpbrDQLc7g (E Q then N4D N2D strings; 3 here to fill her burst, the database has 2 with a Xilonen skill between); her burst when ready (forcing it waited 44 s for energy)"
+ }
+}

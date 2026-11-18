@@ -1,0 +1,135 @@
+[
+ {
+  "guide": "Jahoda",
+  "url": "https://keqingmains.com/q/jahoda-quickguide/",
+  "file": "jahoda-flins-mona-fischl",
+  "team": "Jahoda — Flins — Mona — Fischl",
+  "rotation": "Mona (Q N4) E > Fischl E/Q > Jahoda EQ > Flins combo",
+  "combos": {
+   "flins": "@flins"
+  },
+  "notes": [
+   "Mona's (Q N4) only when her burst is ready. \"Fischl E/Q\": her skill, or her burst when it is ready."
+  ]
+ },
+ {
+  "guide": "Jahoda",
+  "url": "https://keqingmains.com/q/jahoda-quickguide/",
+  "file": "jahoda-ineffa-mona-durin",
+  "team": "Jahoda — Ineffa — Mona — Durin",
+  "rotation": "Mona E > Ineffa E (Q) > Jahoda EQ > Durin 2[E] Q > Mona Q 2[N4D]",
+  "notes": [
+   "The guide's \"If Ineffa's Burst is not ready, do 3[N4D]\" is simplified to 2[N4D]."
+  ]
+ },
+ {
+  "guide": "Jahoda",
+  "url": "https://keqingmains.com/q/jahoda-quickguide/",
+  "file": "jahoda-ineffa-furina-ifa",
+  "team": "Jahoda — Ineffa — Furina — Ifa",
+  "rotation": "Furina ED Q > Ineffa E (Q) > Jahoda EQ > Ifa combo",
+  "combos": {
+   "ifa": "@ifa"
+  }
+ },
+ {
+  "guide": "Jahoda",
+  "url": "https://keqingmains.com/q/jahoda-quickguide/",
+  "file": "jahoda-aino-fischl-sucrose",
+  "team": "Jahoda — Aino — Fischl — Sucrose",
+  "rotation": "Fischl E > Aino QE > Jahoda EQ > Sucrose E 3[N4] > Fischl Q > Sucrose (E) Q 3[N4]",
+  "notes": [
+   "\"Sucrose E N4 spam\" (until Oz leaves) is written as 3[N4]."
+  ]
+ },
+ {
+  "guide": "Linnea",
+  "url": "https://keqingmains.com/q/linnea-quickguide/",
+  "file": "zibai-linnea-columbina-gorou",
+  "team": "Zibai — Linnea — Columbina — Gorou/Illuga",
+  "variant": "Gorou",
+  "rotation": "Columbina E (Q) > Linnea E > Gorou EQ > Zibai combo",
+  "combos": {
+   "zibai": "@zibai"
+  },
+  "notes": [
+   "\"Linnea E / Q\": her burst only if healing is needed, so her skill here."
+  ]
+ },
+ {
+  "guide": "Linnea",
+  "url": "https://keqingmains.com/q/linnea-quickguide/",
+  "file": "navia-columbina-furina-linnea",
+  "team": "Linnea — Navia — Columbina — Furina",
+  "rotation": "Linnea (E) > Furina ED Q > Linnea Q > Columbina E Q > Navia Q tE 2[N2D] N2 > Furina N2 > Navia tE 2[N2D] N2 (tE)",
+  "first": "linnea",
+  "notes": [
+   "Linnea's opening E is first-rotation only in the guide; here she uses it whenever it is ready. Furina's N2 is for a Favonius proc (R4+)."
+  ]
+ },
+ {
+  "guide": "Linnea",
+  "url": "https://keqingmains.com/q/linnea-quickguide/",
+  "file": "aratakiitto-gorou-linnea-columbina",
+  "team": "Arataki Itto — Gorou — Linnea — Columbina",
+  "rotation": "Columbina E (Q) > Gorou EQ > Linnea E (Q) > Itto combo",
+  "combos": {
+   "aratakiitto": "@aratakiitto"
+  },
+  "notes": [
+   "The guide's Linnea 5[E] (Q) is her nuke in Ultimate Power Form; how the simulator triggers it is not settled here, so this uses one skill press (five presses waited 103 s on her cooldown). Her (Q) when ready."
+  ]
+ },
+ {
+  "guide": "Linnea",
+  "url": "https://keqingmains.com/q/linnea-quickguide/",
+  "file": "noelle-linnea-aino-gorou",
+  "team": "Linnea — Noelle — Aino — Geo Traveler / Gorou",
+  "variant": "Gorou",
+  "rotation": "Linnea E > Aino EQ > Gorou EQ > Noelle combo",
+  "combos": {
+   "noelle": "@noelle"
+  }
+ },
+ {
+  "guide": "Alyosha",
+  "url": "https://keqingmains.com/q/alyosha-quickguide/",
+  "file": "sandrone-luminecryo-qiqi-alyosha",
+  "team": "Sandrone / Cyno — Cryo Traveler — Qiqi — Alyosha",
+  "variant": "Sandrone",
+  "rotation": "Alyosha EQ > Qiqi E (Q) > Cryo Traveler EN1C Q > Sandrone combo",
+  "combos": {
+   "sandrone": "@sandrone"
+  }
+ },
+ {
+  "guide": "Alyosha",
+  "url": "https://keqingmains.com/q/alyosha-quickguide/",
+  "file": "arlecchino-chevreuse-bennett-alyosha",
+  "team": "Arlecchino — Chevreuse — Bennett — Alyosha",
+  "rotation": "Arlecchino E > Alyosha EQ > Chevreuse hEQ > Bennett EQ > Arlecchino combo",
+  "combos": {
+   "arlecchino": "@arlecchino"
+  }
+ },
+ {
+  "guide": "Alyosha",
+  "url": "https://keqingmains.com/q/alyosha-quickguide/",
+  "file": "flins-columbina-sucrose-alyosha",
+  "team": "Flins — Columbina — Sucrose — Alyosha",
+  "rotation": "Columbina E(Q) > Alyosha EQ > Sucrose ED (Q) N2 > Flins combo",
+  "combos": {
+   "flins": "@flins"
+  }
+ },
+ {
+  "guide": "Alyosha",
+  "url": "https://keqingmains.com/q/alyosha-quickguide/",
+  "file": "chasca-furina-durin-alyosha",
+  "team": "Chasca — Furina — Durin — Alyosha",
+  "rotation": "Furina ED Q > Durin 2[E] Q > Alyosha EQ > Chasca combo",
+  "combos": {
+   "chasca": "@chasca"
+  }
+ }
+]
