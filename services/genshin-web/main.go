@@ -36,6 +36,8 @@ func main() {
 	addr := flag.String("addr", "127.0.0.1:8080", "address to listen on")
 	imgDir := flag.String("img", "local/web-img", "directory of icons (tools/fetch_images.py fills it)")
 	dataDir := flag.String("data", "local/web-data", "directory for runs and the shared simulation cache")
+	cachePath := flag.String("cache", "", "the shared simulation cache (default: cache.jsonl in -data)")
+	cacheCopy := flag.String("cache-copy", "", "copy the cache here after every run, and restore it from here at start-up (e.g. on a Cloud Storage mount)")
 	dbPath := flag.String("db", "local/rotations/kqm-db.jsonl", "cached KQM Sim Database")
 	ownDir := flag.String("own", "services/genshin-calc/rotations", "this project's own rotation files")
 	simPath := flag.String("sim", "bin/kqmsim", "simulator binary")
@@ -45,6 +47,8 @@ func main() {
 	iterations := flag.Int("iterations", 15, "simulator iterations per rotation in a quick run (15: picks matched 30 within 1-2% on the owner's account)")
 	queueSize := flag.Int("queue", 20, "runs that may wait; more are turned away")
 	variants := flag.Int("variants", 4, "weapon alternatives per team the solver may choose from")
+	perHour := flag.Int("runs-per-hour", 6, "runs one visitor (IP address) may start per hour; 0 for no limit")
+	trustProxy := flag.Bool("trust-proxy", false, "take visitors' addresses from X-Forwarded-For (set behind Cloud Run or a load balancer)")
 	flag.Parse()
 
 	cat, err := catalog.Load()
@@ -56,11 +60,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	eng, err := newEngine(cat, *dataDir, *dbPath, *ownDir, *simPath, *rankingPath, *highsPython, *cpus, *iterations, *queueSize)
+	eng, err := newEngine(cat, *dataDir, *cachePath, *cacheCopy, *dbPath, *ownDir, *simPath, *rankingPath, *highsPython, *cpus, *iterations, *queueSize)
 	if err != nil {
 		log.Fatal(err)
 	}
 	eng.variants = *variants
+	eng.runs.limit = newLimiter(*perHour, *trustProxy)
 	go eng.loop()
 
 	static, _ := fs.Sub(web, "web")

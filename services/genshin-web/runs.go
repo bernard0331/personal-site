@@ -154,6 +154,7 @@ type runs struct {
 	mu     sync.Mutex
 	status map[string]*Status // runs this process has seen; finished ones are also on disk
 	order  []string           // queued ids, oldest first
+	limit  *limiter           // per-visitor limits; nil for none
 }
 
 func newRuns(cat *catalog.Catalog, dir string, queueSize int) *runs {
@@ -172,6 +173,14 @@ func (rs *runs) create(w http.ResponseWriter, r *http.Request) {
 		httpError(w, http.StatusBadRequest, err.Error())
 		return
 	}
+	var ip string
+	if rs.limit != nil {
+		ip = rs.limit.clientIP(r)
+		if why := rs.limit.allow(ip, rs.finished); why != "" {
+			httpError(w, http.StatusTooManyRequests, why)
+			return
+		}
+	}
 	id := newRunID()
 	st := &Status{State: "queued", Created: time.Now().UTC()}
 	if err := rs.store.write(id, "snapshot.json", snap); err != nil {
@@ -185,6 +194,9 @@ func (rs *runs) create(w http.ResponseWriter, r *http.Request) {
 		rs.mu.Lock()
 		rs.order = append(rs.order, id)
 		rs.mu.Unlock()
+		if rs.limit != nil {
+			rs.limit.record(ip, id)
+		}
 	default:
 		rs.setStatus(id, &Status{State: "failed", Error: "the optimizer is busy; try again in a few minutes", Created: st.Created})
 		httpError(w, http.StatusServiceUnavailable, "the optimizer is busy; try again in a few minutes")
@@ -255,6 +267,12 @@ func (rs *runs) statusOf(id string) (Status, bool) {
 		disk.State, disk.Error = "failed", "the server restarted during this run; start it again"
 	}
 	return disk, true
+}
+
+// finished reports whether a run is over (done or failed, or unknown).
+func (rs *runs) finished(id string) bool {
+	st, ok := rs.statusOf(id)
+	return !ok || st.State == "done" || st.State == "failed"
 }
 
 // next takes the oldest queued run off the queue (blocking).

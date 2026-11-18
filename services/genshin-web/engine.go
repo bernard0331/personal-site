@@ -6,8 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -46,10 +48,17 @@ type engine struct {
 	cache     map[string]coarse.Result
 	cacheFile *os.File
 	cacheW    *bufio.Writer
+	cachePath string
+	// cacheCopy, when set, is where the cache is copied after every run and
+	// read from at start-up when the cache file is missing: on Cloud Run the
+	// cache lives on the instance's own (temporary) disk, where appending one
+	// line per simulation is cheap, and the copy goes to a Cloud Storage
+	// mount, where every write uploads the whole file.
+	cacheCopy string
 }
 
 // newEngine loads everything a run needs once, at start-up.
-func newEngine(cat *catalog.Catalog, dataDir, dbPath, ownDir, simPath, rankingPath, highsPython string, cpus, iterations, queueSize int) (*engine, error) {
+func newEngine(cat *catalog.Catalog, dataDir, cachePath, cacheCopy, dbPath, ownDir, simPath, rankingPath, highsPython string, cpus, iterations, queueSize int) (*engine, error) {
 	sources, err := optimizer.ReadRotations(dbPath, ownDir)
 	if err != nil {
 		return nil, fmt.Errorf("rotations: %w", err)
@@ -79,7 +88,20 @@ func newEngine(cat *catalog.Catalog, dataDir, dbPath, ownDir, simPath, rankingPa
 	if err := os.MkdirAll(dataDir, 0o755); err != nil {
 		return nil, err
 	}
-	if err := e.openCache(dataDir + "/cache.jsonl"); err != nil {
+	if cachePath == "" {
+		cachePath = filepath.Join(dataDir, "cache.jsonl")
+	}
+	e.cachePath, e.cacheCopy = cachePath, cacheCopy
+	if cacheCopy != "" {
+		if _, err := os.Stat(cachePath); errors.Is(err, os.ErrNotExist) {
+			if err := copyFile(cacheCopy, cachePath); err == nil {
+				log.Printf("shared cache restored from %s", cacheCopy)
+			} else if !errors.Is(err, os.ErrNotExist) {
+				log.Printf("shared cache: no copy restored: %v", err)
+			}
+		}
+	}
+	if err := e.openCache(cachePath); err != nil {
 		return nil, err
 	}
 	log.Printf("%d rotations, %d cores, %d iterations per quick run", len(sources), cpus, iterations)
@@ -131,7 +153,47 @@ func (e *engine) loop() {
 			st.State = "done"
 		}
 		e.runs.setStatus(id, &st)
+		e.saveCacheCopy()
 	}
+}
+
+// saveCacheCopy copies the cache to cacheCopy, through a temporary file so a
+// reader never sees half of it.
+func (e *engine) saveCacheCopy() {
+	if e.cacheCopy == "" {
+		return
+	}
+	e.mu.Lock()
+	defer e.mu.Unlock()
+	start := time.Now()
+	tmp := e.cacheCopy + ".tmp"
+	if err := copyFile(e.cachePath, tmp); err != nil {
+		log.Printf("shared cache: copy failed: %v", err)
+		return
+	}
+	if err := os.Rename(tmp, e.cacheCopy); err != nil {
+		log.Printf("shared cache: copy failed: %v", err)
+		return
+	}
+	log.Printf("shared cache: copied to %s in %s", e.cacheCopy, time.Since(start).Round(time.Millisecond))
+}
+
+// copyFile copies src to dst, replacing dst.
+func copyFile(src, dst string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+	out, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	if _, err := io.Copy(out, in); err != nil {
+		out.Close()
+		return err
+	}
+	return out.Close()
 }
 
 // account turns a checked snapshot into the optimizer's account: every
@@ -414,7 +476,9 @@ func (e *engine) solve(results []coarse.Result, rule *optimizer.Rule, pins []str
 			var r solver.Result
 			var err error
 			start := time.Now()
-			defer func() { log.Printf("solve %s/%s: %d options, %s", bd.Name, bd.Ranking, len(p.Teams), time.Since(start).Round(time.Second)) }()
+			defer func() {
+				log.Printf("solve %s/%s: %d options, %s", bd.Name, bd.Ranking, len(p.Teams), time.Since(start).Round(time.Second))
+			}()
 			if b.name == "element" {
 				r, err = p.ByElementHiGHS(e.highs, optimizer.Elements, b.obj)
 			} else {
