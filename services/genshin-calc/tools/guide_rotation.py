@@ -1,0 +1,251 @@
+#!/usr/bin/env python3
+"""Write a rotation file from a KQM quick guide's sample rotation.
+
+KQM's guides give each example team a rotation in their combo notation, e.g.
+    Furina ED Q > Ororon EQ > Sayu shEQ > Ifa combo
+Most of that maps straight onto simulator actions. "<Carry> combo" is the
+carry's own combo, which a spec supplies as script lines (usually from the
+guide's Combos section or a KQM Sim Database rotation, credited). Example builds
+(KQM-standard substats) come from database rotations, so the file runs on its
+own; the optimizer replaces them with each player's own.
+
+usage: guide_rotation.py SPEC.json [OUT_DIR]
+
+SPEC.json is a list of teams:
+  {"file": "ifa-ororon-furina-sayu",
+   "guide": "Ifa", "url": "https://keqingmains.com/q/ifa-quickguide/",
+   "team": "Ifa — Ororon — Furina — Sayu",          # the guide's team heading
+   "variant": "",                                    # e.g. "C6 Faruzan"; optional
+   "rotation": "Furina ED Q > Ororon EQ > Sayu shEQ > Ifa combo",
+   "combos": {"ifa": ["ifa skill;", ...]},           # script lines per carry
+   "combo_source": "the guide's Q E N13 (P)",        # credit for the combo
+   "first": "furina",                                # active character at the start
+   "notes": ["..."],                                 # extra comment lines
+   "loops": 6}
+
+Notation (KQM's): E skill, tE tap skill, hE hold skill, shE short hold skill,
+Q burst, sQ special burst, Nk k normal attacks, C charged attack, A aimed shot,
+P/hP high plunge, lP low plunge, D dash, J jump, W walk, (X) only when ready,
+k[...] repeat k times. Iansan in the team adds the movement helper mv(): her
+buff needs the active character's movement reported (see the Varesa/Iansan
+rotation); combos then call mv() themselves.
+"""
+import json, re, sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[3]
+DB = ROOT / "local/rotations/kqm-db.jsonl"
+CATALOG = ROOT / "services/genshin-calc/catalog/catalog.json"
+DISPLAY = ROOT / "services/genshin-web/display.json"
+OWN = ROOT / "services/genshin-calc/rotations"
+
+cat = json.load(open(CATALOG))
+SHORT = {c["key"]: c["key"] for c in cat["characters"]}
+SHORT.update(cat["shortcuts"]["characters"])
+NAMES = {}  # display name (lower case) -> key
+for k, v in json.load(open(DISPLAY))["characters"].items():
+    NAMES[v["name"].lower()] = k
+for el in ("anemo", "geo", "electro", "dendro", "hydro", "pyro", "cryo"):
+    NAMES[f"{el} traveler"] = "lumine" + el
+NAMES["yae"] = "yaemiko"
+NAMES["kazuha"] = "kaedeharakazuha"
+NAMES["raiden"] = "raidenshogun"
+
+
+def key(name):
+    k = name.strip().lower()
+    if k in NAMES:
+        return NAMES[k]
+    k = SHORT.get(k.replace(" ", ""), k.replace(" ", ""))
+    return "lumine" + k[6:] if k.startswith("aether") else k
+
+
+# ---------- example builds from the database ----------
+
+STD5 = {"def%": .062, "def": 19.68, "hp": 253.94, "hp%": .0496, "atk": 16.54, "atk%": .0496,
+        "er": .0551, "em": 19.82, "cr": .0331, "cd": .0662}
+
+
+def standard_line(body):
+    tot = {}
+    for k, v, n in re.findall(r"([a-z%]+)=([0-9.]+)(?:\*([0-9]+))?", body):
+        if k in STD5:
+            tot[k] = tot.get(k, 0) + float(v) * (int(n) if n else 1)
+    if len(tot) < 6:
+        return False
+    for scale in (1, .84):
+        if all(v / (STD5[k] * scale) >= 1.5 and abs(v / (STD5[k] * scale) - round(v / (STD5[k] * scale))) < .03 for k, v in tot.items()):
+            return True
+    return False
+
+
+_db = None
+
+
+def builds(member):
+    """The member's char and add lines from the best-rated database rotation in
+    which every member has KQM-standard substats. Returns (lines, source id)."""
+    global _db
+    if _db is None:
+        _db = [json.loads(l) for l in open(DB)]
+    best = None
+    for e in _db:
+        if e.get("targets") != 1:
+            continue
+        cfg = e["config"]
+        per = {}
+        for m in re.finditer(r"^\s*(\w+)\s+(char|add)\b[^;]*;", cfg, re.M):
+            per.setdefault(key(m.group(1)), []).append(m.group(0).strip())
+        mine = per.get(member)
+        if not mine:
+            continue
+        subs = [l for l in mine if " add stats" in l]
+        if not subs or not any(standard_line(l) for l in subs):
+            continue
+        if best is None or (e.get("dps") or 0) > best[0]:
+            best = (e.get("dps") or 0, e["id"], mine)
+    if best is None:
+        # Characters the database lacks (e.g. Iansan): our own rotation files.
+        for f in sorted(OWN.glob("*.txt")):
+            mine = [m.group(0).strip() for m in re.finditer(r"^\s*(\w+)\s+(char|add)\b[^;]*;", f.read_text(), re.M)
+                    if key(m.group(1)) == member]
+            if any(" add stats" in l for l in mine):
+                best = (0, "own:" + f.stem, mine)
+                break
+    if best is None:
+        raise SystemExit(f"no KQM-standard build for {member}")
+    lines = [re.sub(r"^\w+", member, l) for l in best[2]]
+    lines = [re.sub(r"\s*#.*$", "", l) for l in lines]
+    return lines, best[1]
+
+
+# ---------- notation ----------
+
+TOKEN = re.compile(r"\d+\[[^\]]*\]|\([^)]*\)|shE|hE|tE|sQ|hP|lP|N\d+|[EQCADPJW]")
+
+
+BOW = {c["key"] for c in cat["characters"] if c["weapon_type"] == "bow"}
+
+
+# Supports' bursts: the guides assume enough ER to burst every rotation; with
+# example builds that often stalls a rotation for minutes. By default a
+# support's Q happens when ready (a spec can set "strict_bursts").
+WHEN_READY = True
+
+
+def actions(member, text):
+    """Translate one character's part of a rotation into script lines."""
+    out = []
+    for t in TOKEN.findall(text.replace(" ", "")):
+        m = re.fullmatch(r"(\d+)\[(.*)\]", t)
+        if m:
+            inner = actions(member, m.group(2))
+            out.append(f"for let r=0; r<{m.group(1)}; r=r+1 {{ " + " ".join(inner) + " }")
+            continue
+        if t.startswith("("):
+            inner = t[1:-1]
+            if inner in ("Q", "sQ"):
+                out.append(f"if .{member}.burst.ready {{ {member} burst; }}")
+            elif inner in ("E", "tE", "hE"):
+                out.append(f"if .{member}.skill.ready {{ {' '.join(actions(member, inner))} }}")
+            else:  # optional attacks: done
+                out.extend(actions(member, inner))
+            continue
+        if t in ("Q", "sQ") and WHEN_READY:
+            out.append(f"if .{member}.burst.ready {{ {member} burst; }}")
+            continue
+        act = ONE[t] if t in ONE else "attack:" + t[1:]
+        if t == "C" and member in BOW:
+            act = "aim"  # a bow user's charged attack is an aimed shot
+        out.append(f"{member} {act};")
+    return out
+
+
+ONE = {"E": "skill", "tE": "skill", "hE": "skill[hold=1]", "shE": "skill[short_hold=1]", "Q": "burst",
+       "sQ": "burst", "C": "charge", "A": "aim", "D": "dash", "J": "jump", "W": "walk",
+       "P": "high_plunge", "hP": "high_plunge", "lP": "low_plunge"}
+
+
+def translate(rotation, combos):
+    """Script lines for one rotation, and the members in order of appearance."""
+    lines, members = [], []
+    for part in rotation.split(">"):
+        part = part.strip()
+        name_actions = re.match(r"(.+?)\s+((?:combo.*)|(?:[\d\[\]()hstlNEQCADPJW ].*))$", part)
+        if not name_actions:
+            raise SystemExit(f"cannot read {part!r}")
+        member, acts = key(name_actions.group(1)), name_actions.group(2).strip()
+        if member not in members:
+            members.append(member)
+        if "combo" in acts:
+            before, _, after = acts.partition("combo")
+            lines.extend(actions(member, before))
+            lines.extend(combos[member])
+            lines.extend(actions(member, after))
+        else:
+            lines.extend(actions(member, acts))
+            if member == "iansan" and "burst" in " ".join(lines[-3:]):  # (also when conditional)
+                lines.append("last_f = f();")
+    return lines, members
+
+
+MV = """# Iansan's burst buff needs the active character's movement reported (see the
+# Varesa/Iansan rotation): mv() reports move_speed metres per second of field time.
+let move_speed = 8;
+let last_f = 0;
+fn mv() {
+  movement((f() - last_f) / 60 * move_speed);
+  last_f = f();
+}
+"""
+
+
+def write(spec, out_dir):
+    global WHEN_READY
+    WHEN_READY = not spec.get("strict_bursts", False)
+    body, members = translate(spec["rotation"], spec.get("combos", {}))
+    for m in spec.get("extra_members", []):
+        if m not in members:
+            members.append(m)
+    if len(members) != 4:
+        raise SystemExit(f"{spec['file']}: {len(members)} members {members}")
+    build_lines, sources = [], {}
+    for m in members:
+        lines, src = builds(m)
+        sources[m] = src
+        if m in spec.get("cons", {}):
+            lines = [re.sub(r"cons=\d", f"cons={spec['cons'][m]}", l) for l in lines]
+        build_lines.append("\n".join(lines))
+    team = ", ".join(NAMES_BY_KEY.get(m, m) for m in members)
+    head = [f"# Team: {team}",
+            "# Written for this project with tools/guide_rotation.py. Not from the KQM Sim Database.",
+            f"# Source: KQM's {spec['guide']} quick guide, {spec['url']}",
+            f"#   Team \"{spec['team']}\", sample rotation{(' (' + spec['variant'] + ')') if spec.get('variant') else ''}:",
+            f"#     {spec['rotation']}"]
+    if spec.get("combo_source"):
+        head.append(f"#   Combo: {spec['combo_source']}.")
+    if WHEN_READY:
+        head.append("#   Supports burst when ready (the guide assumes enough ER to burst every rotation).")
+    for n in spec.get("notes", []):
+        head.append(f"#   {n}")
+    head.append("#   Example builds (KQM-standard substats) from KQM Sim Database rotations: " +
+                ", ".join(f"{m} {s}" for m, s in sources.items()) + ".")
+    head.append("#   The optimizer replaces them with each player's own.")
+    loops = spec.get("loops", 6)
+    script = "\n".join("  " + l for l in body)
+    text = "\n".join(head) + "\n\noptions swap_delay=12 iteration=1000;\n\n" + "\n\n".join(build_lines) + \
+        "\n\ntarget lvl=100 resist=0.1 radius=2 pos=0,2.4 hp=999999999;\nenergy every interval=480,720 amount=1;\n\n" + \
+        (MV + "\n" if "iansan" in members else "") + "".join(spec.get("functions", [])) + \
+        f"active {spec.get('first', members[0])};\nfor let i=0; i<{loops}; i=i+1 {{\n{script}\n}}\n"
+    path = Path(out_dir) / f"{spec['file']}.txt"
+    path.write_text(text)
+    return path
+
+
+NAMES_BY_KEY = {k: v["name"] for k, v in json.load(open(DISPLAY))["characters"].items()}
+
+if __name__ == "__main__":
+    specs = json.load(open(sys.argv[1]))
+    out = sys.argv[2] if len(sys.argv) > 2 else OWN
+    for s in specs:
+        print(write(s, out))

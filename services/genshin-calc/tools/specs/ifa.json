@@ -1,0 +1,140 @@
+[
+ {
+  "file": "ifa-ororon-furina-sayu",
+  "team": "Ifa — Ororon — Furina — Sayu",
+  "rotation": "Furina ED Q > Ororon EQ > Sayu shEQ > Ifa combo > Sayu (shE)",
+  "combos": {
+   "ifa": [
+    "if .ifa.burst.ready { ifa burst; }",
+    "ifa skill;",
+    "while .ifa.nightsoul.points > 10 { ifa charge; }"
+   ]
+  },
+  "combo_source": "the guide's standard Q E N13 (P): burst when ready, skill, then held Tonicshots (charged attacks in the simulator) while his Nightsoul lasts, as KQM Sim Database Ifa rotations do; the optional plunge is left out",
+  "guide": "Ifa",
+  "url": "https://keqingmains.com/q/ifa-quickguide/"
+ },
+ {
+  "file": "ifa-ororon-aino-ineffa",
+  "team": "Ifa — Ororon — Aino — Ineffa",
+  "rotation": "Ineffa E (Q) > Aino EQ > Ororon EQ > Ifa combo",
+  "combos": {
+   "ifa": [
+    "if .ifa.burst.ready { ifa burst; }",
+    "ifa skill;",
+    "while .ifa.nightsoul.points > 10 { ifa charge; }"
+   ]
+  },
+  "combo_source": "the guide's standard Q E N13 (P): burst when ready, skill, then held Tonicshots (charged attacks in the simulator) while his Nightsoul lasts, as KQM Sim Database Ifa rotations do; the optional plunge is left out",
+  "guide": "Ifa",
+  "url": "https://keqingmains.com/q/ifa-quickguide/"
+ },
+ {
+  "file": "ifa-iansan-furina-ineffa",
+  "team": "Ifa — Iansan — Furina — Ineffa",
+  "rotation": "Ineffa E (Q) > Furina ED Q > Iansan E (N1) Q > Ifa combo",
+  "combos": {
+   "ifa": [
+    "if .ifa.burst.ready { ifa burst; }",
+    "ifa skill;",
+    "while .ifa.nightsoul.points > 10 { ifa charge; mv(); }"
+   ]
+  },
+  "combo_source": "the guide's standard Q E N13 (P): burst when ready, skill, then held Tonicshots (charged attacks in the simulator) while his Nightsoul lasts, as KQM Sim Database Ifa rotations do; the optional plunge is left out; Iansan's movement reported during his shots",
+  "guide": "Ifa",
+  "url": "https://keqingmains.com/q/ifa-quickguide/"
+ },
+ {
+  "file": "ifa-fischl-xingqiu-beidou",
+  "team": "Ifa — Fischl — Xingqiu — Beidou",
+  "rotation": "Xingqiu EDQ N1 > Beidou EN1Q > Fischl N2 Q > Ifa N1 combo > Beidou E > Fischl E > Ifa N3D N3",
+  "combos": {
+   "ifa": [
+    "if .ifa.burst.ready { ifa burst; }",
+    "ifa skill;",
+    "while .ifa.nightsoul.points > 10 { ifa attack; }"
+   ]
+  },
+  "combo_source": "the guide's Q E N10 (P) for Xingqiu/Yelan/Beidou drivers: tapped Tonicshots (normal attacks in the simulator) so each one triggers their coordinated attacks",
+  "guide": "Ifa",
+  "url": "https://keqingmains.com/q/ifa-quickguide/"
+ },
+ {
+  "file": "ifa-fischl-xingqiu-luminedendro",
+  "team": "Ifa — Fischl — Xingqiu — Dendro Traveler",
+  "rotation": "Xingqiu EDQ N1 > Dendro Traveler EQ N1 > Fischl E N1 > Ifa combo > Dendro Traveler E N2 > Fischl Q > Ifa 3[N3CJ]",
+  "combos": {
+   "ifa": [
+    "if .ifa.burst.ready { ifa burst; }",
+    "ifa skill;",
+    "while .ifa.nightsoul.points > 10 { ifa attack; }"
+   ]
+  },
+  "combo_source": "the guide's Q E N10 (P) for Xingqiu/Yelan/Beidou drivers: tapped Tonicshots (normal attacks in the simulator) so each one triggers their coordinated attacks",
+  "guide": "Ifa",
+  "url": "https://keqingmains.com/q/ifa-quickguide/"
+ },
+ {
+  "file": "ifa-fischl-yaemiko-nahida",
+  "team": "Ifa — Fischl — Yae Miko — Nahida",
+  "rotation": "Nahida E Q > Yae 3[E] > Fischl E > Ifa combo > Yae Q 3[N1 E] > Fischl N2 Q > Ifa 3[N3CJ]",
+  "combos": {
+   "ifa": [
+    "if .ifa.burst.ready { ifa burst; }",
+    "ifa skill;",
+    "while .ifa.nightsoul.points > 10 { ifa charge; }"
+   ]
+  },
+  "combo_source": "the guide's standard Q E N13 (P): burst when ready, skill, then held Tonicshots (charged attacks in the simulator) while his Nightsoul lasts, as KQM Sim Database Ifa rotations do; the optional plunge is left out",
+  "guide": "Ifa",
+  "url": "https://keqingmains.com/q/ifa-quickguide/"
+ },
+ {
+  "file": "ifa-furina-bennett-faruzan",
+  "team": "Ifa — Furina — Bennett — Faruzan",
+  "variant": "C6 Faruzan",
+  "rotation": "Furina ED Q > Bennett Q E > Faruzan E Q > Ifa combo > Bennett E",
+  "combos": {
+   "ifa": [
+    "ifa skill;",
+    "while .ifa.nightsoul.points > 10 { ifa charge; }",
+    "if .ifa.burst.ready { ifa burst; }"
+   ]
+  },
+  "combo_source": "the guide's E N13 Q (P), best for Anemo DPS: burst last, after held Tonicshots",
+  "guide": "Ifa",
+  "url": "https://keqingmains.com/q/ifa-quickguide/"
+ },
+ {
+  "file": "ifa-mavuika-bennett-faruzan",
+  "team": "Ifa — Mavuika — Bennett / Iansan — C6 Faruzan",
+  "variant": "Bennett",
+  "rotation": "Faruzan E Q > Bennett Q E > Mavuika Q E > Ifa combo > Bennett E",
+  "combos": {
+   "ifa": [
+    "ifa skill;",
+    "while .ifa.nightsoul.points > 10 { ifa charge; }",
+    "if .ifa.burst.ready { ifa burst; }"
+   ]
+  },
+  "combo_source": "the guide's E N13 Q (P), best for Anemo DPS: burst last, after held Tonicshots",
+  "guide": "Ifa",
+  "url": "https://keqingmains.com/q/ifa-quickguide/"
+ },
+ {
+  "file": "ifa-mavuika-iansan-faruzan",
+  "team": "Ifa — Mavuika — Bennett / Iansan — C6 Faruzan",
+  "variant": "Iansan",
+  "rotation": "Faruzan E Q > Mavuika E > Iansan E C Q > Mavuika Q > Ifa combo",
+  "combos": {
+   "ifa": [
+    "ifa skill;",
+    "while .ifa.nightsoul.points > 10 { ifa charge; mv(); }",
+    "if .ifa.burst.ready { ifa burst; }"
+   ]
+  },
+  "combo_source": "the guide's E N13 Q (P), best for Anemo DPS: burst last, after held Tonicshots; Iansan's movement reported during his shots",
+  "guide": "Ifa",
+  "url": "https://keqingmains.com/q/ifa-quickguide/"
+ }
+]

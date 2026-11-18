@@ -1,0 +1,63 @@
+# Team: Ineffa, Furina, Iansan, Ifa
+# Written for this project with tools/guide_rotation.py. Not from the KQM Sim Database.
+# Source: KQM's Ifa quick guide, https://keqingmains.com/q/ifa-quickguide/
+#   Team "Ifa — Iansan — Furina — Ineffa", sample rotation:
+#     Ineffa E (Q) > Furina ED Q > Iansan E (N1) Q > Ifa combo
+#   Combo: the guide's standard Q E N13 (P): burst when ready, skill, then held Tonicshots (charged attacks in the simulator) while his Nightsoul lasts, as KQM Sim Database Ifa rotations do; the optional plunge is left out; Iansan's movement reported during his shots.
+#   Supports burst when ready (the guide assumes enough ER to burst every rotation).
+#   Example builds (KQM-standard substats) from KQM Sim Database rotations: ineffa JFwBcLbqDR9j, furina WHFJgzbdggJf, iansan own:chasca-bennett-furina-iansan, ifa C9jwQ8jjfk67.
+#   The optimizer replaces them with each player's own.
+
+options swap_delay=12 iteration=1000;
+
+ineffa char lvl=90/90 cons=6 talent=10,10,10;
+ineffa add weapon="fracturedhalo" refine=5 lvl=90/90;
+ineffa add set="aubade" count=4;
+ineffa add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 cr=0.311;
+ineffa add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.1984 er=0.1102 em=39.64 cr=0.331 cd=0.7944;
+
+furina char lvl=90/90 cons=6 talent=10,10,10;
+furina add weapon="freedomsworn" refine=5 lvl=90/90;
+furina add set="tom" count=4;
+furina add stats hp=4780 atk=311 er=0.518 hp%=0.466 cd=0.622;
+furina add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*10 em=19.82*2 cr=0.0331*11 cd=0.0662*5;
+
+iansan char lvl=90/90 cons=6 talent=10,10,10;
+iansan add weapon="favoniuslance" refine=5 lvl=90/90;
+iansan add set="scrolloftheheroofcindercity" count=4;
+iansan add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 atk%=0.466;
+iansan add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*6 er=0.0551*8 em=19.82*2 cr=0.0331*2 cd=0.0662*2;
+
+ifa char lvl=90/90 cons=6 talent=9,9,9;
+ifa add weapon="evenstar" refine=1 lvl=90/90;
+ifa add set="vv" count=4;
+ifa add stats hp=4780 atk=311 em=187*3;
+ifa add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.0992 er=0.1102 em=118.92 cr=0.3972 cd=0.5296;
+
+target lvl=100 resist=0.1 radius=2 pos=0,2.4 hp=999999999;
+energy every interval=480,720 amount=1;
+
+# Iansan's burst buff needs the active character's movement reported (see the
+# Varesa/Iansan rotation): mv() reports move_speed metres per second of field time.
+let move_speed = 8;
+let last_f = 0;
+fn mv() {
+  movement((f() - last_f) / 60 * move_speed);
+  last_f = f();
+}
+
+active ineffa;
+for let i=0; i<6; i=i+1 {
+  ineffa skill;
+  if .ineffa.burst.ready { ineffa burst; }
+  furina skill;
+  furina dash;
+  if .furina.burst.ready { furina burst; }
+  iansan skill;
+  iansan attack:1;
+  if .iansan.burst.ready { iansan burst; }
+  last_f = f();
+  if .ifa.burst.ready { ifa burst; }
+  ifa skill;
+  while .ifa.nightsoul.points > 10 { ifa charge; mv(); }
+}
