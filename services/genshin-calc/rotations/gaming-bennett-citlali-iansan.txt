@@ -1,0 +1,74 @@
+# Team: Gaming, Bennett, Citlali, Iansan
+# Written for this project on 2026-11-18. Not from the KQM Sim Database.
+# Source: KQM's Iansan quick guide, https://keqingmains.com/q/iansan-quickguide/
+#   Team "Iansan — Gaming — Bennett — Citlali", sample rotation (Citlali):
+#     Bennett E > Iansan ECQ > Bennett Q E > Citlali EQ > Gaming Q 5-6[EP]
+#   Gaming's plunges are the database's melt combo (rotation FcBkKmzwDLFp, Gaming Citlali
+#   Bennett Diona): burst, then skill + high plunge catching Man Chai mid-descent, 7 plunges,
+#   with Citlali's N2 refreshing Cryo before the last one. That is one more than the guide's
+#   5-6; the author found all 7 melt. Plunges cover a lot of height, so Iansan's movement is
+#   reported after each one.
+#   Notation (the guide's): E skill, C charged attack, Q burst, P plunge.
+#
+# The builds only make the file runnable on its own (KQM-standard substats, from the database
+# rotation and our Iansan files). The optimizer replaces them with the player's own.
+
+options swap_delay=12 iteration=1000;
+
+gaming char lvl=90/90 cons=6 talent=9,9,9;
+gaming add weapon="serpent" refine=1 lvl=90/90 +params=[stacks=5];
+gaming add set="cw" count=4;
+gaming add stats hp=4780 atk=311 em=187 pyro%=0.466 cd=0.622;
+gaming add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.0992 er=0.2755 em=59.46 cr=0.331 cd=0.662;
+
+bennett char lvl=90/90 cons=6 talent=9,9,9;
+bennett add weapon="alleyflash" refine=1 lvl=90/90;
+bennett add set="no" count=4;
+bennett add stats hp=4780 atk=311 er=0.518 pyro%=0.466 cr=0.311;
+bennett add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.1984 er=0.1102 em=39.64 cr=0.331 cd=0.7944;
+
+citlali char lvl=90/90 cons=0 talent=9,9,9;
+citlali add weapon="ttds" refine=5 lvl=90/90;
+citlali add set="scroll" count=4;
+citlali add stats hp=4780 atk=311 er=0.518 em=187 em=187;
+citlali add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.0992 er=0.2755 em=39.64 cr=0.3972 cd=0.5958;
+
+iansan char lvl=90/90 cons=6 talent=10,10,10;
+iansan add weapon="favoniuslance" refine=5 lvl=90/90;
+iansan add set="scrolloftheheroofcindercity" count=4;
+iansan add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 atk%=0.466;
+iansan add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*6 er=0.0551*8 em=19.82*2 cr=0.0331*2 cd=0.0662*2;
+
+target lvl=100 resist=0.1 radius=2 pos=0,2.4 hp=999999999;
+energy every interval=480,720 amount=1;
+
+# Iansan's burst buff needs the active character to move (see the Varesa/Iansan file).
+let move_speed = 8;
+let last_f = 0;
+fn mv() {
+  movement((f() - last_f) / 60 * move_speed);
+  last_f = f();
+}
+
+fn plunge() {
+  gaming skill, high_plunge;
+  mv();
+}
+
+active bennett;
+for let i=0; i<6; i=i+1 {
+  bennett skill;
+  iansan skill, attack, burst;
+  last_f = f();
+  bennett burst, skill;
+  citlali skill, burst;
+  gaming burst;
+  for let j=0; j<5; j=j+1 {
+    sleep(45);   # catch Man Chai during his descent
+    plunge();
+  }
+  sleep(30);
+  plunge();
+  citlali attack:2;   # refresh Cryo for the last plunge
+  plunge();
+}
