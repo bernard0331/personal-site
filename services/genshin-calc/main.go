@@ -30,6 +30,7 @@ import (
 
 	"github.com/bernard0331/personal-site/services/genshin-calc/catalog"
 	"github.com/bernard0331/personal-site/services/genshin-calc/good"
+	"github.com/bernard0331/personal-site/services/genshin-calc/optimizer"
 	"github.com/bernard0331/personal-site/services/genshin-calc/rotation"
 	"github.com/bernard0331/personal-site/services/genshin-calc/weapons"
 )
@@ -142,7 +143,7 @@ func config(rotationPath, accountPath string, opt weaponAssumptions) error {
 	if err != nil {
 		return err
 	}
-	cfg, _, err := buildConfig(rot, acc, cat, rule)
+	cfg, _, err := optimizer.BuildConfig(rot, acc, cat, rule)
 	if err != nil {
 		return err
 	}
@@ -151,7 +152,7 @@ func config(rotationPath, accountPath string, opt weaponAssumptions) error {
 }
 
 // rule adds the assumed weapons to the account and reads the ranking.
-func (opt weaponAssumptions) rule(acc *good.Account, cat *catalog.Catalog) (*weaponRule, error) {
+func (opt weaponAssumptions) rule(acc *good.Account, cat *catalog.Catalog) (*optimizer.Rule, error) {
 	if opt.fourStars {
 		acc.AssumeFourStars(cat)
 	}
@@ -165,90 +166,9 @@ func (opt weaponAssumptions) rule(acc *good.Account, cat *catalog.Catalog) (*wea
 			return nil, err
 		}
 	}
-	rule := newWeaponRule(acc, ranking)
-	rule.energy = opt.energyRate
+	rule := optimizer.NewRule(acc, ranking)
+	rule.Energy = opt.energyRate
 	return rule, nil
-}
-
-// errMissingCharacter means the account cannot field the team.
-type errMissingCharacter string
-
-func (e errMissingCharacter) Error() string { return "the account does not have " + string(e) }
-
-// weaponRule decides which weapon copy each team member wields.
-type weaponRule struct {
-	inv     *weapons.Inventory
-	ranking weapons.Ranking   // from the weapon trials; nil ranks nothing
-	force   map[string]string // character -> weapon to wield regardless (the trials use it)
-	energy  float64           // flat energy drop rate, as a multiple of KQM standard
-}
-
-func newWeaponRule(acc *good.Account, ranking weapons.Ranking) *weaponRule {
-	return &weaponRule{inv: weapons.NewInventory(acc), ranking: ranking}
-}
-
-// errLockedWeapon means the rotation needs a weapon the account lacks.
-type errLockedWeapon struct{ character, weapon string }
-
-func (e errLockedWeapon) Error() string {
-	return fmt.Sprintf("the rotation needs %s on %s", e.weapon, e.character)
-}
-
-// buildConfig writes the simulator config for the player's version of a team
-// and lists each member's weapon as "key: weapon Rn".
-//
-// Members the weapon trials ranked get their best-ranked weapons that are
-// still free (no copy is wielded twice, except unlimited ones). Others stand
-// in: the rotation's own weapon if owned, otherwise the owned weapon of the
-// right type with the highest rarity.
-func buildConfig(rot *rotation.Rotation, acc *good.Account, cat *catalog.Catalog, rule *weaponRule) (string, []string, error) {
-	owned := map[string]good.Character{}
-	for _, c := range acc.Characters {
-		owned[c.Key] = c
-	}
-	wants := make([][]weapons.Choice, len(rot.Members))
-	fallback := make([][]string, len(rot.Members))
-	for i, m := range rot.Members {
-		if _, ok := owned[m.Key]; !ok {
-			return "", nil, errMissingCharacter(m.Key)
-		}
-		ch, _ := cat.Character(m.Key)
-		fallback[i] = weapons.Fallback(ch, cat, rule.inv, m.Weapon)
-		if len(fallback[i]) == 0 {
-			return "", nil, fmt.Errorf("the account has no %s for %s", ch.WeaponType, m.Key)
-		}
-		if m.WeaponLocked {
-			// The script waits on this weapon's own effect; any other weapon
-			// would make it loop forever.
-			if !rule.inv.Owns(m.Weapon) {
-				return "", nil, errLockedWeapon{m.Key, m.Weapon}
-			}
-			wants[i], fallback[i] = []weapons.Choice{{Weapon: m.Weapon, Score: 1}}, []string{m.Weapon}
-			continue
-		}
-		if w, ok := rule.force[m.Key]; ok {
-			wants[i] = []weapons.Choice{{Weapon: w, Score: 1}}
-			continue
-		}
-		for _, c := range rule.ranking[m.Key] {
-			if rule.inv.Owns(c.Weapon) {
-				wants[i] = append(wants[i], c)
-			}
-		}
-	}
-	picks, err := weapons.Allocate(wants, fallback, rule.inv)
-	if err != nil {
-		return "", nil, err
-	}
-	loadout := map[string]rotation.Slot{}
-	var list []string
-	for i, m := range rot.Members {
-		c := owned[m.Key]
-		loadout[m.Key] = rotation.Slot{Constellation: c.Constellation, Level: c.Level, Weapon: picks[i].Weapon, Refinement: picks[i].Refinement}
-		list = append(list, fmt.Sprintf("%s: %s R%d", m.Key, picks[i].Weapon, picks[i].Refinement))
-	}
-	cfg, err := rot.Config(loadout)
-	return rotation.ScaleEnergy(cfg, rule.energy), list, err
 }
 
 // checkRotations parses every entry of a cached rotation database (one JSON

@@ -11,15 +11,11 @@ import (
 
 	"github.com/bernard0331/personal-site/services/genshin-calc/catalog"
 	"github.com/bernard0331/personal-site/services/genshin-calc/coarse"
+	"github.com/bernard0331/personal-site/services/genshin-calc/optimizer"
 	"github.com/bernard0331/personal-site/services/genshin-calc/solver"
-	"github.com/bernard0331/personal-site/services/genshin-calc/weapons"
 )
 
 const reportUsage = "usage: genshin-calc report [options] RESULTS ACCOUNT"
-
-// The seven elements a team can be counted under. A team whose largest damage
-// share is physical belongs to none of them.
-var elements = []string{"pyro", "hydro", "electro", "cryo", "anemo", "geo", "dendro"}
 
 // reportCmd chooses the player's best teams from a results file (the full
 // pass's, or the quick pass's) and prints both breakdowns, each ranked both
@@ -71,7 +67,7 @@ func reportCmd(args []string) error {
 	}
 	// One team per element is fast on every team. Any N teams is not: it
 	// runs on the candidates the full pass would pick.
-	alt := alternatives{rule: rule, within: *within, max: *variants}
+	alt := optimizer.Alternatives{Rule: rule, Within: *within, Max: *variants}
 	chosenTeams := map[string]bool{}
 	show := func(ts []solver.Team, byID map[string]coarse.Result) {
 		for _, t := range ts {
@@ -106,12 +102,12 @@ func reportCmd(args []string) error {
 	if *python != "" {
 		// HiGHS proves its answers best, over every team and weapon option.
 		h := &solver.HiGHS{Python: *python, TimeLimit: *maxTime}
-		all, byID := problem(usable, alt)
+		all, byID := optimizer.Problem(usable, alt)
 		fmt.Printf("# Best teams\n\nFrom %s: %d teams, %d team options with weapon variants, solved with HiGHS.\n",
 			fs.Arg(0), coarse.Teams(asJobs(usable)), len(all.Teams))
 		for _, o := range []solver.Objective{solver.Min, solver.Sum} {
 			fmt.Printf("\n## One team per element, %s\n", o)
-			r, err := all.ByElementHiGHS(h, elements, o)
+			r, err := all.ByElementHiGHS(h, optimizer.Elements, o)
 			if err != nil {
 				return err
 			}
@@ -137,8 +133,8 @@ func reportCmd(args []string) error {
 	// Without HiGHS: this package's branch and bound, on candidates (it is
 	// too slow on every team): the full pass's picks for any N teams, and a
 	// wider set for one per element.
-	all, byID := problem(coarse.Select(usable, elementPicks), alt)
-	candidates, _ := problem(coarse.Select(usable, picks), alt)
+	all, byID := optimizer.Problem(coarse.Select(usable, elementPicks), alt)
+	candidates, _ := optimizer.Problem(coarse.Select(usable, picks), alt)
 	fmt.Printf("# Best teams\n\nFrom %s: %d teams; %d and %d team options (weapon variants included) searched.\n",
 		fs.Arg(0), coarse.Teams(asJobs(usable)), len(all.Teams), len(candidates.Teams))
 	deadline := func(p *solver.Problem) {
@@ -149,7 +145,7 @@ func reportCmd(args []string) error {
 	for _, o := range []solver.Objective{solver.Min, solver.Sum} {
 		deadline(all)
 		fmt.Printf("\n## One team per element, %s\n", o)
-		show(all.ByElement(elements, o), byID)
+		show(all.ByElement(optimizer.Elements, o), byID)
 		if took(); all.Exhausted {
 			notProven()
 		}
@@ -184,68 +180,6 @@ func asJobs(rs []coarse.Result) []coarse.Job {
 	return js
 }
 
-// alternatives says how far the solver may re-arm teams.
-type alternatives struct {
-	rule   *weaponRule
-	within float64
-	max    int
-}
-
-// problem turns results into solver teams: each team's best successful
-// rotation, in its simulated weapons and in the weapon variants the trials
-// rank close behind (DPS estimated from the trials). The variants share the
-// team's four characters, so the solver takes at most one of them. byID finds
-// a team's result again, with a variant's weapons and estimate filled in.
-func problem(results []coarse.Result, alt alternatives) (*solver.Problem, map[string]coarse.Result) {
-	best := coarse.BestPerTeam(results)
-	inv := alt.rule.inv
-	p := &solver.Problem{Copies: map[string]int{}}
-	byID := map[string]coarse.Result{}
-	for _, r := range best {
-		id := r.Source + "/" + r.ID
-		current := make([]string, len(r.Weapons))
-		fixed := make([]bool, len(r.Weapons))
-		for i, w := range r.Weapons {
-			current[i] = weaponKey(w)
-			// Favonius and Sacrificial weapons may be ones the rotation's
-			// script waits on (see rotation.Member.WeaponLocked): keep them.
-			fixed[i] = strings.HasPrefix(current[i], "favonius") || strings.HasPrefix(current[i], "sacrificial")
-		}
-		vs := []weapons.Variant{{Weapons: current, Factor: 1}}
-		if alt.rule.ranking != nil && alt.max > 1 {
-			vs = weapons.Alternatives(r.Team, current, fixed, alt.rule.ranking, inv, alt.within, alt.max)
-		}
-		for v, variant := range vs {
-			vid, vr := id, r
-			if v > 0 {
-				vid = fmt.Sprintf("%s~%d", id, v)
-				vr.DPS, vr.DPSSD = r.DPS*variant.Factor, r.DPSSD*variant.Factor
-				vr.CharDPS = nil
-				vr.Weapons = nil
-				for i, w := range variant.Weapons {
-					vr.Weapons = append(vr.Weapons, fmt.Sprintf("%s: %s R%d", r.Team[i], w, inv.Best(w)))
-				}
-				vr.Flags = append([]string{fmt.Sprintf("weapons changed after simulating: DPS estimated (%+.1f%%)", 100*(variant.Factor-1))}, r.Flags...)
-			}
-			byID[vid] = vr
-			for _, w := range variant.Weapons {
-				p.Copies[w] = inv.Copies(w)
-			}
-			p.Teams = append(p.Teams, solver.Team{
-				ID: vid, Members: r.Team, Weapons: variant.Weapons, Element: coarse.MainElement(r), DPS: vr.DPS,
-			})
-		}
-	}
-	return p, byID
-}
-
-// weaponKey takes the weapon out of "member: weapon Rn".
-func weaponKey(s string) string {
-	_, rest, _ := strings.Cut(s, ": ")
-	key, _, _ := strings.Cut(rest, " ")
-	return key
-}
-
 func printTeams(w io.Writer, teams []solver.Team, byID map[string]coarse.Result, stats bool) {
 	var dps []float64
 	for _, t := range teams {
@@ -267,7 +201,7 @@ func printTeams(w io.Writer, teams []solver.Team, byID map[string]coarse.Result,
 	fmt.Fprintln(w, "|---|---|---|---|---|---|")
 	for i, t := range teams {
 		if t.ID == "" {
-			fmt.Fprintf(w, "| %s | – | no team fits | | | |\n", elements[i])
+			fmt.Fprintf(w, "| %s | – | no team fits | | | |\n", optimizer.Elements[i])
 			continue
 		}
 		r := byID[t.ID]

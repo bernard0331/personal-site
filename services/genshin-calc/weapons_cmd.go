@@ -11,6 +11,7 @@ import (
 
 	"github.com/bernard0331/personal-site/services/genshin-calc/catalog"
 	"github.com/bernard0331/personal-site/services/genshin-calc/coarse"
+	"github.com/bernard0331/personal-site/services/genshin-calc/optimizer"
 	"github.com/bernard0331/personal-site/services/genshin-calc/rotation"
 	"github.com/bernard0331/personal-site/services/genshin-calc/weapons"
 )
@@ -58,7 +59,7 @@ func weaponsCmd(args []string) error {
 	if err != nil {
 		return err
 	}
-	sources, err := readRotations(fs.Arg(0), *own)
+	sources, err := optimizer.ReadRotations(fs.Arg(0), *own)
 	if err != nil {
 		return err
 	}
@@ -66,18 +67,18 @@ func weaponsCmd(args []string) error {
 	// Parse every single-target rotation the account can field; count weapon
 	// usage and team popularity over all of them.
 	type parsed struct {
-		s   source
+		s   optimizer.Source
 		rot *rotation.Rotation
 	}
 	var fieldable []parsed
 	usage := weapons.Usage{}
 	popularity := map[string]int{}
 	for _, s := range sources {
-		if s.targets != 1 {
+		if s.Targets != 1 {
 			continue
 		}
-		rot, err := rotation.Parse(s.config, cat)
-		if err != nil || (s.from == "kqm-db" && !rot.Standard()) {
+		rot, err := rotation.Parse(s.Config, cat)
+		if err != nil || (s.From == "kqm-db" && !rot.Standard()) {
 			continue // unreadable, or built on personal artifact stats
 		}
 		for _, m := range rot.Members {
@@ -86,7 +87,7 @@ func weaponsCmd(args []string) error {
 			}
 		}
 		popularity[coarse.TeamKey(rot.Team())]++
-		if _, _, err := buildConfig(rot, acc, cat, rule); err == nil {
+		if _, _, err := optimizer.BuildConfig(rot, acc, cat, rule); err == nil {
 			fieldable = append(fieldable, parsed{s, rot})
 		}
 	}
@@ -94,14 +95,14 @@ func weaponsCmd(args []string) error {
 	// common teams; the id breaks ties so the choice is stable.
 	sort.SliceStable(fieldable, func(i, j int) bool {
 		a, b := fieldable[i], fieldable[j]
-		if (a.s.from == "own") != (b.s.from == "own") {
-			return a.s.from == "own"
+		if (a.s.From == "own") != (b.s.From == "own") {
+			return a.s.From == "own"
 		}
 		pa, pb := popularity[coarse.TeamKey(a.rot.Team())], popularity[coarse.TeamKey(b.rot.Team())]
 		if pa != pb {
 			return pa > pb
 		}
-		return a.s.id < b.s.id
+		return a.s.ID < b.s.ID
 	})
 
 	wanted := map[string]bool{}
@@ -149,25 +150,25 @@ func weaponsCmd(args []string) error {
 				}
 			}
 		}
-		cands := weapons.Candidates(ch, cat, rule.inv, usage, *frequent, extra...)
+		cands := weapons.Candidates(ch, cat, rule.Inv, usage, *frequent, extra...)
 		if len(cands) == 1 {
 			ranking[c] = []weapons.Choice{{Weapon: cands[0], Score: 1}}
 			continue
 		}
 		for _, p := range trialTeams[c] {
 			for _, w := range cands {
-				rule.force = map[string]string{c: w}
-				cfg, list, err := buildConfig(p.rot, acc, cat, rule)
+				rule.Force = map[string]string{c: w}
+				cfg, list, err := optimizer.BuildConfig(p.rot, acc, cat, rule)
 				if err != nil {
 					continue // e.g. the weapon's only copy is needed by a teammate
 				}
 				jobs = append(jobs, coarse.Job{
-					ID: c + "|" + w + "|" + p.s.from + "/" + p.s.id, Source: "trial",
+					ID: c + "|" + w + "|" + p.s.From + "/" + p.s.ID, Source: "trial",
 					Team: p.rot.Team(), Weapons: list, Config: coarse.SetIterations(cfg, *iterations),
 				})
 			}
 		}
-		rule.force = nil
+		rule.Force = nil
 	}
 	fmt.Fprintf(os.Stderr, "%d characters to rank, %d trial simulations\n", len(chars), len(jobs))
 	if *dryRun {

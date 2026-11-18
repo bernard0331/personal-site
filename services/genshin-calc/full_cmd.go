@@ -10,6 +10,7 @@ import (
 
 	"github.com/bernard0331/personal-site/services/genshin-calc/catalog"
 	"github.com/bernard0331/personal-site/services/genshin-calc/coarse"
+	"github.com/bernard0331/personal-site/services/genshin-calc/optimizer"
 )
 
 const fullUsage = "usage: genshin-calc full [options] DATABASE_CACHE ACCOUNT"
@@ -121,11 +122,11 @@ func fullCmd(args []string) error {
 	if err != nil {
 		return err
 	}
-	sources, err := readRotations(fs.Arg(0), *own)
+	sources, err := optimizer.ReadRotations(fs.Arg(0), *own)
 	if err != nil {
 		return err
 	}
-	fieldable, _ := makeJobs(sources, acc, cat, rule, *iterations)
+	fieldable, _ := optimizer.MakeJobs(sources, acc, cat, rule, *iterations)
 	byID := map[string]coarse.Job{}
 	for _, j := range fieldable {
 		byID[j.Source+"/"+j.ID] = j

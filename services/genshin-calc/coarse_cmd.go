@@ -11,15 +11,13 @@ import (
 	"os/signal"
 	"path/filepath"
 	"runtime"
-	"sort"
 	"strings"
 	"syscall"
 	"time"
 
 	"github.com/bernard0331/personal-site/services/genshin-calc/catalog"
 	"github.com/bernard0331/personal-site/services/genshin-calc/coarse"
-	"github.com/bernard0331/personal-site/services/genshin-calc/good"
-	"github.com/bernard0331/personal-site/services/genshin-calc/rotation"
+	"github.com/bernard0331/personal-site/services/genshin-calc/optimizer"
 )
 
 const coarseUsage = "usage: genshin-calc coarse [options] DATABASE_CACHE ACCOUNT"
@@ -60,15 +58,15 @@ func coarseCmd(args []string) error {
 		return err
 	}
 
-	sources, err := readRotations(fs.Arg(0), *own)
+	sources, err := optimizer.ReadRotations(fs.Arg(0), *own)
 	if err != nil {
 		return err
 	}
-	jobs, skipped := makeJobs(sources, acc, cat, rule, *iterations)
+	jobs, skipped := optimizer.MakeJobs(sources, acc, cat, rule, *iterations)
 	fmt.Fprintf(os.Stderr, "%d rotations read; %d can be fielded (%d distinct teams)\n",
 		len(sources), len(jobs), coarse.Teams(jobs))
 	for _, s := range skipped {
-		fmt.Fprintf(os.Stderr, "  skipped %4d: %s\n", s.n, s.reason)
+		fmt.Fprintf(os.Stderr, "  skipped %4d: %s\n", s.N, s.Reason)
 	}
 	if *limit > 0 && *limit < len(jobs) {
 		jobs = jobs[:*limit]
@@ -167,123 +165,4 @@ func runJobs(jobs []coarse.Job, sim coarse.Simulator, workers int, out string, e
 		return nil
 	}
 	return err
-}
-
-// source is one rotation to consider, before checking the account can field it.
-type source struct {
-	id, from string
-	config   string
-	targets  int
-}
-
-// readRotations reads the cached database (one JSON object per line) and the
-// own rotation files (*.txt in dir).
-func readRotations(dbPath, dir string) ([]source, error) {
-	var out []source
-	f, err := os.Open(dbPath)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-	sc := bufio.NewScanner(f)
-	sc.Buffer(make([]byte, 1<<20), 16<<20)
-	for sc.Scan() {
-		var e struct {
-			ID      string `json:"id"`
-			Config  string `json:"config"`
-			Targets int    `json:"targets"`
-		}
-		if err := json.Unmarshal(sc.Bytes(), &e); err != nil {
-			return nil, fmt.Errorf("%s: %w", dbPath, err)
-		}
-		out = append(out, source{id: e.ID, from: "kqm-db", config: e.Config, targets: e.Targets})
-	}
-	if err := sc.Err(); err != nil {
-		return nil, err
-	}
-	if dir == "" {
-		return out, nil
-	}
-	files, err := filepath.Glob(filepath.Join(dir, "*.txt"))
-	if err != nil {
-		return nil, err
-	}
-	for _, p := range files {
-		text, err := os.ReadFile(p)
-		if err != nil {
-			return nil, err
-		}
-		id := strings.TrimSuffix(filepath.Base(p), ".txt")
-		out = append(out, source{id: id, from: "own", config: string(text), targets: 1})
-	}
-	return out, nil
-}
-
-type skipReason struct {
-	reason string
-	n      int
-}
-
-// makeJobs keeps the single-target rotations the account can field and writes
-// each one's config. It also says how many were left out, and why.
-func makeJobs(sources []source, acc *good.Account, cat *catalog.Catalog, rule *weaponRule, iterations int) ([]coarse.Job, []skipReason) {
-	var jobs []coarse.Job
-	reasons := map[string]int{}
-	playerCons := map[string]int{}
-	for _, c := range acc.Characters {
-		playerCons[c.Key] = c.Constellation
-	}
-	for _, s := range sources {
-		if s.targets != 1 {
-			reasons["not single-target"]++
-			continue
-		}
-		rot, err := rotation.Parse(s.config, cat)
-		if err != nil {
-			reasons["cannot be read: "+err.Error()]++
-			continue
-		}
-		// Database sims built on someone's personal artifacts rate those
-		// artifacts, not the team. (Our own rotation files are standard.)
-		if s.from == "kqm-db" && !rot.Standard() {
-			reasons["built on personal artifact stats"]++
-			continue
-		}
-		cfg, weapons, err := buildConfig(rot, acc, cat, rule)
-		var missing errMissingCharacter
-		var locked errLockedWeapon
-		switch {
-		case errors.As(err, &missing):
-			reasons["account lacks a member"]++
-			continue
-		case errors.As(err, &locked):
-			reasons["account lacks a weapon the script depends on"]++
-			continue
-		case err != nil:
-			reasons[err.Error()]++
-			continue
-		}
-		job := coarse.Job{
-			ID: s.id, Source: s.from, Team: rot.Team(), Weapons: weapons,
-			Config: coarse.SetIterations(cfg, iterations),
-		}
-		for _, m := range rot.Members {
-			job.RotCons = append(job.RotCons, m.Cons)
-			job.PlayerCons = append(job.PlayerCons, playerCons[m.Key])
-		}
-		jobs = append(jobs, job)
-	}
-	var list []skipReason
-	for r, n := range reasons {
-		list = append(list, skipReason{r, n})
-	}
-	sort.Slice(list, func(i, j int) bool { return list[i].n > list[j].n })
-	if len(list) > 8 {
-		rest := 0
-		for _, s := range list[8:] {
-			rest += s.n
-		}
-		list = append(list[:8], skipReason{"other reasons", rest})
-	}
-	return jobs, list
 }
