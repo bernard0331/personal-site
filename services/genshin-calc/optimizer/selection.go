@@ -18,7 +18,21 @@ type Alternatives struct {
 	Rule   *Rule
 	Within float64
 	Max    int
+	// Confirmed holds weapon variants that have since been simulated (keyed
+	// by ConfirmKey): the solver gets their real result instead of the
+	// estimate. The confirmation pass fills it.
+	Confirmed map[string]coarse.Result
 }
+
+// ConfirmKey names one rotation with one set of weapons (catalog keys, in
+// the rotation's member order).
+func ConfirmKey(rotation string, weapons []string) string {
+	return rotation + "|" + strings.Join(weapons, ",")
+}
+
+// Estimated reports whether a team id from Problem is a weapon variant whose
+// DPS is estimated rather than simulated.
+func Estimated(id string) bool { return strings.Contains(id, "~") }
 
 // Problem turns results into solver teams: each team's best successful
 // rotation, in its simulated weapons and in the weapon variants the trials
@@ -46,7 +60,10 @@ func Problem(results []coarse.Result, alt Alternatives) (*solver.Problem, map[st
 		}
 		for v, variant := range vs {
 			vid, vr := id, r
-			if v > 0 {
+			if c, ok := alt.Confirmed[ConfirmKey(id, variant.Weapons)]; ok && v > 0 {
+				// Simulated since: a real result, not an estimate.
+				vid, vr = fmt.Sprintf("%s=%d", id, v), c
+			} else if v > 0 {
 				vid = fmt.Sprintf("%s~%d", id, v)
 				vr.DPS, vr.DPSSD = r.DPS*variant.Factor, r.DPSSD*variant.Factor
 				// The split is the simulated one scaled by the estimated change
@@ -66,7 +83,7 @@ func Problem(results []coarse.Result, alt Alternatives) (*solver.Problem, map[st
 				p.Copies[w] = inv.Copies(w)
 			}
 			p.Teams = append(p.Teams, solver.Team{
-				ID: vid, Members: r.Team, Weapons: variant.Weapons, Element: coarse.MainElement(r), DPS: vr.DPS,
+				ID: vid, Members: r.Team, Weapons: variant.Weapons, Element: coarse.MainElement(vr), DPS: vr.DPS,
 			})
 		}
 	}

@@ -18,6 +18,7 @@ import (
 	"github.com/bernard0331/personal-site/services/genshin-calc/coarse"
 	"github.com/bernard0331/personal-site/services/genshin-calc/good"
 	"github.com/bernard0331/personal-site/services/genshin-calc/optimizer"
+	"github.com/bernard0331/personal-site/services/genshin-calc/rotation"
 	"github.com/bernard0331/personal-site/services/genshin-calc/solver"
 	"github.com/bernard0331/personal-site/services/genshin-calc/weapons"
 )
@@ -29,8 +30,9 @@ import (
 type engine struct {
 	runs       *runs
 	cat        *catalog.Catalog
-	sources    []optimizer.Source // every rotation: the database cache and our own files
-	ranking    weapons.Ranking    // weapon trials' ranking; nil means stand-in weapons
+	sources    []optimizer.Source          // every rotation: the database cache and our own files
+	byRotation map[string]optimizer.Source // "source/id" -> rotation
+	ranking    weapons.Ranking             // weapon trials' ranking; nil means stand-in weapons
 	sim        *coarse.Binary
 	workers    int
 	iterations int
@@ -59,7 +61,11 @@ func newEngine(cat *catalog.Catalog, dataDir, dbPath, ownDir, simPath, rankingPa
 	// One core per simulation, as many at once as there are cores; the same
 	// time and memory limits as the command-line passes.
 	sim.Threads, sim.Timeout, sim.MaxMemoryMB = 1, 2*time.Minute, 400
-	e := &engine{runs: newRuns(cat, dataDir, queueSize), cat: cat, sources: sources, sim: sim, workers: cpus, iterations: iterations}
+	e := &engine{runs: newRuns(cat, dataDir, queueSize), cat: cat, sources: sources, sim: sim, workers: cpus, iterations: iterations,
+		byRotation: map[string]optimizer.Source{}}
+	for _, s := range sources {
+		e.byRotation[s.From+"/"+s.ID] = s
+	}
 	if r, err := weapons.ReadRanking(rankingPath); err == nil {
 		e.ranking = r
 	} else {
@@ -223,7 +229,7 @@ func (e *engine) execute(id string) error {
 
 	st.State = "solving"
 	e.runs.setStatus(id, &st)
-	result, err := e.solve(results, rule, snap.Pins)
+	result, err := e.solveConfirmed(results, acc, rule, snap.Pins)
 	if err != nil {
 		return err
 	}
@@ -241,14 +247,16 @@ type Breakdown struct {
 
 // TeamView is one chosen team.
 type TeamView struct {
-	Element   string       `json:"element"`
-	DPS       float64      `json:"dps"`
-	SD        float64      `json:"sd"`
-	Members   []MemberView `json:"members"`
-	Rotation  string       `json:"rotation"` // rotation id
-	Source    string       `json:"source"`   // "kqm-db" or "own"
-	Flags     []string     `json:"flags,omitempty"`
-	Estimated bool         `json:"estimated,omitempty"` // weapons changed after simulating
+	Element     string       `json:"element"`
+	DPS         float64      `json:"dps"`
+	SD          float64      `json:"sd"`
+	Members     []MemberView `json:"members"`
+	Rotation    string       `json:"rotation"` // rotation id
+	Source      string       `json:"source"`   // "kqm-db" or "own"
+	Flags       []string     `json:"flags,omitempty"`
+	Estimated   bool         `json:"estimated,omitempty"` // weapons changed after simulating
+	estimatedID string       // the solver's id for it, while estimated
+	confirmKey  string       // its optimizer.ConfirmKey, while estimated
 }
 
 // MemberView is one team member.
@@ -265,8 +273,124 @@ type Result struct {
 	Teams      int         `json:"teams"` // distinct teams the account can field
 }
 
-func (e *engine) solve(results []coarse.Result, rule *optimizer.Rule, pins []string) (*Result, error) {
-	p, byID := optimizer.Problem(results, optimizer.Alternatives{Rule: rule, Within: 0.10, Max: max(1, e.variants)})
+// confirmRounds bounds the confirmation pass. Each round solves all four
+// breakdowns (about a minute) and simulates the chosen teams whose weapons
+// were swapped. Teams still estimated after the last solve are simulated and
+// their real numbers put in place without solving again, so every number
+// shown is simulated; at worst such a team is not re-optimised.
+const confirmRounds = 2
+
+// solveConfirmed chooses the teams, then simulates every chosen team whose
+// weapons the solver swapped (its DPS was estimated from the weapon trials)
+// and solves again with the real results.
+func (e *engine) solveConfirmed(results []coarse.Result, acc *good.Account, rule *optimizer.Rule, pins []string) (*Result, error) {
+	confirmed := map[string]coarse.Result{}
+	confirm := func(pending map[string]coarse.Result) {
+		jobs := map[string]coarse.Job{}
+		for key, v := range pending {
+			if j, ok := e.confirmJob(v, acc, rule); ok {
+				jobs[key] = j
+			}
+		}
+		for key, r := range e.simulate(jobs) {
+			confirmed[key] = r
+		}
+	}
+	for round := 1; ; round++ {
+		res, pending, err := e.solve(results, rule, pins, confirmed)
+		if err != nil || len(pending) == 0 {
+			return res, err
+		}
+		confirm(pending)
+		if round < confirmRounds {
+			log.Printf("confirmation pass, round %d: simulated %d swapped teams; solving again", round, len(pending))
+			continue
+		}
+		// Last round: put the real numbers in place.
+		replaced := 0
+		for bi := range res.Breakdowns {
+			bd := &res.Breakdowns[bi]
+			for ti, t := range bd.Teams {
+				if !t.Estimated {
+					continue
+				}
+				if r, ok := confirmed[t.confirmKey]; ok {
+					bd.Teams[ti] = teamView(r, solver.Team{ID: "confirmed", Element: t.Element})
+					replaced++
+				}
+			}
+			sort.Slice(bd.Teams, func(i, j int) bool { return bd.Teams[i].DPS > bd.Teams[j].DPS })
+		}
+		log.Printf("confirmation pass, round %d: %d swapped teams simulated and put in place", round, replaced)
+		return res, nil
+	}
+}
+
+// confirmJob rebuilds a weapon variant's rotation with exactly its weapons.
+func (e *engine) confirmJob(v coarse.Result, acc *good.Account, rule *optimizer.Rule) (coarse.Job, bool) {
+	src, ok := e.byRotation[v.Source+"/"+v.ID]
+	if !ok {
+		return coarse.Job{}, false
+	}
+	rot, err := rotation.Parse(src.Config, e.cat)
+	if err != nil {
+		return coarse.Job{}, false
+	}
+	force := map[string]string{}
+	for _, w := range v.Weapons {
+		member, rest, _ := strings.Cut(w, ": ")
+		weapon, _, _ := strings.Cut(rest, " R")
+		force[member] = weapon
+	}
+	r := *rule
+	r.Force = force
+	cfg, list, err := optimizer.BuildConfig(rot, acc, e.cat, &r)
+	if err != nil {
+		return coarse.Job{}, false
+	}
+	return coarse.Job{ID: v.ID, Source: v.Source, Team: v.Team, Weapons: list,
+		Config: coarse.SetIterations(cfg, e.iterations), RotCons: v.RotCons, PlayerCons: v.PlayerCons}, true
+}
+
+// simulate runs jobs through the shared cache and returns their results by
+// the same keys.
+func (e *engine) simulate(jobs map[string]coarse.Job) map[string]coarse.Result {
+	out := map[string]coarse.Result{}
+	var todo []coarse.Job
+	owner := map[string][]string{} // cache key -> pending keys
+	e.mu.Lock()
+	for key, j := range jobs {
+		ck := coarse.Key(j.Config, e.sim.Fingerprint())
+		if r, ok := e.cache[ck]; ok && r.Error == "" {
+			r.ID, r.Source, r.Team, r.Weapons, r.RotCons, r.PlayerCons = j.ID, j.Source, j.Team, j.Weapons, j.RotCons, j.PlayerCons
+			out[key] = r
+			continue
+		}
+		if len(owner[ck]) == 0 {
+			todo = append(todo, j)
+		}
+		owner[ck] = append(owner[ck], key)
+	}
+	e.mu.Unlock()
+	var mu sync.Mutex
+	coarse.Run(context.Background(), todo, e.sim, e.workers, nil, func(r coarse.Result) error {
+		e.remember(r)
+		mu.Lock()
+		for _, key := range owner[r.Key] {
+			if r.Error == "" {
+				out[key] = r
+			}
+		}
+		mu.Unlock()
+		return nil
+	}, nil)
+	return out
+}
+
+// solve chooses teams for the four breakdowns. pending lists the chosen
+// teams whose DPS is still an estimate, by optimizer.ConfirmKey.
+func (e *engine) solve(results []coarse.Result, rule *optimizer.Rule, pins []string, confirmed map[string]coarse.Result) (*Result, map[string]coarse.Result, error) {
+	p, byID := optimizer.Problem(results, optimizer.Alternatives{Rule: rule, Within: 0.10, Max: max(1, e.variants), Confirmed: confirmed})
 	p.Require = pins
 	out := &Result{Teams: len(coarse.BestPerTeam(results))}
 	type job struct {
@@ -327,15 +451,37 @@ func (e *engine) solve(results []coarse.Result, rule *optimizer.Rule, pins []str
 	}
 	for _, err := range errs {
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
-	return out, nil
+	pending := map[string]coarse.Result{}
+	for _, bd := range out.Breakdowns {
+		for _, t := range bd.Teams {
+			if t.estimatedID != "" {
+				v := byID[t.estimatedID]
+				var ws []string
+				for _, w := range v.Weapons {
+					ws = append(ws, optimizer.WeaponKey(w))
+				}
+				key := optimizer.ConfirmKey(v.Source+"/"+v.ID, ws)
+				pending[key] = v
+				for ti := range bd.Teams {
+					if bd.Teams[ti].estimatedID == t.estimatedID {
+						bd.Teams[ti].confirmKey = key
+					}
+				}
+			}
+		}
+	}
+	return out, pending, nil
 }
 
 func teamView(r coarse.Result, t solver.Team) TeamView {
 	v := TeamView{Element: t.Element, DPS: r.DPS, SD: r.DPSSD, Rotation: r.ID, Source: r.Source, Flags: r.Flags,
-		Estimated: strings.Contains(t.ID, "~")}
+		Estimated: optimizer.Estimated(t.ID)}
+	if v.Estimated {
+		v.estimatedID = t.ID
+	}
 	for i, k := range r.Team {
 		m := MemberView{Key: k}
 		if i < len(r.PlayerCons) {

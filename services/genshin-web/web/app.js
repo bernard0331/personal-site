@@ -22,7 +22,7 @@ const imgURL = icon => `/img/${icon}.png`;
 let catalog;               // from /api/catalog
 const byKey = { char: {}, weapon: {}, set: {} };
 const STORE = 'team-optimizer-draft';
-const freshOptions = () => ({ energy: 2, pins: [], excluded: [] });
+const freshOptions = () => ({ energy: 1, pins: [], excluded: [] }); // energy 1: KQM standard
 // all4: weapons "Every 4-star" added, so switching it off removes only those.
 let draft = { chars: {}, weapons: {}, unlimited3: true, all4: [], artifacts: [], options: freshOptions() };
 
@@ -335,7 +335,7 @@ async function showRun(id) {
   $('rerun').onclick = () => {
     draft.chars = { ...(snap.characters || {}) }; draft.weapons = JSON.parse(JSON.stringify(snap.weapons || {}));
     draft.unlimited3 = !!snap.unlimited;
-    draft.options = { energy: snap.energy || 2, pins: [...(snap.pins || [])], excluded: [...(snap.excluded || [])] };
+    draft.options = { energy: snap.energy || 1, pins: [...(snap.pins || [])], excluded: [...(snap.excluded || [])] };
     save(); history.pushState(null, '', '/'); clearTimeout(runTimer);
     drawGrid(); drawWFilters(); drawWeapons(); go(0);
   };
