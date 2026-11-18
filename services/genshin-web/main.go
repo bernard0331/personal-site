@@ -42,8 +42,9 @@ func main() {
 	rankingPath := flag.String("ranking", "local/weapons/ranking.json", "weapon trials' ranking (missing: stand-in weapons)")
 	highsPython := flag.String("highs", "local/highs-venv/bin/python", "a Python with highspy (missing: the slower branch and bound)")
 	cpus := flag.Int("cpus", max(1, runtime.NumCPU()-2), "cores the simulations may use")
-	iterations := flag.Int("iterations", 30, "simulator iterations per rotation in a quick run")
+	iterations := flag.Int("iterations", 15, "simulator iterations per rotation in a quick run (15: picks matched 30 within 1-2% on the owner's account)")
 	queueSize := flag.Int("queue", 20, "runs that may wait; more are turned away")
+	variants := flag.Int("variants", 4, "weapon alternatives per team the solver may choose from")
 	flag.Parse()
 
 	cat, err := catalog.Load()
@@ -59,6 +60,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	eng.variants = *variants
 	go eng.loop()
 
 	static, _ := fs.Sub(web, "web")

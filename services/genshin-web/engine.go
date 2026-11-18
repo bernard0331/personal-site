@@ -34,6 +34,7 @@ type engine struct {
 	sim        *coarse.Binary
 	workers    int
 	iterations int
+	variants   int           // weapon alternatives per team for the solver
 	highs      *solver.HiGHS // nil: the slower branch and bound
 
 	// The shared cache: every simulation any run has done, by key (the
@@ -265,7 +266,7 @@ type Result struct {
 }
 
 func (e *engine) solve(results []coarse.Result, rule *optimizer.Rule, pins []string) (*Result, error) {
-	p, byID := optimizer.Problem(results, optimizer.Alternatives{Rule: rule, Within: 0.10, Max: 4})
+	p, byID := optimizer.Problem(results, optimizer.Alternatives{Rule: rule, Within: 0.10, Max: max(1, e.variants)})
 	p.Require = pins
 	out := &Result{Teams: len(coarse.BestPerTeam(results))}
 	type job struct {
