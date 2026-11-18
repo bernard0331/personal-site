@@ -1,0 +1,72 @@
+# Team: Flins, Aino, Lynette, Iansan
+# Written for this project on 2026-11-18. Not from the KQM Sim Database.
+# Source: KQM's Iansan quick guide, https://keqingmains.com/q/iansan-quickguide/
+#   Team "Iansan — Flins — Aino — Sucrose / Lynette", sample rotation (Lynette):
+#     Aino EQ > Iansan ECQ > Lynette E > Flins E N1 E sQ D N3D N4D 2[D] E sQ N4D N5
+#   "Dash twice to refresh Iansan's Nightsoul points, then E sQ immediately." The guide says
+#   Iansan holds 4pc Noblesse in Flins teams (for his Lunar-Charged damage), so her example
+#   build here does. In the simulator Flins's burst during his special state is his special
+#   burst (sQ), as in the database's Flins rotations (e.g. Gjb9dqBQkNhp).
+#   The guide's two special bursts per rotation need C1's energy; each sQ here happens only
+#   when ready, so C0 Flins skips one (with two per rotation at C0 the rotation stalled for
+#   minutes waiting on energy). At C1 nothing changes.
+#   Notation (the guide's): E skill, C charged attack, D dash, Nx x normal attacks,
+#   Q burst, sQ special burst.
+#
+# The builds only make the file runnable on its own (KQM-standard substats from database
+# rotations and our Iansan files). The optimizer replaces them with the player's own.
+
+options swap_delay=12 iteration=1000;
+
+flins char lvl=90/90 cons=1 talent=9,9,9;
+flins add weapon="bloodsoakedruins" refine=1 lvl=90/90;
+flins add set="nightoftheskysunveiling" count=4;
+flins add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622;
+flins add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.1984 er=0.1102 em=39.64 cr=0.3972 cd=0.662;
+
+aino char lvl=90/90 cons=6 talent=9,9,9;
+aino add weapon="aquamarine" refine=1 lvl=90/90;
+aino add set="silkenmoonsserenade" count=4;
+aino add stats hp=4780 atk=311 er=0.518 em=187 em=187;
+aino add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.0992 er=0.551 em=158.56 cr=0.2648 cd=0.1324;
+
+lynette char lvl=90/90 cons=5 talent=9,9,9;
+lynette add weapon="favsword" refine=5 lvl=90/90;
+lynette add set="vv" count=4;
+lynette add stats hp=4780 atk=311 er=0.518 atk%=0.466 cr=0.311;
+lynette add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*15 em=19.82*2 cr=0.0331*10 cd=0.0662*2;
+
+iansan char lvl=90/90 cons=6 talent=10,10,10;
+iansan add weapon="favoniuslance" refine=5 lvl=90/90;
+iansan add set="noblesseoblige" count=4;
+iansan add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 atk%=0.466;
+iansan add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*6 er=0.0551*8 em=19.82*2 cr=0.0331*2 cd=0.0662*2;
+
+target lvl=100 resist=0.1 radius=2 pos=0,2.4 hp=999999999;
+energy every interval=480,720 amount=1;
+
+# Iansan's burst buff needs the active character to move (see the Varesa/Iansan file).
+let move_speed = 8;
+let last_f = 0;
+fn mv() {
+  movement((f() - last_f) / 60 * move_speed);
+  last_f = f();
+}
+
+active aino;
+for let i=0; i<6; i=i+1 {
+  aino skill, burst;
+  iansan skill, attack, burst;
+  last_f = f();
+  lynette skill;
+  flins skill, attack, skill;
+  if .flins.burst.ready { flins burst; }
+  flins dash; mv();
+  flins attack:3, dash; mv();
+  flins attack:4, dash; mv();
+  flins dash, dash; mv();
+  flins skill;
+  if .flins.burst.ready { flins burst; }
+  flins attack:4, dash; mv();
+  flins attack:5; mv();
+}
