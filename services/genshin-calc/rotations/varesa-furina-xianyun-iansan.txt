@@ -1,0 +1,79 @@
+# Team: Varesa, Furina, Xianyun, Iansan
+# Written for this project on 2026-11-18. Not from the KQM Sim Database.
+# Source: KQM's Iansan quick guide, https://keqingmains.com/q/iansan-quickguide/
+#   Team "Iansan — Varesa — Furina — Xianyun", sample rotation:
+#     Furina ED Q > Iansan ECQ > Xianyun N1 EPQ > Varesa combo
+#   Varesa's combo is the database's (rotation NJdLc7LNGw87, Varesa Ororon Furina Xianyun,
+#   7 plunge combos, collision damage): ECP when her skill is ready, a jump plunge while
+#   Xianyun's buff lasts, otherwise CP, and her short burst whenever she can. Iansan's
+#   movement is reported after each plunge. Furina's ED N1 Q is also the database's.
+#   Notation (the guide's): E skill, C charged attack, D dash, N1 one normal attack,
+#   P plunge, Q burst.
+#
+# The builds only make the file runnable on its own (KQM-standard substats, from the database
+# rotation and our Iansan files). The optimizer replaces them with the player's own.
+
+options swap_delay=12 iteration=1000;
+
+varesa char lvl=90/90 cons=0 talent=9,9,9;
+varesa add weapon="thewidsith" refine=3 lvl=90/90;
+varesa add set="longnightsoath" count=4;
+varesa add stats hp=4780 atk=311 atk%=0.466 electro%=0.466 cr=0.311;
+varesa add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*4 er=0.0551*2 em=19.82*2 cr=0.0331*10 cd=0.0662*12;
+
+furina char lvl=90/90 cons=0 talent=9,9,9;
+furina add weapon="favoniussword" refine=3 lvl=90/90;
+furina add set="totm" count=4;
+furina add stats hp=4780 atk=311 er=0.518 hp%=0.466 cr=0.311;
+furina add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*4 atk=16.54*2 atk%=0.0496*2 er=0.0551*2 em=19.82*2 cr=0.0331*10 cd=0.0662*12;
+
+xianyun char lvl=90/90 cons=0 talent=9,9,9;
+xianyun add weapon="hakushinring" refine=5 lvl=90/90;
+xianyun add set="viridescentvenerer" count=4;
+xianyun add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 atk%=0.466;
+xianyun add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*8 atk%=0.0496*6 er=0.0551*12 em=19.82*2 cr=0.0331*2 cd=0.0662*2;
+
+iansan char lvl=90/90 cons=6 talent=10,10,10;
+iansan add weapon="favoniuslance" refine=5 lvl=90/90;
+iansan add set="scrolloftheheroofcindercity" count=4;
+iansan add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 atk%=0.466;
+iansan add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*6 er=0.0551*8 em=19.82*2 cr=0.0331*2 cd=0.0662*2;
+
+target lvl=100 resist=0.1 radius=2 pos=0,2.4 hp=999999999;
+energy every interval=480,720 amount=1;
+
+# Iansan's burst buff needs the active character to move (see the Varesa/Iansan file).
+let move_speed = 8;
+let last_f = 0;
+fn mv() {
+  movement((f() - last_f) / 60 * move_speed);
+  last_f = f();
+}
+
+fn varesa_combo(amt) {
+  for let j = 0; j < amt; j = j + 1 {
+    if .varesa.skill.ready {
+      varesa skill, attack, high_plunge[collision=1];   # ECP
+    } else if .xianyun.status.xianyun-airborne-buff {
+      varesa jump;
+      if .airborne {
+        varesa high_plunge[collision=1];                # JP
+      }
+    } else {
+      varesa charge, high_plunge[collision=1];          # CP
+    }
+    mv();
+    if .varesa.energy >= 30 && .varesa.status.apex-drive {
+      varesa burst;
+    }
+  }
+}
+
+active furina;
+for let i=0; i<6; i=i+1 {
+  furina skill, dash, attack, burst;
+  iansan skill, attack, burst;
+  last_f = f();
+  xianyun attack, skill, low_plunge, burst;
+  varesa_combo(7);
+}
