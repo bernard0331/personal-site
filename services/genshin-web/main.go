@@ -9,6 +9,8 @@
 //	GET /img/<name>.png character, weapon and artifact icons, from -img
 //	GET /api/catalog    every released character, weapon and artifact set
 //	POST /api/good      read an uploaded GOOD file (untrusted) into an account
+//	POST /api/runs      start a run from a locked snapshot; returns its private id
+//	GET /api/runs/{id}  a run's progress, and its teams once done
 //	GET /healthz        "ok", for the cluster's health checks
 package main
 
@@ -18,6 +20,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"runtime"
 	"time"
 
 	"github.com/bernard0331/personal-site/services/genshin-calc/catalog"
@@ -32,6 +35,15 @@ var web embed.FS
 func main() {
 	addr := flag.String("addr", "127.0.0.1:8080", "address to listen on")
 	imgDir := flag.String("img", "local/web-img", "directory of icons (tools/fetch_images.py fills it)")
+	dataDir := flag.String("data", "local/web-data", "directory for runs and the shared simulation cache")
+	dbPath := flag.String("db", "local/rotations/kqm-db.jsonl", "cached KQM Sim Database")
+	ownDir := flag.String("own", "services/genshin-calc/rotations", "this project's own rotation files")
+	simPath := flag.String("sim", "bin/kqmsim", "simulator binary")
+	rankingPath := flag.String("ranking", "local/weapons/ranking.json", "weapon trials' ranking (missing: stand-in weapons)")
+	highsPython := flag.String("highs", "local/highs-venv/bin/python", "a Python with highspy (missing: the slower branch and bound)")
+	cpus := flag.Int("cpus", max(1, runtime.NumCPU()-2), "cores the simulations may use")
+	iterations := flag.Int("iterations", 30, "simulator iterations per rotation in a quick run")
+	queueSize := flag.Int("queue", 20, "runs that may wait; more are turned away")
 	flag.Parse()
 
 	cat, err := catalog.Load()
@@ -43,12 +55,20 @@ func main() {
 		log.Fatal(err)
 	}
 
+	eng, err := newEngine(cat, *dataDir, *dbPath, *ownDir, *simPath, *rankingPath, *highsPython, *cpus, *iterations, *queueSize)
+	if err != nil {
+		log.Fatal(err)
+	}
+	go eng.loop()
+
 	static, _ := fs.Sub(web, "web")
 	mux := http.NewServeMux()
 	mux.Handle("GET /static/", noCache(http.StripPrefix("/static/", http.FileServerFS(static))))
 	mux.Handle("GET /img/", http.StripPrefix("/img/", imageServer(*imgDir)))
 	mux.HandleFunc("GET /api/catalog", catalogAPI.serve)
 	mux.HandleFunc("POST /api/good", importGOOD(cat))
+	mux.HandleFunc("POST /api/runs", eng.runs.create)
+	mux.HandleFunc("GET /api/runs/{id}", eng.runs.get)
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("ok")) })
 	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFileFS(w, r, static, "index.html")

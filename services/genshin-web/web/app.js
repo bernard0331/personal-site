@@ -50,6 +50,7 @@ function art(icon, label) {
 
 const STEPS = ['Characters', 'Weapons', 'Artifacts', 'Optimize'];
 function go(i) {
+  if (location.hash.startsWith('#/runs/')) { clearTimeout(runTimer); history.pushState(null, '', '/'); }
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('on', +p.dataset.step === i));
   $('steps').style.display = i >= 0 && i < 4 ? 'flex' : 'none';
   const bar = $('steps'); bar.innerHTML = '';
@@ -276,6 +277,115 @@ function exportGood() {
   setTimeout(() => URL.revokeObjectURL(link.href), 1000);
 }
 
+
+// ---------- runs ----------
+// Optimize sends a locked snapshot; the run lives at #/runs/<id>, a private
+// link. The page polls for progress, then shows the teams.
+
+let runTimer = null, runData = null, view = { name: 'element', ranking: 'min' };
+
+async function optimize() {
+  const snapshot = { characters: draft.chars, weapons: draft.weapons, unlimited: draft.unlimited3,
+    energy: draft.options.energy, pins: draft.options.pins, excluded: draft.options.excluded };
+  const res = await fetch('/api/runs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(snapshot) });
+  const body = await res.json();
+  if (!res.ok) { toast(body.error || 'The run could not be started.'); return; }
+  location.hash = `#/runs/${body.id}`;
+}
+
+function routeFromHash() {
+  const m = location.hash.match(/^#\/runs\/([a-z2-7]{26})$/);
+  if (m) { showRun(m[1]); return true; }
+  return false;
+}
+
+async function showRun(id) {
+  clearTimeout(runTimer);
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('on', p.id === 'run'));
+  $('steps').style.display = 'none';
+  const box = $('run');
+  const res = await fetch(`/api/runs/${id}`);
+  if (!res.ok) { box.innerHTML = '<h2>Run not found</h2><p class="sub">The link may be mistyped, or the run has been removed.</p>'; return; }
+  runData = await res.json();
+  const st = runData.status, snap = runData.snapshot || {};
+  const link = `${location.origin}/#/runs/${id}`;
+  const weaponCopies = Object.values(snap.weapons || {}).reduce((n, rs) => n + rs.length, 0);
+  const pins = (snap.pins || []).map(k => byKey.char[k]?.name || k);
+  const head = `<div class="runhead"><div style="display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="urlbar">${link}</span><button class="mini" id="copy-link">Copy link</button></div>
+      <span class="lock">Locked snapshot · ${Object.keys(snap.characters || {}).length} characters · ${weaponCopies} weapon copies${snap.unlimited ? ' + unlimited 3-stars and craftables' : ''} · energy ${snap.energy === 2 ? '×2' : 'KQM standard'}${pins.length ? ' · pinned: ' + pins.join(', ') : ''}</span>
+    </div><button id="rerun">Edit and run again</button></div>`;
+
+  if (st.state === 'done' && runData.result) {
+    box.innerHTML = head + resultsHTML(runData.result);
+    wireResults();
+  } else if (st.state === 'failed') {
+    box.innerHTML = head + `<h2>The run failed</h2><p class="sub">${st.error || 'Something went wrong.'}</p>`;
+  } else {
+    const pct = st.total ? Math.round(100 * st.done / st.total) : 0;
+    const what = st.state === 'queued' ? (st.queue ? `Waiting: ${st.queue} run${st.queue > 1 ? 's' : ''} ahead` : 'Starting…')
+      : st.state === 'solving' ? 'Choosing the best teams…'
+      : `Simulating teams: ${st.done.toLocaleString()} of ${st.total.toLocaleString()}${st.cached ? ` (${st.cached.toLocaleString()} already known)` : ''}`;
+    box.innerHTML = head + `<h2>Optimizing</h2><p class="sub">${what}</p>
+      <div style="height:10px;border-radius:5px;background:var(--border);overflow:hidden;margin:14px 0"><div style="height:100%;width:${pct}%;background:var(--accent);transition:width .4s"></div></div>
+      <p class="sub">You can leave this page and come back with the link above.</p>`;
+    runTimer = setTimeout(() => showRun(id), 2000);
+  }
+  $('copy-link').onclick = () => { navigator.clipboard?.writeText(link).then(() => toast('Link copied'), () => toast(link)); };
+  $('rerun').onclick = () => {
+    draft.chars = { ...(snap.characters || {}) }; draft.weapons = JSON.parse(JSON.stringify(snap.weapons || {}));
+    draft.unlimited3 = !!snap.unlimited;
+    draft.options = { energy: snap.energy || 2, pins: [...(snap.pins || [])], excluded: [...(snap.excluded || [])] };
+    save(); history.pushState(null, '', '/'); clearTimeout(runTimer);
+    drawGrid(); drawWFilters(); drawWeapons(); go(0);
+  };
+}
+
+function resultsHTML(result) {
+  const bd = result.breakdowns.find(b => b.name === view.name && b.ranking === view.ranking);
+  const dps = bd.teams.map(t => t.dps);
+  const avg = dps.length ? dps.reduce((a, b) => a + b, 0) / dps.length : 0;
+  const k = n => Math.round(n / 1000) + 'k';
+  const seg = (id, opts, cur) => `<div class="seg" id="${id}">${opts.map(([v, t]) => `<button data-v="${v}" class="${cur === v ? 'on' : ''}">${t}</button>`).join('')}</div>`;
+  return `<div class="section-head"><div><h2>Best teams</h2><div class="sub">${result.teams.toLocaleString()} teams your account can field · quick run (rough numbers)</div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">${seg('bd-name', [['element', '7 teams, one per element'], ['any', '10 teams, any element']], view.name)}${seg('bd-rank', [['min', 'Best weakest team'], ['sum', 'Highest average']], view.ranking)}</div></div>
+    <div class="metrics"><div class="metric"><div class="label">Average</div><div class="value">${k(avg)}</div></div>
+      <div class="metric"><div class="label">Weakest team</div><div class="value">${dps.length ? k(Math.min(...dps)) : '–'}</div></div>
+      <div class="metric"><div class="label">Teams</div><div class="value">${dps.length}</div></div></div>
+    ${bd.error ? `<p class="flag">${bd.error}</p>` : ''}${bd.optimal ? '' : '<p class="sub">The solver hit its time limit: this is the best set found, not proven best.</p>'}
+    <div id="teams">${bd.teams.map(teamHTML).join('')}</div>`;
+}
+
+function teamHTML(t, pos) {
+  const total = t.members.reduce((a, m) => a + (m.dps || 0), 0);
+  const known = total > 0;
+  const members = t.members.map((m, i) => {
+    const c = byKey.char[m.key] || { name: m.key, rarity: 4, element: t.element }, w = byKey.weapon[m.weapon] || { name: m.weapon };
+    const share = known ? Math.round(100 * m.dps / total) : null;
+    return `<div class="member" data-i="${i}"><div class="portrait r${c.rarity}">${art(c.icon, c.name)}${w.icon ? `<span class="w"><img src="${imgURL(w.icon)}" alt=""></span>` : ''}</div>
+      <div style="min-width:0"><div class="mname">${c.name} <span class="sub">C${m.cons}</span></div><div class="msub">${w.name} R${m.refinement}</div>
+      <div class="msub">${known ? `${Math.round(m.dps / 1000)}k DPS · <span class="share">${share}%</span>` : 'DPS split estimated'}</div></div></div>`;
+  }).join('');
+  const bar = known ? `<div class="bar">${t.members.map((m, i) => { const c = byKey.char[m.key]; const pct = Math.round(100 * m.dps / total); return `<div style="flex:${Math.max(m.dps, 1)};background:${EL[c?.element] || 'var(--border-strong)'};opacity:${i === 0 ? 1 : .7}" title="${c?.name || m.key} ${Math.round(m.dps / 1000)}k (${pct}%)">${pct >= 8 ? pct + '%' : ''}</div>`; }).join('')}</div>` : '';
+  const source = t.source === 'own' ? 'Own rotation' : 'KQM Sim Database';
+  return `<div class="team" style="--ring:${EL[t.element] || 'var(--border-strong)'}"><div class="team-head"><div style="display:flex;gap:10px;align-items:center"><span class="rank">#${pos + 1}</span><span class="etag">${cap(t.element || 'physical')}</span><span class="dps">${Math.round(t.dps / 1000)}k</span><span class="sub">DPS</span></div></div>
+    <div class="members">${members}</div>${bar}
+    <div class="foot"><span>${known ? t.members.map(m => `${byKey.char[m.key]?.name || m.key} ${Math.round(m.dps / 1000)}k (${Math.round(100 * m.dps / total)}%)`).join(' · ') : ''}</span><span>${source} · ${t.rotation}</span></div>
+    ${t.estimated ? '<span class="flag">Weapons changed after simulating: DPS estimated</span>' : ''}${(t.flags || []).filter(f => !f.startsWith('weapons changed')).map(f => `<span class="flag">${f}</span>`).join('')}</div>`;
+}
+
+function wireResults() {
+  const pick = (id, key) => document.querySelectorAll(`#${id} button`).forEach(b => b.onclick = () => { view[key] = b.dataset.v; $('run').querySelector('.section-head').parentElement; showRun(location.hash.split('/')[2]); });
+  pick('bd-name', 'name'); pick('bd-rank', 'ranking');
+  document.querySelectorAll('#teams .team').forEach(team => {
+    const bar = team.querySelector('.bar'); if (!bar) return;
+    team.querySelectorAll('.member').forEach(m => {
+      m.onmouseenter = () => { bar.classList.add('focus'); bar.children[+m.dataset.i].classList.add('hl'); };
+      m.onmouseleave = () => { bar.classList.remove('focus'); bar.children[+m.dataset.i].classList.remove('hl'); };
+    });
+  });
+}
+
 // ---------- start ----------
 
 function heroArt() {
@@ -337,8 +447,9 @@ async function main() {
   });
   $('unl3').onclick = () => { draft.unlimited3 = !draft.unlimited3; save(); drawWFilters(); drawWeapons(); };
   segmented('energy', i => { draft.options.energy = i === 0 ? 1 : 2; save(); });
-  $('optimize').onclick = () => toast('Runs are the next part of the build.');
-  go(Object.keys(draft.chars).length ? 0 : -1);
+  $('optimize').onclick = optimize;
+  window.addEventListener('hashchange', () => { if (!routeFromHash()) { clearTimeout(runTimer); go(0); } });
+  if (!routeFromHash()) go(Object.keys(draft.chars).length ? 0 : -1);
 }
 
 main().catch(err => { document.querySelector('main').innerHTML = `<p>Something went wrong loading the optimizer: ${err.message}</p>`; });
