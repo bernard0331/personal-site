@@ -5,7 +5,7 @@
 #     Odette 2[E] (Q) > Alyosha EQ > Vodyanitsa E > Sandrone combo
 #   Combo: our sandrone rotations (KQM's Sandrone guide).
 #   Supports burst when ready (the guide assumes enough ER to burst every rotation).
-#   Example builds (KQM-standard substats) from KQM Sim Database rotations: odette kqm-cb9466b0-5d3e-4ed0-87b7-2360bbc64514, alyosha own:arlecchino-chevreuse-bennett-alyosha, vodyanitsa own:skirk-vodyanitsa-escoffier-furina, sandrone own:sandrone-luminecryo-qiqi-alyosha.
+#   Example builds (KQM-standard substats) from KQM Sim Database rotations: odette kqm-cb9466b0-5d3e-4ed0-87b7-2360bbc64514, alyosha own:arlecchino-chevreuse-bennett-alyosha, vodyanitsa own:ayato-vodyanitsa-citlali-escoffier, sandrone own:sandrone-alyosha-charlotte-sucrose.
 #   The optimizer replaces them with each player's own.
 
 options swap_delay=12 iteration=1000;

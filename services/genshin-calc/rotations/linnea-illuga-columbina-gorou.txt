@@ -5,7 +5,7 @@
 #     Linnea E > Columbina E (Q) > Gorou EQ > Illuga EQ > Linnea 3[C] > Gorou E > Linnea 5[C]
 #   Supports burst when ready (the guide assumes enough ER to burst every rotation).
 #   Linnea's charged shots are aimed shots in the simulator. The guide's "(Linnea C)" when Columbina's burst is not ready is left out.
-#   Example builds (KQM-standard substats) from KQM Sim Database rotations: linnea own:aratakiitto-gorou-linnea-columbina, columbina JFwBcLbqDR9j, gorou CtQDRw9pt6f6, illuga own:zibai-illuga-aino-dahlia.
+#   Example builds (KQM-standard substats) from KQM Sim Database rotations: linnea own:aratakiitto-gorou-linnea-columbina, columbina JFwBcLbqDR9j, gorou CtQDRw9pt6f6, illuga own:aratakiitto-illuga-columbina-gorou.
 #   The optimizer replaces them with each player's own.
 
 options swap_delay=12 iteration=1000;

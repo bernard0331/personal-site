@@ -129,5 +129,15 @@
    "wriothesley attack:3;"
   ],
   "source": "Prydwen's Mitya guide, Wriothesley teams (steady-state rotation): E 4[N5Cd] N3"
+ },
+ "cyno": {
+  "lines": [
+   "cyno skill;",
+   "if .cyno.burst.ready { cyno burst; }",
+   "while .cyno.mods.cyno-q {",
+   "  if .cyno.mods.cyno-a1 && .cyno.skill.ready { cyno skill; } else if .cyno.normal == 5 && .stam > 20 { cyno dash; } else { cyno attack; }",
+   "}"
+  ],
+  "source": "KQM Sim Database rotation jBkf669CgWCr: during his burst, his skill only in the Endseer stance (so it fires Duststalker Bolts), a dash after N5, otherwise normal attacks"
  }
 }

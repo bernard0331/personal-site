@@ -5,7 +5,7 @@
 #     Columbina E Q > Illuga EQ > Gorou Q E > Itto combo
 #   Combo: KQM Sim Database rotation g6wbFkjbNKLc (N1 Q E, charged attacks on Superlative Superstrength stacks, normal attacks between, until his burst ends); his burst when ready (forcing it waited 45 s for energy).
 #   Supports burst when ready (the guide assumes enough ER to burst every rotation).
-#   Example builds (KQM-standard substats) from KQM Sim Database rotations: columbina JFwBcLbqDR9j, illuga own:aratakiitto-illuga-columbina-linnea, gorou CtQDRw9pt6f6, aratakiitto bkd7t7WCRqBd.
+#   Example builds (KQM-standard substats) from KQM Sim Database rotations: columbina JFwBcLbqDR9j, illuga own:aratakiitto-illuga-columbina-gorou, gorou CtQDRw9pt6f6, aratakiitto bkd7t7WCRqBd.
 #   The optimizer replaces them with each player's own.
 
 options swap_delay=12 iteration=1000;

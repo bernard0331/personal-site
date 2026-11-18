@@ -6,16 +6,17 @@
 #   Combo: our sandrone rotations (KQM's Sandrone guide).
 #   Supports burst when ready (the guide assumes enough ER to burst every rotation).
 #   Flex option: the guide lists Nicole for this slot without a sample rotation. This is the Escoffier rotation with Nicole in Escoffier's place, doing "Nicole E" (as in KQM's Sandrone guide sample rotations).
-#   Example builds (KQM-standard substats) from KQM Sim Database rotations: yaemiko CktbDtBmrqtT, odette kqm-cb9466b0-5d3e-4ed0-87b7-2360bbc64514, nicole Md8hLn8jNNLJ, sandrone own:sandrone-alyosha-charlotte-sucrose.
+#   Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one.
+#   Example builds (KQM-standard substats) from KQM Sim Database rotations: yaemiko this spec's gear (see notes), odette kqm-cb9466b0-5d3e-4ed0-87b7-2360bbc64514, nicole Md8hLn8jNNLJ, sandrone own:sandrone-alyosha-charlotte-sucrose.
 #   The optimizer replaces them with each player's own.
 
 options swap_delay=12 iteration=1000;
 
 yaemiko char lvl=90/90 cons=6 talent=10,10,10;
-yaemiko add weapon="kagurasverity" refine=5 lvl=90/90;
-yaemiko add set="mh" count=5;
+yaemiko add weapon="thewidsith" refine=1 lvl=90/90;
+yaemiko add set="disenchantmentindeepshadow" count=4;
 yaemiko add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622;
-yaemiko add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.1984 er=0.1102 em=39.64 cr=0.3972 cd=0.662;
+yaemiko add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*5 er=0.0551*2 em=19.82*2 cr=0.0331*11 cd=0.0662*10;
 
 odette char lvl=90/90 cons=0 talent=9,9,9;
 odette add weapon="exaiphanesblade" refine=5 lvl=90/90;

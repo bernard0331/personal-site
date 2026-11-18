@@ -81,8 +81,19 @@
    "sandrone": "@sandrone"
   },
   "notes": [
-   "Flex option: the guide lists Xilonen for this slot without a sample rotation. This is the Escoffier rotation with Xilonen in Escoffier's place, doing \"Xilonen E N2\" (as in KQM's Sandrone guide sample rotations)."
-  ]
+   "Flex option: the guide lists Xilonen for this slot without a sample rotation. This is the Escoffier rotation with Xilonen in Escoffier's place, doing \"Xilonen E N2\" (as in KQM's Sandrone guide sample rotations).",
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one."
+  ],
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
+  }
  },
  {
   "guide": "Sandrone",
@@ -95,8 +106,19 @@
    "sandrone": "@sandrone"
   },
   "notes": [
-   "Flex option: the guide lists Nicole for this slot without a sample rotation. This is the Escoffier rotation with Nicole in Escoffier's place, doing \"Nicole E\" (as in KQM's Sandrone guide sample rotations)."
-  ]
+   "Flex option: the guide lists Nicole for this slot without a sample rotation. This is the Escoffier rotation with Nicole in Escoffier's place, doing \"Nicole E\" (as in KQM's Sandrone guide sample rotations).",
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one."
+  ],
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
+  }
  },
  {
   "guide": "Sandrone",
@@ -109,10 +131,21 @@
    "sandrone": "@sandrone"
   },
   "notes": [
-   "Flex option: the guide lists Beidou for this slot without a sample rotation. This is the Escoffier rotation with Beidou in Escoffier's place, doing \"Beidou EQ\" (as in KQM's Sandrone guide sample rotations)."
+   "Flex option: the guide lists Beidou for this slot without a sample rotation. This is the Escoffier rotation with Beidou in Escoffier's place, doing \"Beidou EQ\" (as in KQM's Sandrone guide sample rotations).",
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one."
   ],
   "cons": {
    "beidou": 6
+  },
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
   }
  },
  {
@@ -126,8 +159,19 @@
    "sandrone": "@sandrone"
   },
   "notes": [
-   "Flex option: the guide lists Lan Yan for this slot without a sample rotation. This is the Escoffier rotation with Lan Yan in Escoffier's place, doing \"Lan Yan 2[E]\" (as in KQM's Zibai guide sample rotations)."
-  ]
+   "Flex option: the guide lists Lan Yan for this slot without a sample rotation. This is the Escoffier rotation with Lan Yan in Escoffier's place, doing \"Lan Yan 2[E]\" (as in KQM's Zibai guide sample rotations).",
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one."
+  ],
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
+  }
  },
  {
   "guide": "Sandrone",
@@ -227,8 +271,19 @@
   "rotation": "Yae 3[E] > Odette E (Q) E > Alyosha EQ > Cryo Traveler E N2CD N1CD N2C Q N2C",
   "variant": "Alyosha (flex option)",
   "notes": [
-   "Flex option: the guide lists Alyosha for this slot without a sample rotation. This is the Escoffier rotation with Alyosha in Escoffier's place, doing \"Alyosha EQ\" (as in KQM's Sandrone guide sample rotations)."
-  ]
+   "Flex option: the guide lists Alyosha for this slot without a sample rotation. This is the Escoffier rotation with Alyosha in Escoffier's place, doing \"Alyosha EQ\" (as in KQM's Sandrone guide sample rotations).",
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one."
+  ],
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
+  }
  },
  {
   "guide": "Alyosha",
@@ -238,10 +293,21 @@
   "rotation": "Yae 3[E] > Odette E (Q) E > Beidou EQ > Cryo Traveler E N2CD N1CD N2C Q N2C",
   "variant": "Beidou (flex option)",
   "notes": [
-   "Flex option: the guide lists Beidou for this slot without a sample rotation. This is the Escoffier rotation with Beidou in Escoffier's place, doing \"Beidou EQ\" (as in KQM's Sandrone guide sample rotations)."
+   "Flex option: the guide lists Beidou for this slot without a sample rotation. This is the Escoffier rotation with Beidou in Escoffier's place, doing \"Beidou EQ\" (as in KQM's Sandrone guide sample rotations).",
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one."
   ],
   "cons": {
    "beidou": 6
+  },
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
   }
  },
  {
@@ -252,8 +318,19 @@
   "rotation": "Yae 3[E] > Odette E (Q) E > Nicole E > Cryo Traveler E N2CD N1CD N2C Q N2C",
   "variant": "Nicole (flex option)",
   "notes": [
-   "Flex option: the guide lists Nicole for this slot without a sample rotation. This is the Escoffier rotation with Nicole in Escoffier's place, doing \"Nicole E\" (as in KQM's Sandrone guide sample rotations)."
-  ]
+   "Flex option: the guide lists Nicole for this slot without a sample rotation. This is the Escoffier rotation with Nicole in Escoffier's place, doing \"Nicole E\" (as in KQM's Sandrone guide sample rotations).",
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one."
+  ],
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
+  }
  },
  {
   "guide": "Lohen",

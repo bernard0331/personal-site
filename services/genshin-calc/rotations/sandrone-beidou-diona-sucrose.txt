@@ -5,7 +5,7 @@
 #     Beidou EQ > Diona hEQ > Sucrose ED N1 > Sandrone combo
 #   Combo: our sandrone rotations (KQM's Sandrone guide).
 #   Supports burst when ready (the guide assumes enough ER to burst every rotation).
-#   Example builds (KQM-standard substats) from KQM Sim Database rotations: beidou CrRmHmjrQrgr, diona JRLrhkQDpgk8, sucrose KkHQq8qkfjdW, sandrone own:sandrone-alyosha-odette-escoffier.
+#   Example builds (KQM-standard substats) from KQM Sim Database rotations: beidou CrRmHmjrQrgr, diona JRLrhkQDpgk8, sucrose KkHQq8qkfjdW, sandrone own:sandrone-alyosha-charlotte-sucrose.
 #   The optimizer replaces them with each player's own.
 
 options swap_delay=12 iteration=1000;

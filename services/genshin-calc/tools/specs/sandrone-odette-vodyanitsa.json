@@ -8,7 +8,20 @@
   "variant": "Escoffier",
   "combos": {
    "sandrone": "@sandrone"
-  }
+  },
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
+  },
+  "notes": [
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one."
+  ]
  },
  {
   "guide": "Sandrone",
@@ -19,7 +32,20 @@
   "variant": "Sucrose",
   "combos": {
    "sandrone": "@sandrone"
-  }
+  },
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
+  },
+  "notes": [
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one."
+  ]
  },
  {
   "guide": "Sandrone",
@@ -196,7 +222,20 @@
   },
   "cons": {
    "diona": 6
-  }
+  },
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
+  },
+  "notes": [
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one."
+  ]
  },
  {
   "guide": "Odette",
@@ -204,7 +243,20 @@
   "file": "luminecryo-yaemiko-odette-qiqi",
   "team": "Odette — Yae Miko — Cryo Traveler — Qiqi / Escoffier / Sucrose",
   "rotation": "Yae 3[E] > Odette E (Q) E > Qiqi E (Q) > Cryo Traveler E N2CD N1CD N2C Q N2C",
-  "variant": "Qiqi"
+  "variant": "Qiqi",
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
+  },
+  "notes": [
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one."
+  ]
  },
  {
   "guide": "Odette",
@@ -212,7 +264,20 @@
   "file": "luminecryo-yaemiko-odette-escoffier",
   "team": "Odette — Yae Miko — Cryo Traveler — Qiqi / Escoffier / Sucrose",
   "rotation": "Yae 3[E] > Odette E (Q) E > Escoffier E > Cryo Traveler E N2CD N1CD N2C Q N2C",
-  "variant": "Escoffier"
+  "variant": "Escoffier",
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
+  },
+  "notes": [
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one."
+  ]
  },
  {
   "guide": "Odette",
@@ -220,23 +285,88 @@
   "file": "luminecryo-yaemiko-odette-sucrose",
   "team": "Odette — Yae Miko — Cryo Traveler — Qiqi / Escoffier / Sucrose",
   "rotation": "Yae 3[E] > Odette E (Q) E > Sucrose N1 ED > Cryo Traveler E N2CD N1CD N2C Q N2C",
-  "variant": "Sucrose"
+  "variant": "Sucrose",
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
+  },
+  "notes": [
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one."
+  ]
  },
  {
   "guide": "Odette",
   "url": "https://keqingmains.com/q/odette-quickguide/",
   "file": "cyno-yaemiko-odette-qiqi",
   "team": "Odette — Cyno — Yae Miko — Qiqi / Alyosha",
-  "rotation": "Yae 3[E] > Odette 2[E] > Qiqi E (Q) > Cyno E N1 Q N2E 4[N4D N4E]",
-  "variant": "Qiqi"
+  "rotation": "Yae 3[E] > Odette 2[E] > Qiqi E (Q) > Cyno combo",
+  "variant": "Qiqi",
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   },
+   "cyno": {
+    "weapon": "kitaincrossspear",
+    "refine": 5,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
+  },
+  "notes": [
+   "The source's Cyno string (Cyno E N1 Q N2E 4[N4D N4E]) is replaced by an Endseer-timed combo: as written it missed his Endseer windows in the simulator, so his Duststalker Bolts rarely fired.",
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one.",
+   "Cyno's gear for Stellar-Conduct teams (Prydwen: Kitain Cross Spear R5, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT)."
+  ],
+  "combos": {
+   "cyno": "@cyno"
+  }
  },
  {
   "guide": "Odette",
   "url": "https://keqingmains.com/q/odette-quickguide/",
   "file": "cyno-yaemiko-odette-alyosha",
   "team": "Odette — Cyno — Yae Miko — Qiqi / Alyosha",
-  "rotation": "Yae 3[E] > Odette 2[E] > Alyosha Q E > Cyno E N1 Q N2E 4[N4D N4E]",
-  "variant": "Alyosha"
+  "rotation": "Yae 3[E] > Odette 2[E] > Alyosha Q E > Cyno combo",
+  "variant": "Alyosha",
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   },
+   "cyno": {
+    "weapon": "kitaincrossspear",
+    "refine": 5,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
+  },
+  "notes": [
+   "The source's Cyno string (Cyno E N1 Q N2E 4[N4D N4E]) is replaced by an Endseer-timed combo: as written it missed his Endseer windows in the simulator, so his Duststalker Bolts rarely fired.",
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one.",
+   "Cyno's gear for Stellar-Conduct teams (Prydwen: Kitain Cross Spear R5, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT)."
+  ],
+  "combos": {
+   "cyno": "@cyno"
+  }
  },
  {
   "guide": "Odette",
@@ -277,8 +407,19 @@
   "team": "Vodyanitsa — Cryo Traveler — Odette — Yae Miko",
   "rotation": "Yae 3[E] > Odette (Q) E (E) > Vodyanitsa E > Cryo Traveler E 2[N2CD] N2C Q D N2C",
   "notes": [
-   "\"Odette Q/E E\": her burst when ready, otherwise a second skill. The optional ending (Yae E Q, or Traveler D N2C) is left out."
-  ]
+   "\"Odette Q/E E\": her burst when ready, otherwise a second skill. The optional ending (Yae E Q, or Traveler D N2C) is left out.",
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one."
+  ],
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
+  }
  },
  {
   "guide": "Vodyanitsa",

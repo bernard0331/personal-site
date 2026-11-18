@@ -6,7 +6,7 @@
 #   Combo: our sandrone rotations (KQM's Sandrone guide).
 #   Supports burst when ready (the guide assumes enough ER to burst every rotation).
 #   The first-rotation-only Sandrone E is left out.
-#   Example builds (KQM-standard substats) from KQM Sim Database rotations: alyosha own:arlecchino-chevreuse-bennett-alyosha, charlotte M8dHqNTHtRmm, sucrose KkHQq8qkfjdW, sandrone own:sandrone-alyosha-odette-escoffier.
+#   Example builds (KQM-standard substats) from KQM Sim Database rotations: alyosha own:arlecchino-chevreuse-bennett-alyosha, charlotte M8dHqNTHtRmm, sucrose KkHQq8qkfjdW, sandrone own:sandrone-alyosha-charlotte-sucrose.
 #   The optimizer replaces them with each player's own.
 
 options swap_delay=12 iteration=1000;

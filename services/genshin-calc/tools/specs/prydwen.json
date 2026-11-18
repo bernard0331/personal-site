@@ -27,9 +27,20 @@
   },
   "notes": [
    "Mitya's example build: Prydwen's team gear (Etherlight Spindlelute R1, 2pc+2pc EM sets) and main stats (EM/EM/CRIT); KQM-standard substats from database rotation LLntnMBNJmf7 (same main stats).",
-   "Valeriy's example build (C6, as Prydwen's teams): Finale of the Deep R5 (craftable), 4pc Noblesse, ATK% main stats; KQM-standard substats from database rotation kqm-532f5039 (same main stats)."
+   "Valeriy's example build (C6, as Prydwen's teams): Finale of the Deep R5 (craftable), 4pc Noblesse, ATK% main stats; KQM-standard substats from database rotation kqm-532f5039 (same main stats).",
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one."
   ],
-  "site": "Prydwen"
+  "site": "Prydwen",
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
+  }
  },
  {
   "guide": "Mitya",
@@ -91,9 +102,20 @@
   },
   "notes": [
    "Mitya's example build: Prydwen's team gear (Etherlight Spindlelute R1, 2pc+2pc EM sets) and main stats (EM/EM/CRIT); KQM-standard substats from database rotation LLntnMBNJmf7 (same main stats).",
-   "Valeriy's example build (C6, as Prydwen's teams): Finale of the Deep R5 (craftable), 4pc Noblesse, ATK% main stats; KQM-standard substats from database rotation kqm-532f5039 (same main stats)."
+   "Valeriy's example build (C6, as Prydwen's teams): Finale of the Deep R5 (craftable), 4pc Noblesse, ATK% main stats; KQM-standard substats from database rotation kqm-532f5039 (same main stats).",
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one."
   ],
-  "site": "Prydwen"
+  "site": "Prydwen",
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
+  }
  },
  {
   "guide": "Mitya",
@@ -116,9 +138,20 @@
   },
   "notes": [
    "Prydwen's first rotation (E N5d 3[N5Cd] N1) is left out; every rotation here is the steady-state one.",
-   "Mitya's example build: Prydwen's team gear (Etherlight Spindlelute R1, 2pc+2pc EM sets) and main stats (EM/EM/CRIT); KQM-standard substats from database rotation LLntnMBNJmf7 (same main stats)."
+   "Mitya's example build: Prydwen's team gear (Etherlight Spindlelute R1, 2pc+2pc EM sets) and main stats (EM/EM/CRIT); KQM-standard substats from database rotation LLntnMBNJmf7 (same main stats).",
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one."
   ],
-  "site": "Prydwen"
+  "site": "Prydwen",
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
+  }
  },
  {
   "guide": "Mitya",
@@ -141,9 +174,20 @@
   },
   "notes": [
    "Steady-state rotation only.",
-   "Mitya's example build: Prydwen's team gear (Etherlight Spindlelute R1, 2pc+2pc EM sets) and main stats (EM/EM/CRIT); KQM-standard substats from database rotation LLntnMBNJmf7 (same main stats)."
+   "Mitya's example build: Prydwen's team gear (Etherlight Spindlelute R1, 2pc+2pc EM sets) and main stats (EM/EM/CRIT); KQM-standard substats from database rotation LLntnMBNJmf7 (same main stats).",
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one."
   ],
-  "site": "Prydwen"
+  "site": "Prydwen",
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
+  }
  },
  {
   "guide": "Mitya",
@@ -175,7 +219,7 @@
   "url": "https://www.prydwen.gg/genshin-impact/characters/mitya",
   "file": "cyno-mitya-odette-alyosha",
   "team": "Cyno (Alyosha + Mitya)",
-  "rotation": "Mitya E > Odette 2[E] > Alyosha EQ > Cyno EQ 2[N4D] N2E 2[N4D N4E]",
+  "rotation": "Mitya E > Odette 2[E] > Alyosha EQ > Cyno combo",
   "builds": {
    "mitya": [
     "mitya char lvl=90/90 cons=0 talent=10,10,10;",
@@ -187,17 +231,32 @@
    ]
   },
   "notes": [
+   "The source's Cyno string (Cyno EQ 2[N4D] N2E 2[N4D N4E]) is replaced by an Endseer-timed combo: as written it missed his Endseer windows in the simulator, so his Duststalker Bolts rarely fired.",
    "Cyno's string is Prydwen's own.",
-   "Mitya's example build: Prydwen's team gear (Etherlight Spindlelute R1, 2pc+2pc EM sets) and main stats (EM/EM/CRIT); KQM-standard substats from database rotation LLntnMBNJmf7 (same main stats)."
+   "Mitya's example build: Prydwen's team gear (Etherlight Spindlelute R1, 2pc+2pc EM sets) and main stats (EM/EM/CRIT); KQM-standard substats from database rotation LLntnMBNJmf7 (same main stats).",
+   "Cyno's gear for Stellar-Conduct teams (Prydwen: Kitain Cross Spear R5, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT)."
   ],
-  "site": "Prydwen"
+  "site": "Prydwen",
+  "gear": {
+   "cyno": {
+    "weapon": "kitaincrossspear",
+    "refine": 5,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
+  },
+  "combos": {
+   "cyno": "@cyno"
+  }
  },
  {
   "guide": "Mitya",
   "url": "https://www.prydwen.gg/genshin-impact/characters/mitya",
   "file": "cyno-mitya-qiqi-yaemiko",
   "team": "Cyno (Yae + Mitya, Odetteless)",
-  "rotation": "Mitya E > Yae 3[E] > Qiqi E N1 > Cyno QE 2[N4D] N2E 2[N4D N4E]",
+  "rotation": "Mitya E > Yae 3[E] > Qiqi E N1 > Cyno combo",
   "builds": {
    "mitya": [
     "mitya char lvl=90/90 cons=0 talent=10,10,10;",
@@ -209,10 +268,34 @@
    ]
   },
   "notes": [
+   "The source's Cyno string (Cyno QE 2[N4D] N2E 2[N4D N4E]) is replaced by an Endseer-timed combo: as written it missed his Endseer windows in the simulator, so his Duststalker Bolts rarely fired.",
    "Cyno's string is Prydwen's own.",
-   "Mitya's example build: Prydwen's team gear (Etherlight Spindlelute R1, 2pc+2pc EM sets) and main stats (EM/EM/CRIT); KQM-standard substats from database rotation LLntnMBNJmf7 (same main stats)."
+   "Mitya's example build: Prydwen's team gear (Etherlight Spindlelute R1, 2pc+2pc EM sets) and main stats (EM/EM/CRIT); KQM-standard substats from database rotation LLntnMBNJmf7 (same main stats).",
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one.",
+   "Cyno's gear for Stellar-Conduct teams (Prydwen: Kitain Cross Spear R5, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT)."
   ],
-  "site": "Prydwen"
+  "site": "Prydwen",
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   },
+   "cyno": {
+    "weapon": "kitaincrossspear",
+    "refine": 5,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
+  },
+  "combos": {
+   "cyno": "@cyno"
+  }
  },
  {
   "guide": "Mitya",
@@ -260,16 +343,27 @@
   },
   "notes": [
    "Sandrone combo as in the Alyosha + Mitya team.",
-   "Mitya's example build: Prydwen's team gear (Etherlight Spindlelute R1, 2pc+2pc EM sets) and main stats (EM/EM/CRIT); KQM-standard substats from database rotation LLntnMBNJmf7 (same main stats)."
+   "Mitya's example build: Prydwen's team gear (Etherlight Spindlelute R1, 2pc+2pc EM sets) and main stats (EM/EM/CRIT); KQM-standard substats from database rotation LLntnMBNJmf7 (same main stats).",
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one."
   ],
-  "site": "Prydwen"
+  "site": "Prydwen",
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
+  }
  },
  {
   "guide": "Valeriy",
   "url": "https://www.prydwen.gg/genshin-impact/characters/valeriy",
   "file": "cyno-yaemiko-odette-valeriy",
   "team": "Cyno (Valeriy C6)",
-  "rotation": "Yae 3[E] > Odette 2[E] > Valeriy QEC > Cyno EQ N4E N5 N2E 2[N4D N4E]",
+  "rotation": "Yae 3[E] > Odette 2[E] > Valeriy QEC > Cyno combo",
   "builds": {
    "valeriy": [
     "valeriy char lvl=90/90 cons=6 talent=10,10,10;",
@@ -280,10 +374,34 @@
    ]
   },
   "notes": [
+   "The source's Cyno string (Cyno EQ N4E N5 N2E 2[N4D N4E]) is replaced by an Endseer-timed combo: as written it missed his Endseer windows in the simulator, so his Duststalker Bolts rarely fired.",
    "Cyno's string is Prydwen's own.",
-   "Valeriy's example build (C6, as Prydwen's teams): Finale of the Deep R5 (craftable), 4pc Noblesse, ATK% main stats; KQM-standard substats from database rotation kqm-532f5039 (same main stats)."
+   "Valeriy's example build (C6, as Prydwen's teams): Finale of the Deep R5 (craftable), 4pc Noblesse, ATK% main stats; KQM-standard substats from database rotation kqm-532f5039 (same main stats).",
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one.",
+   "Cyno's gear for Stellar-Conduct teams (Prydwen: Kitain Cross Spear R5, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT)."
   ],
-  "site": "Prydwen"
+  "site": "Prydwen",
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   },
+   "cyno": {
+    "weapon": "kitaincrossspear",
+    "refine": 5,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
+  },
+  "combos": {
+   "cyno": "@cyno"
+  }
  },
  {
   "guide": "Vesna",
@@ -469,8 +587,20 @@
    "wriothesley": "@wriothesley"
   },
   "builds": {},
-  "notes": [],
-  "site": "Prydwen"
+  "notes": [
+   "Yae's gear for Stellar-Conduct teams (Prydwen: The Widsith, 4pc Disenchantment in Deep Shadow, ATK%/ATK%/CRIT); the database's best Yae build is a non-Stellar one."
+  ],
+  "site": "Prydwen",
+  "gear": {
+   "yaemiko": {
+    "weapon": "thewidsith",
+    "refine": 1,
+    "sets": {
+     "disenchantmentindeepshadow": 4
+    },
+    "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"
+   }
+  }
  },
  {
   "guide": "Wriothesley",

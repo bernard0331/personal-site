@@ -23,7 +23,9 @@ SPEC.json is a list of teams:
    "first": "furina",                                # active character at the start
    "notes": ["..."],                                 # extra comment lines
    "loops": 6,
-   "builds": {"lohen": ["lohen char ...;", ...]}}    # example build, when no file has one
+   "builds": {"lohen": ["lohen char ...;", ...]},    # example build, when no file has one
+   "gear": {"yaemiko": {"weapon": "thewidsith", "refine": 1, "sets": {"disenchantmentindeepshadow": 4},
+            "main": "hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622"}}}  # archetype gear
 
 Notation (KQM's): E skill, tE tap skill, hE hold skill, shE short hold skill,
 Q burst, sQ special burst, Nk k normal attacks, C charged attack, A aimed shot,
@@ -119,6 +121,37 @@ def builds(member):
     lines = [re.sub(r"^\w+", member, l) for l in best[2]]
     lines = [re.sub(r"\s*#.*$", "", l) for l in lines]
     return lines, best[1]
+
+
+def regear(member, lines, g):
+    """The member's build with another weapon, sets and main stats; the
+    KQM-standard substats come from a database build with the same main stats."""
+    global _db
+    if _db is None:
+        _db = [json.loads(l) for l in open(DB)]
+    main = g["main"]
+    subs = None
+    for e in _db:
+        L = e["config"].splitlines()
+        for i, l in enumerate(L):
+            if re.search(r"add stats " + re.escape(main) + r";", l):
+                ch = l.split()[0]
+                for n in L[i + 1:i + 3]:
+                    body = n.split(" add stats ", 1)[-1]
+                    if n.startswith(ch + " add stats") and standard_line(n):
+                        subs = re.sub(r"\s*#.*$", "", body)
+                        break
+            if subs:
+                break
+        if subs:
+            break
+    if subs is None:
+        raise SystemExit(f"no KQM-standard substats for main stats {main}")
+    char = [l for l in lines if " char " in l]
+    out = char + [f'{member} add weapon="{g["weapon"]}" refine={g["refine"]} lvl=90/90;']
+    out += [f'{member} add set="{s}" count={n};' for s, n in g["sets"].items()]
+    out += [f"{member} add stats {main};", f"{member} add stats {subs}"]
+    return out
 
 
 # ---------- notation ----------
@@ -245,6 +278,8 @@ def write(spec, out_dir):
             lines, src = spec["builds"][m], "this spec (see notes)"
         else:
             lines, src = builds(m)
+        if m in spec.get("gear", {}):  # the archetype's gear (e.g. Stellar-Conduct sets)
+            lines, src = regear(m, lines, spec["gear"][m]), "this spec's gear (see notes)"
         sources[m] = src
         if m in spec.get("cons", {}):
             lines = [re.sub(r"cons=\d", f"cons={spec['cons'][m]}", l) for l in lines]
