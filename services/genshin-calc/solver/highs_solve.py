@@ -2,7 +2,7 @@
 
 The Go solver package runs this helper with a problem on stdin and reads the
 answer from stdout, both JSON. It needs the highspy package (HiGHS's official
-Python interface, MIT licence): pip install highspy.
+Python interface, MIT licence) and numpy, which highspy installs: pip install highspy.
 
 Input:
   {"options": [{"dps": 213000.0, "uses": ["c:bennett", "w:azurelight", ...]}, ...],
@@ -30,40 +30,71 @@ import os
 import sys
 
 import highspy
+import numpy as np
+
+INF = highspy.kHighsInf
 
 
-def build(options, capacity, keep, require=()):
-    """A model over the options in keep, with the resource rows; each required
-    resource (a pinned character) is used by exactly one chosen option."""
-    h = highspy.Highs()
-    h.setOptionValue("output_flag", False)
-    x = {i: h.addBinary() for i in keep}
-    rows = {}
-    for i in keep:
-        for r in options[i]["uses"]:
-            rows.setdefault(r, []).append(x[i])
-    for r, xs in rows.items():
-        cap = capacity.get(r, 1)
-        if r in require:
-            h.addConstr(sum(xs) == 1)
-        elif cap >= 0 and len(xs) > cap:
-            h.addConstr(sum(xs) <= cap)
-    for r in require:
-        if r not in rows:  # no team has this character at all
-            h.addConstr(h.addBinary() + 1 <= 0)  # infeasible
-    return h, x
+class Model:
+    """A HiGHS model built from arrays in a few calls: building it one Python
+    expression at a time took longer than solving it (20-28 s for 12,000
+    options). x[i] is the column of option i."""
+
+    def __init__(self, options, capacity, keep, require=()):
+        h = highspy.Highs()
+        h.setOptionValue("output_flag", False)
+        self.h, self.keep, self.n = h, list(keep), len(keep)
+        n = self.n
+        h.addCols(n, np.zeros(n), np.zeros(n), np.ones(n), 0, np.array([], np.int32), np.array([], np.int32), np.array([]))
+        h.changeColsIntegrality(n, np.arange(n, dtype=np.int32), np.full(n, highspy.HighsVarType.kInteger))
+        self.x = {i: c for c, i in enumerate(self.keep)}
+        # rows[r][c]: copies of resource r option c uses (two members can hold
+        # copies of the same weapon).
+        rows = {}
+        for c, i in enumerate(self.keep):
+            for r in options[i]["uses"]:
+                rows.setdefault(r, {})
+                rows[r][c] = rows[r].get(c, 0) + 1
+        lo, hi, starts, idx, vals = [], [], [], [], []
+        for r, cs in rows.items():
+            cap = capacity.get(r, 1)
+            if r in require:  # a pinned character: in exactly one chosen option
+                lo.append(1); hi.append(1)
+            elif cap >= 0 and sum(cs.values()) > cap:
+                lo.append(-INF); hi.append(cap)
+            else:
+                continue
+            starts.append(len(idx)); idx.extend(cs); vals.extend(cs.values())
+        if any(r not in rows for r in require):  # no team has this character at all
+            lo.append(1); hi.append(1); starts.append(len(idx))  # an empty row that must be 1: infeasible
+        self.add_rows(lo, hi, starts, idx, vals)
+
+    def add_rows(self, lo, hi, starts, idx, vals):
+        if lo:
+            st = self.h.addRows(len(lo), np.array(lo, float), np.array(hi, float), len(idx),
+                                np.array(starts, np.int32), np.array(idx, np.int32), np.array(vals, float))
+            if st != highspy.HighsStatus.kOk:
+                raise RuntimeError(f"HiGHS rejected the constraints: {st}")
+
+    def count(self, lo, hi):
+        """lo <= number of chosen options <= hi."""
+        self.add_rows([lo], [hi], [0], list(range(self.n)), [1.0] * self.n)
+
+    def maximize(self, costs):
+        h = self.h
+        h.changeColsCost(len(costs), np.arange(len(costs), dtype=np.int32), np.array(costs, float))
+        h.changeObjectiveSense(highspy.ObjSense.kMaximize)
+
+    def chosen(self):
+        vals = self.h.getSolution().col_value
+        return [i for i, c in self.x.items() if vals[c] > 0.5]
 
 
-def solve(h, time_limit):
-    h.setOptionValue("time_limit", float(time_limit))
-    h.run()
-    status = h.modelStatusToString(h.getModelStatus())
+def solve(m, time_limit):
+    m.h.setOptionValue("time_limit", float(time_limit))
+    m.h.run()
+    status = m.h.modelStatusToString(m.h.getModelStatus())
     return status, status == "Optimal"
-
-
-def chosen(h, x):
-    vals = h.getSolution().col_value
-    return [i for i, v in x.items() if vals[v.index] > 0.5]
 
 
 def main():
@@ -83,40 +114,45 @@ def main():
         return
 
     # 1. The most teams that fit together, at most k.
-    h, x = build(options, capacity, every, req)
-    h.addConstr(sum(x.values()) <= k)
-    h.maximize(sum(x.values()))
-    status, optimal = solve(h, limit)
+    m = Model(options, capacity, every, req)
+    m.count(-INF, k)
+    m.maximize([1.0] * m.n)
+    status, optimal = solve(m, limit)
     if status == "Infeasible":
         print(json.dumps({"chosen": [], "optimal": True, "status": status, "infeasible": True}))
         return
-    n = len(chosen(h, x))
+    n = len(m.chosen())
     if n == 0:
         print(json.dumps({"chosen": [], "optimal": optimal, "status": status}))
         return
 
     keep = every
     if p["objective"] == "min":
-        # 2. The strongest weakest team among n fitting teams.
-        h, x = build(options, capacity, every, req)
-        h.addConstr(sum(x.values()) == n)
+        # 2. The strongest weakest team among n fitting teams: an extra column
+        # z with z <= dps_i + big (1 - x_i), i.e. z + big x_i <= dps_i + big.
+        m = Model(options, capacity, every, req)
+        m.count(n, n)
         big = max(o["dps"] for o in options)
-        z = h.addVariable(lb=0, ub=big)
-        for i in every:
-            h.addConstr(z <= options[i]["dps"] + big * (1 - x[i]))
-        h.maximize(z)
-        status, ok = solve(h, limit)
+        m.h.addCols(1, np.array([0.0]), np.array([0.0]), np.array([big]), 0, np.array([], np.int32), np.array([], np.int32), np.array([]))
+        z = m.n
+        lo, hi, starts, idx, vals = [], [], [], [], []
+        for i, c in m.x.items():
+            lo.append(-INF); hi.append(options[i]["dps"] + big); starts.append(len(idx))
+            idx += [z, c]; vals += [1.0, big]
+        m.add_rows(lo, hi, starts, idx, vals)
+        costs = [0.0] * (m.n + 1); costs[z] = 1.0
+        m.maximize(costs)
+        status, ok = solve(m, limit)
         optimal = optimal and ok
-        weakest = min(options[i]["dps"] for i in chosen(h, x))
+        weakest = min(options[i]["dps"] for i in m.chosen())
         keep = [i for i in every if options[i]["dps"] >= weakest or req.intersection(options[i]["uses"])]
 
     # 3. The highest total (among teams at least as strong as the weakest).
-    h, x = build(options, capacity, keep, req)
-    h.addConstr(sum(x.values()) == n)
-    h.maximize(sum(options[i]["dps"] * x[i] for i in keep))
-    status, ok = solve(h, limit)
-    print(json.dumps({"chosen": sorted(chosen(h, x)), "optimal": optimal and ok, "status": status}))
-
+    m = Model(options, capacity, keep, req)
+    m.count(n, n)
+    m.maximize([options[i]["dps"] for i in m.keep])
+    status, ok = solve(m, limit)
+    print(json.dumps({"chosen": sorted(m.chosen()), "optimal": optimal and ok, "status": status}))
 
 if __name__ == "__main__":
     main()

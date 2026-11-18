@@ -406,6 +406,8 @@ func (e *engine) solve(results []coarse.Result, rule *optimizer.Rule, pins []str
 		if e.highs != nil {
 			var r solver.Result
 			var err error
+			start := time.Now()
+			defer func() { log.Printf("solve %s/%s: %d options, %s", bd.Name, bd.Ranking, len(p.Teams), time.Since(start).Round(time.Second)) }()
 			if b.name == "element" {
 				r, err = p.ByElementHiGHS(e.highs, optimizer.Elements, b.obj)
 			} else {

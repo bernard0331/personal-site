@@ -107,6 +107,13 @@ func (p *Problem) solveHiGHS(h *HiGHS, n int, o Objective, elements []string) (R
 		return Result{}, err
 	}
 
+	if d := os.Getenv("GENSHIN_HIGHS_DUMP"); d != "" { // debugging: keep each problem
+		f, _ := os.CreateTemp(d, "problem-*.json")
+		if f != nil {
+			f.Write(body)
+			f.Close()
+		}
+	}
 	dir, err := os.MkdirTemp("", "highs-")
 	if err != nil {
 		return Result{}, err
