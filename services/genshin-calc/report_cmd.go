@@ -26,7 +26,7 @@ func reportCmd(args []string) error {
 	opt.flags(fs)
 	within := fs.Float64("within", 0.10, "let the solver swap a member to a weapon whose trial score is within this fraction of theirs (needs -weapons)")
 	variants := fs.Int("variants", 4, "weapon variants per team at most, the simulated one included")
-	n := fs.Int("n", 10, "teams in the breakdown without an element rule")
+	n := fs.Int("n", 5, "teams in the breakdown without an element rule")
 	stats := fs.Bool("stats", false, "print each team's artifact stat lines (the full pass keeps the optimised substats)")
 	skipFlagged := fs.Bool("skip-flagged", false, "leave out results flagged as waiting for energy or cooldowns")
 	var picks coarse.Picks

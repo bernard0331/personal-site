@@ -175,3 +175,27 @@ func TestBestIsFastAtRealSize(t *testing.T) {
 		t.Logf("took %s", d)
 	}
 }
+
+// There is one Traveler: two teams with different Traveler elements never go
+// together.
+func TestOneTraveler(t *testing.T) {
+	p := &Problem{Teams: []Team{
+		tm("geo", 100, "geo", "luminegeo", "a"),
+		tm("dendro", 90, "dendro", "luminedendro", "b"),
+		tm("other", 50, "hydro", "c", "d"),
+	}}
+	if got := ids(p.Best(2, Sum)); fmt.Sprint(got) != "[geo other]" {
+		t.Errorf("branch and bound: got %v, want [geo other]", got)
+	}
+	if h := highsForTest(t); h != nil {
+		r, err := p.BestHiGHS(h, 2, Sum)
+		if err != nil || fmt.Sprint(ids(r.Teams)) != "[geo other]" {
+			t.Errorf("HiGHS: got %v %v, want [geo other]", ids(r.Teams), err)
+		}
+		p.Require = []string{"luminedendro"} // a pinned Traveler rules out the other element
+		r, err = p.BestHiGHS(h, 2, Sum)
+		if err != nil || fmt.Sprint(ids(r.Teams)) != "[dendro other]" {
+			t.Errorf("HiGHS, Dendro Traveler pinned: got %v %v, want [dendro other]", ids(r.Teams), err)
+		}
+	}
+}

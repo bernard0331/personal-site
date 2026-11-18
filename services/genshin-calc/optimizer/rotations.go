@@ -21,6 +21,9 @@ type Source struct {
 	ID, From string // rotation id; "kqm-db" or "own"
 	Config   string
 	Targets  int
+	// The database entry's own description and submitter (empty for own
+	// files, whose credits are in their comments).
+	Description, Submitter string
 }
 
 // ReadRotations reads the cached database (one JSON object per line) and the
@@ -36,14 +39,17 @@ func ReadRotations(dbPath, dir string) ([]Source, error) {
 	sc.Buffer(make([]byte, 1<<20), 16<<20)
 	for sc.Scan() {
 		var e struct {
-			ID      string `json:"id"`
-			Config  string `json:"config"`
-			Targets int    `json:"targets"`
+			ID          string `json:"id"`
+			Config      string `json:"config"`
+			Targets     int    `json:"targets"`
+			Description string `json:"description"`
+			Submitter   string `json:"submitter"`
 		}
 		if err := json.Unmarshal(sc.Bytes(), &e); err != nil {
 			return nil, fmt.Errorf("%s: %w", dbPath, err)
 		}
-		out = append(out, Source{ID: e.ID, From: "kqm-db", Config: e.Config, Targets: e.Targets})
+		out = append(out, Source{ID: e.ID, From: "kqm-db", Config: e.Config, Targets: e.Targets,
+			Description: e.Description, Submitter: e.Submitter})
 	}
 	if err := sc.Err(); err != nil {
 		return nil, err

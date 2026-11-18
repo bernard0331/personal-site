@@ -2,7 +2,7 @@
 
 The simulation and solver service of the Genshin team optimizer. Given a player's
 account, it finds the strongest teams with no character and no weapon copy used
-twice: seven teams, one for each element, and ten teams with no element rule.
+twice: seven teams, one for each element, and five teams with no element rule.
 
 Team damage comes from [KQM Sim](https://github.com/KQM-git/kqmsim), KeqingMains'
 fork of [gcsim](https://github.com/genshinsim/gcsim). This service writes no damage

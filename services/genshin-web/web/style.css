@@ -156,6 +156,7 @@ footer { border-top: 1px solid var(--border); padding: 16px 28px; font-size: 12p
 .details .row { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; padding: 3px 0; border-bottom: 1px dashed var(--border); }
 .details .row span:last-child { color: var(--muted); text-align: right; }
 .steps-list { font-size: 12px; color: var(--muted); margin: 0; padding-left: 18px; line-height: 1.7; }
+.details .script { font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; margin: 6px 0 0; max-height: 260px; overflow: auto; white-space: pre; }
 .srcbar { height: 6px; border-radius: 3px; background: var(--accent); opacity: .7; margin-top: 2px; }
 .thor { display: none; margin-top: 12px; }
 .thor.on { display: block; }

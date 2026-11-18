@@ -73,7 +73,7 @@ func (p *Problem) solveHiGHS(h *HiGHS, n int, o Objective, elements []string) (R
 		Require   []string       `json:"require,omitempty"` // resources every answer must use once
 	}{Capacity: map[string]int{}, K: n, Objective: "sum", TimeLimit: h.TimeLimit.Seconds()}
 	for _, c := range p.Require {
-		in.Require = append(in.Require, "c:"+c)
+		in.Require = append(in.Require, "c:"+c) // a pinned Traveler means that element
 	}
 	if o == Min {
 		in.Objective = "min"

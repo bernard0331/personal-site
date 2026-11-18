@@ -238,7 +238,7 @@ func (e *engine) execute(id string) error {
 
 // Breakdown is one way of choosing teams, as the results page shows it.
 type Breakdown struct {
-	Name    string     `json:"name"`    // "element" (7, one per element) or "any" (10)
+	Name    string     `json:"name"`    // "element" (7, one per element) or "any" (anyTeams)
 	Ranking string     `json:"ranking"` // "min" (best weakest team) or "sum" (highest average)
 	Optimal bool       `json:"optimal"` // proven best
 	Teams   []TeamView `json:"teams"`
@@ -255,6 +255,7 @@ type TeamView struct {
 	Source      string       `json:"source"`   // "kqm-db" or "own"
 	Flags       []string     `json:"flags,omitempty"`
 	Estimated   bool         `json:"estimated,omitempty"` // weapons changed after simulating
+	Details     *Details     `json:"details,omitempty"`   // the card's Details panel
 	estimatedID string       // the solver's id for it, while estimated
 	confirmKey  string       // its optimizer.ConfirmKey, while estimated
 }
@@ -272,6 +273,11 @@ type Result struct {
 	Breakdowns []Breakdown `json:"breakdowns"`
 	Teams      int         `json:"teams"` // distinct teams the account can field
 }
+
+// anyTeams is how many teams the breakdown without an element rule has. Ten
+// spread an account too thin to be useful; five is a realistic rotation of
+// teams (owner, 2026-11-18).
+const anyTeams = 5
 
 // confirmRounds bounds the confirmation pass. Each round solves all four
 // breakdowns (about a minute) and simulates the chosen teams whose weapons
@@ -316,6 +322,7 @@ func (e *engine) solveConfirmed(results []coarse.Result, acc *good.Account, rule
 				}
 				if r, ok := confirmed[t.confirmKey]; ok {
 					bd.Teams[ti] = teamView(r, solver.Team{ID: "confirmed", Element: t.Element})
+					bd.Teams[ti].Details = e.details(r)
 					replaced++
 				}
 			}
@@ -411,7 +418,7 @@ func (e *engine) solve(results []coarse.Result, rule *optimizer.Rule, pins []str
 			if b.name == "element" {
 				r, err = p.ByElementHiGHS(e.highs, optimizer.Elements, b.obj)
 			} else {
-				r, err = p.BestHiGHS(e.highs, 10, b.obj)
+				r, err = p.BestHiGHS(e.highs, anyTeams, b.obj)
 			}
 			if errors.Is(err, solver.ErrInfeasible) {
 				bd.Error = err.Error()
@@ -425,13 +432,15 @@ func (e *engine) solve(results []coarse.Result, rule *optimizer.Rule, pins []str
 			if b.name == "element" {
 				teams = p.ByElement(optimizer.Elements, b.obj)
 			} else {
-				teams = p.Best(10, b.obj)
+				teams = p.Best(anyTeams, b.obj)
 			}
 			bd.Optimal = !p.Exhausted
 		}
 		for _, t := range teams {
 			if t.ID != "" {
-				bd.Teams = append(bd.Teams, teamView(byID[t.ID], t))
+				v := teamView(byID[t.ID], t)
+				v.Details = e.details(byID[t.ID])
+				bd.Teams = append(bd.Teams, v)
 			}
 		}
 		sort.Slice(bd.Teams, func(i, j int) bool { return bd.Teams[i].DPS > bd.Teams[j].DPS })

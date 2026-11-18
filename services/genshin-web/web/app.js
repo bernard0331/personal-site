@@ -349,7 +349,7 @@ function resultsHTML(result) {
   const k = n => Math.round(n / 1000) + 'k';
   const seg = (id, opts, cur) => `<div class="seg" id="${id}">${opts.map(([v, t]) => `<button data-v="${v}" class="${cur === v ? 'on' : ''}">${t}</button>`).join('')}</div>`;
   return `<div class="section-head"><div><h2>Best teams</h2><div class="sub">${result.teams.toLocaleString()} teams your account can field · quick run (rough numbers)</div></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">${seg('bd-name', [['element', '7 teams, one per element'], ['any', '10 teams, any element']], view.name)}${seg('bd-rank', [['min', 'Best weakest team'], ['sum', 'Highest average']], view.ranking)}</div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">${seg('bd-name', [['element', '7 teams, one per element'], ['any', '5 teams, any element']], view.name)}${seg('bd-rank', [['min', 'Best weakest team'], ['sum', 'Highest average']], view.ranking)}</div></div>
     <div class="metrics"><div class="metric"><div class="label">Average</div><div class="value">${k(avg)}</div></div>
       <div class="metric"><div class="label">Weakest team</div><div class="value">${dps.length ? k(Math.min(...dps)) : '–'}</div></div>
       <div class="metric"><div class="label">Teams</div><div class="value">${dps.length}</div></div></div>
@@ -369,10 +369,36 @@ function teamHTML(t, pos) {
   }).join('');
   const bar = known ? `<div class="bar">${t.members.map((m, i) => { const c = byKey.char[m.key]; const pct = Math.round(100 * m.dps / total); return `<div style="flex:${Math.max(m.dps, 1)};background:${EL[c?.element] || 'var(--border-strong)'};opacity:${i === 0 ? 1 : .7}" title="${c?.name || m.key} ${Math.round(m.dps / 1000)}k (${pct}%)">${pct >= 8 ? pct + '%' : ''}</div>`; }).join('')}</div>` : '';
   const source = t.source === 'own' ? 'Own rotation' : 'KQM Sim Database';
-  return `<div class="team" style="--ring:${EL[t.element] || 'var(--border-strong)'}"><div class="team-head"><div style="display:flex;gap:10px;align-items:center"><span class="rank">#${pos + 1}</span><span class="etag">${cap(t.element || 'physical')}</span><span class="dps">${Math.round(t.dps / 1000)}k</span><span class="sub">DPS</span></div></div>
+  return `<div class="team" style="--ring:${EL[t.element] || 'var(--border-strong)'}"><div class="team-head"><div style="display:flex;gap:10px;align-items:center"><span class="rank">#${pos + 1}</span><span class="etag">${cap(t.element || 'physical')}</span><span class="dps">${Math.round(t.dps / 1000)}k</span><span class="sub">DPS</span></div>${t.details ? '<button class="details-toggle">Details</button>' : ''}</div>
     <div class="members">${members}</div>${bar}
     <div class="foot"><span>${known ? t.members.map(m => `${byKey.char[m.key]?.name || m.key} ${Math.round(m.dps / 1000)}k (${Math.round(100 * m.dps / total)}%)`).join(' · ') : ''}</span><span>${source} · ${t.rotation}</span></div>
-    ${t.estimated ? '<span class="flag">Weapons changed after simulating: DPS estimated</span>' : ''}${(t.flags || []).filter(f => !f.startsWith('weapons changed')).map(f => `<span class="flag">${f}</span>`).join('')}${caveatFlags(t.members)}</div>`;
+    ${t.estimated ? '<span class="flag">Weapons changed after simulating: DPS estimated</span>' : ''}${(t.flags || []).filter(f => !f.startsWith('weapons changed')).map(f => `<span class="flag">${f}</span>`).join('')}${caveatFlags(t.members)}${t.details ? detailsHTML(t) : ''}</div>`;
+}
+
+// The Details panel: where the rotation comes from and the rotation itself,
+// the example builds the quick run used, damage by element, and notes.
+function detailsHTML(t) {
+  const d = t.details, esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const name = k => byKey.char[k]?.name || k;
+  const source = d.source_url ? `<a href="${esc(d.source_url)}" target="_blank" rel="noopener" style="color:var(--accent)">${esc(d.source_name)}</a>` : esc(d.source_name);
+  const builds = d.builds.map(b => {
+    const sets = Object.entries(b.sets || {}).map(([k, n]) => `${n}pc ${esc(byKey.set[k]?.name || k)}`).join(' + ');
+    return `<div class="row"><span>${esc(name(b.key))}</span><span>${[sets, esc(b.main || '')].filter(Boolean).join(' · ') || '—'}</span></div>`;
+  }).join('');
+  const els = Object.entries(d.element_dps || {}).filter(([, v]) => v >= 500).sort((a, b) => b[1] - a[1]);
+  const top = Math.max(1, ...els.map(([, v]) => v));
+  const damage = els.map(([el, v]) => `<div class="row" style="border:none;flex-direction:column;gap:0"><div style="display:flex;justify-content:space-between"><span>${cap(el)}</span><span>${Math.round(v / 1000)}k</span></div><div class="srcbar" style="width:${Math.round(100 * v / top)}%;background:${EL[el] || 'var(--accent)'}"></div></div>`).join('');
+  const notes = [`Fight ${Math.round(d.duration)} s · ${d.iterations} iterations · ±${(t.sd / 1000).toFixed(1)}k`];
+  for (const [why, s] of Object.entries(d.waits || {})) if (s >= 0.5) notes.push(`Waits ${s.toFixed(1)} s in all: ${esc(why.replace(/_/g, ' '))}`);
+  if (d.rot_cons) notes.push('Rotation written for ' + t.members.map((m, i) => `${name(m.key)} C${d.rot_cons[i] ?? '?'}`).join(', '));
+  notes.push('Builds are the rotation\'s example builds (KQM-standard substats); a refined run will use yours.');
+  return `<div class="details">
+    <div><h4>Rotation</h4><div class="sub" style="font-size:12px;margin-bottom:6px">${source}</div>${(d.credit || []).map(c => `<div class="sub" style="font-size:12px;margin-bottom:4px">${esc(c)}</div>`).join('')}
+      <pre class="script">${esc(d.script.join('\n'))}</pre></div>
+    <div><h4>Builds</h4>${builds}</div>
+    <div><h4>Damage by element</h4>${damage || '<div class="sub">—</div>'}</div>
+    <div><h4>Notes</h4>${notes.map(n => `<div class="row"><span>${n}</span><span></span></div>`).join('')}</div>
+  </div>`;
 }
 
 // One flag per caveat: "Mitya and Valeriy are new: ...".
@@ -386,6 +412,8 @@ function wireResults() {
   const pick = (id, key) => document.querySelectorAll(`#${id} button`).forEach(b => b.onclick = () => { view[key] = b.dataset.v; $('run').querySelector('.section-head').parentElement; showRun(location.hash.split('/')[2]); });
   pick('bd-name', 'name'); pick('bd-rank', 'ranking');
   document.querySelectorAll('#teams .team').forEach(team => {
+    const tog = team.querySelector('.details-toggle');
+    if (tog) tog.onclick = () => { team.classList.toggle('open'); tog.textContent = team.classList.contains('open') ? 'Hide details' : 'Details'; };
     const bar = team.querySelector('.bar'); if (!bar) return;
     team.querySelectorAll('.member').forEach(m => {
       m.onmouseenter = () => { bar.classList.add('focus'); bar.children[+m.dataset.i].classList.add('hl'); };

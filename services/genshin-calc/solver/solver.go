@@ -85,7 +85,7 @@ func newUsage(copies map[string]int) *usage {
 
 func (u *usage) fits(t *Team) bool {
 	for _, c := range t.Members {
-		if u.chars[c] {
+		if u.chars[Person(c)] {
 			return false
 		}
 	}
@@ -103,7 +103,7 @@ func (u *usage) fits(t *Team) bool {
 
 func (u *usage) add(t *Team, sign int) {
 	for _, c := range t.Members {
-		u.chars[c] = sign > 0
+		u.chars[Person(c)] = sign > 0
 	}
 	for _, w := range t.Weapons {
 		u.weapons[w] += sign
@@ -433,6 +433,15 @@ func (p *Problem) ByElement(elements []string, o Objective) []Team {
 // key contains a colon.
 const elementResource = "element:"
 
+// Person is who a character key stands for: every element of the Traveler is
+// one person, so at most one of them can be in a set of teams.
+func Person(c string) string {
+	if strings.HasPrefix(c, "lumine") || strings.HasPrefix(c, "aether") {
+		return "traveler"
+	}
+	return c
+}
+
 // resources lists what a team uses up: each member (capacity 1) and each
 // limited weapon copy (capacity: the copies owned). Unlimited weapons are not
 // resources.
@@ -440,6 +449,9 @@ func (p *Problem) resources(t *Team) []string {
 	var rs []string
 	for _, c := range t.Members {
 		rs = append(rs, "c:"+c)
+		if pc := Person(c); pc != c { // a Traveler element also uses up the one Traveler
+			rs = append(rs, "c:"+pc)
+		}
 	}
 	for _, w := range t.Weapons {
 		if c, ok := p.Copies[w]; ok && c >= 0 {
