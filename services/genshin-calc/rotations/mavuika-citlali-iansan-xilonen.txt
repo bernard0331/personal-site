@@ -1,0 +1,93 @@
+# Team: Mavuika, Citlali, Iansan, Xilonen
+# Written for this project on 2026-11-18, from our mavuika-citlali-iansan-bennett rotation.
+# Source: KQM's Iansan quick guide, https://keqingmains.com/q/iansan-quickguide/
+#   Team "Iansan — Mavuika — Citlali — Bennett / Xilonen", sample rotation (Xilonen):
+#     Mavuika tE > Xilonen E(Q) N2 > Iansan ECQ > Citlali EQ N1 > Mavuika combo
+#   Everything else (Mavuika's hold-E dash-cancel melt combo from KQM Sim Database rotation
+#   kNgftcWMgtfT, Iansan's timing and movement) is as in our Bennett version; see that file's
+#   notes. Xilonen holds 4pc Archaic Petra and picks up the Pyro crystallize shard after her
+#   E N2, as the database rotation does.
+#
+# The builds below only make the file runnable on its own (main stats from the guide's
+# recommendations, KQM-standard substats). The optimizer replaces them with the player's own.
+
+options swap_delay=12 iteration=1000;
+
+mavuika char lvl=90/90 cons=1 talent=10,10,10;
+# Melt build from KQM Sim Database rotation kNgftcWMgtfT (EM substats, Serpent Spine at full stacks).
+mavuika add weapon="serpentspine" refine=1 lvl=90/90 +params=[stacks=5];
+mavuika add set="oc" count=4;
+mavuika add stats hp=4780 atk=311 em=187 pyro%=0.466 cd=0.622;
+mavuika add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.0992 er=0.1102 em=158.56 cr=0.2648 cd=0.662;
+
+citlali char lvl=90/90 cons=0 talent=10,10,10;
+# Build from KQM Sim Database rotation kNgftcWMgtfT.
+citlali add weapon="ttds" refine=5 lvl=90/90;
+citlali add set="scroll" count=4;
+citlali add stats hp=4780 atk=311 er=0.518 cryo%=0.466 cr=0.311;
+citlali add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.0992 er=0.2204 em=237.84 cr=0.1324 cd=0.5296;
+
+iansan char lvl=90/90 cons=6 talent=10,10,10;
+iansan add weapon="favoniuslance" refine=5 lvl=90/90;
+iansan add set="scrolloftheheroofcindercity" count=4;
+iansan add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 atk%=0.466;
+iansan add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*6 er=0.0551*8 em=19.82*2 cr=0.0331*2 cd=0.0662*2;
+
+xilonen char lvl=90/90 cons=0 talent=9,9,9;
+xilonen add weapon="favsword" refine=3 lvl=90/90;
+xilonen add set="ap" count=4;
+xilonen add stats hp=4780 atk=311 def%=0.583 geo%=0.466 cr=0.311;
+xilonen add stats def%=0.31 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.0992 er=0.1102 em=39.64 cr=0.331 cd=0.7282;
+
+target lvl=100 resist=0.1 radius=2 pos=0,2.4 hp=999999999;
+energy every interval=480,720 amount=1;
+
+# Iansan's burst buff is 27% of her ATK at 42+ Nightsoul points and less below that. Her
+# points drain by 6 per second, and she regains them from the active character's movement,
+# which the simulator only counts when the script reports it (her burst also ends if she runs
+# out). mv() reports movement at move_speed metres per second of field time since the last
+# call. 8 m/s is the least that keeps her at 42+ through the burst, as the guides assume
+# ("easily maintain the maximum buff"); faster movement overflows her points, which at C6 adds
+# her damage bonus (about +2% team DPS here at 12 m/s). Without movement her buff fell to
+# under 4% of her ATK.
+let move_speed = 8;
+let last_f = 0;
+fn mv() {
+  movement((f() - last_f) / 60 * move_speed);
+  last_f = f();
+}
+
+fn dc() {   # D*: dash that cancels a charged attack, as mav_dc_cancel(6) in the database rotations
+  while !.mavuika.dash.ready { wait(1); }
+  if .mavuika.nightsoul.points > 16 || .mavuika.status.mavuika-burst {
+    mavuika dash[charge_cancel=1, travel=6], charge;
+  } else {
+    mavuika jump;
+  }
+}
+
+active mavuika;
+for let i=0; i<6; i=i+1 {
+  mavuika skill[hold=1], dash;
+  xilonen skill;
+  if .xilonen.burst.ready { xilonen burst; }
+  xilonen attack:2;
+  pick_up_crystallize("pyro");   # the shard triggers Archaic Petra, as in kNgftcWMgtfT
+  iansan skill, attack;
+  if .iansan.burst.ready { iansan burst; } else { delay(30); }
+  last_f = f();
+  citlali skill;
+  if .citlali.burst.ready { citlali burst; }
+  citlali attack;
+  mavuika swap;
+  # recast E (hE C1) while still in Nightsoul; the database script has no skill.ready check,
+  # but here her skill can come off cooldown first, and a recast is then not allowed
+  if .mavuika.nightsoul.points && !.mavuika.skill.ready { mavuika skill[recast=1]; mavuika charge; }
+  while !.mavuika.burst.ready { mavuika attack; }
+  mavuika burst; mv();
+  mavuika charge, charge[final=1]; mv();
+  dc(); mavuika charge[final=1]; mv();
+  dc(); mavuika charge[final=1]; mv();
+  dc(); mavuika charge[final=1]; mv();
+  dc(); mavuika charge[hold=40], charge[final=1]; mv();
+}
