@@ -23,6 +23,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends procps \
     && python -m venv /opt/highs \
     && /opt/highs/bin/pip install --no-cache-dir highspy==1.16.0 numpy==2.4.6 \
     && useradd --uid 10001 --create-home app
+# One thread each for numpy's libraries: four solves already run at once.
+ENV OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
 COPY --from=build /out/ /app/
 COPY src/services/genshin-calc/rotations/ /app/rotations/
 COPY data/ /app/data/

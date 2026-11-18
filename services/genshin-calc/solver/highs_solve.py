@@ -43,6 +43,10 @@ class Model:
     def __init__(self, options, capacity, keep, require=()):
         h = highspy.Highs()
         h.setOptionValue("output_flag", False)
+        # One thread: the server runs the four breakdowns' solves at once, and
+        # HiGHS sizing its own pool from the machine's cores oversubscribed
+        # Cloud Run's instance (2+ minutes a solve against 15-20 s).
+        h.setOptionValue("threads", 1)
         self.h, self.keep, self.n = h, list(keep), len(keep)
         n = self.n
         h.addCols(n, np.zeros(n), np.zeros(n), np.ones(n), 0, np.array([], np.int32), np.array([], np.int32), np.array([]))
