@@ -1,0 +1,371 @@
+[
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-yaemiko-odette-escoffier",
+  "team": "Sandrone — Yae Miko — Odette — Escoffier / C6 Qiqi / C6 Alyosha / Sucrose",
+  "rotation": "Yae Miko 3[E] > Odette 2[E] (Q) > Escoffier (Q) E > Sandrone combo",
+  "variant": "Escoffier",
+  "combos": {
+   "sandrone": "@sandrone"
+  }
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-yaemiko-odette-sucrose",
+  "team": "Sandrone — Yae Miko — Odette — Escoffier / C6 Qiqi / C6 Alyosha / Sucrose",
+  "rotation": "Yae Miko 3[E] > Odette 2[E] (Q) > Sucrose ED N1 > Sandrone combo",
+  "variant": "Sucrose",
+  "combos": {
+   "sandrone": "@sandrone"
+  }
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-alyosha-odette-vodyanitsa",
+  "team": "Sandrone — (C6) Alyosha — Odette — Vodyanitsa / Escoffier",
+  "rotation": "Odette 2[E] (Q) > Alyosha EQ > Vodyanitsa E > Sandrone combo",
+  "variant": "Vodyanitsa",
+  "combos": {
+   "sandrone": "@sandrone"
+  }
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-alyosha-odette-escoffier",
+  "team": "Sandrone — (C6) Alyosha — Odette — Vodyanitsa / Escoffier",
+  "rotation": "Odette 2[E] (Q) > Alyosha EQ > Escoffier (Q) E > Sandrone combo",
+  "variant": "Escoffier",
+  "combos": {
+   "sandrone": "@sandrone"
+  }
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-yaemiko-qiqi-escoffier",
+  "team": "Sandrone — Yae Miko — Qiqi — Escoffier / Nicole / C6 Beidou / C6 Diona",
+  "rotation": "Yae Miko 3[E] > Qiqi E (Q) > Escoffier (Q) E > Sandrone combo",
+  "variant": "Escoffier with Qiqi on 4pc TotM",
+  "combos": {
+   "sandrone": "@sandrone"
+  }
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-yaemiko-qiqi-nicole",
+  "team": "Sandrone — Yae Miko — Qiqi — Escoffier / Nicole / C6 Beidou / C6 Diona",
+  "rotation": "Nicole E > Yae Miko 3[E] > Qiqi E > Sandrone combo",
+  "variant": "Nicole",
+  "combos": {
+   "sandrone": "@sandrone"
+  }
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-yaemiko-qiqi-beidou",
+  "team": "Sandrone — Yae Miko — Qiqi — Escoffier / Nicole / C6 Beidou / C6 Diona",
+  "rotation": "Yae Miko 3[E] > Qiqi E > Beidou EQ > Sandrone combo",
+  "variant": "C6 Beidou",
+  "combos": {
+   "sandrone": "@sandrone"
+  },
+  "cons": {
+   "beidou": 6
+  }
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-yaemiko-qiqi-diona",
+  "team": "Sandrone — Yae Miko — Qiqi — Escoffier / Nicole / C6 Beidou / C6 Diona",
+  "rotation": "Yae Miko 3[E] > Qiqi E > Diona hEQ > Sandrone combo",
+  "variant": "C6 Diona",
+  "combos": {
+   "sandrone": "@sandrone"
+  },
+  "cons": {
+   "diona": 6
+  }
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-yaemiko-escoffier-nicole",
+  "team": "Sandrone — Yae Miko — Escoffier — Nicole",
+  "rotation": "Nicole E > Yae Miko 3[E] > Escoffier (Q) E > Sandrone combo",
+  "combos": {
+   "sandrone": "@sandrone"
+  }
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-beidou-diona-sucrose",
+  "team": "Sandrone — C6 Beidou — C6 Diona — Sucrose / Xilonen",
+  "rotation": "Beidou EQ > Diona hEQ > Sucrose ED N1 > Sandrone combo",
+  "variant": "Sucrose",
+  "combos": {
+   "sandrone": "@sandrone"
+  },
+  "cons": {
+   "beidou": 6,
+   "diona": 6
+  }
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-beidou-diona-xilonen",
+  "team": "Sandrone — C6 Beidou — C6 Diona — Sucrose / Xilonen",
+  "rotation": "Beidou EQ > Diona hEQ > Xilonen E N2 > Sandrone combo",
+  "variant": "Xilonen",
+  "combos": {
+   "sandrone": "@sandrone"
+  },
+  "cons": {
+   "beidou": 6,
+   "diona": 6
+  }
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-columbina-ineffa-yaemiko",
+  "team": "Sandrone — Columbina — Ineffa — Yae Miko",
+  "rotation": "Yae Miko 3[E] > Columbina E > Ineffa E (Q) > Sandrone combo",
+  "combos": {
+   "sandrone": "@sandrone"
+  }
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-alyosha-charlotte-sucrose",
+  "team": "Sandrone — Alyosha — Charlotte / Diona — Sucrose",
+  "rotation": "Alyosha EQ > Charlotte EQ > Sucrose ED N1 (Q) > Sandrone combo",
+  "variant": "Charlotte",
+  "combos": {
+   "sandrone": "@sandrone"
+  },
+  "notes": [
+   "The first-rotation-only Sandrone E is left out."
+  ]
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-alyosha-diona-sucrose",
+  "team": "Sandrone — Alyosha — Charlotte / Diona — Sucrose",
+  "rotation": "Alyosha EQ > Diona hEQ > Sucrose ED N1 (Q) > Sandrone combo",
+  "variant": "Diona",
+  "combos": {
+   "sandrone": "@sandrone"
+  },
+  "notes": [
+   "The first-rotation-only Sandrone E is left out."
+  ]
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-odette-sucrose-luminecryo",
+  "team": "Sandrone — Odette — Sucrose — Cryo Traveler",
+  "rotation": "Odette 2[E] (Q) > Sucrose N1 ED (Q) > Cryo Traveler E N1C Q > Sandrone C E > Sucrose N1 (E) D > Sandrone combo",
+  "combos": {
+   "sandrone": "@sandrone"
+  },
+  "notes": [
+   "Sucrose's second skill when ready (its cooldown may not be back)."
+  ]
+ },
+ {
+  "guide": "Odette",
+  "url": "https://keqingmains.com/q/odette-quickguide/",
+  "file": "sandrone-yaemiko-odette-diona",
+  "team": "Odette — Yae Miko — Sandrone — Qiqi / Escoffier / C6 Beidou / C6 Diona",
+  "rotation": "Yae 3[E] > Odette 2[E] > Diona hEQ > Sandrone combo",
+  "variant": "Diona",
+  "combos": {
+   "sandrone": "@sandrone"
+  },
+  "cons": {
+   "diona": 6
+  }
+ },
+ {
+  "guide": "Odette",
+  "url": "https://keqingmains.com/q/odette-quickguide/",
+  "file": "luminecryo-yaemiko-odette-qiqi",
+  "team": "Odette — Yae Miko — Cryo Traveler — Qiqi / Escoffier / Sucrose",
+  "rotation": "Yae 3[E] > Odette E (Q) E > Qiqi E (Q) > Cryo Traveler E N2CD N1CD N2C Q N2C",
+  "variant": "Qiqi"
+ },
+ {
+  "guide": "Odette",
+  "url": "https://keqingmains.com/q/odette-quickguide/",
+  "file": "luminecryo-yaemiko-odette-escoffier",
+  "team": "Odette — Yae Miko — Cryo Traveler — Qiqi / Escoffier / Sucrose",
+  "rotation": "Yae 3[E] > Odette E (Q) E > Escoffier E > Cryo Traveler E N2CD N1CD N2C Q N2C",
+  "variant": "Escoffier"
+ },
+ {
+  "guide": "Odette",
+  "url": "https://keqingmains.com/q/odette-quickguide/",
+  "file": "luminecryo-yaemiko-odette-sucrose",
+  "team": "Odette — Yae Miko — Cryo Traveler — Qiqi / Escoffier / Sucrose",
+  "rotation": "Yae 3[E] > Odette E (Q) E > Sucrose N1 ED > Cryo Traveler E N2CD N1CD N2C Q N2C",
+  "variant": "Sucrose"
+ },
+ {
+  "guide": "Odette",
+  "url": "https://keqingmains.com/q/odette-quickguide/",
+  "file": "cyno-yaemiko-odette-qiqi",
+  "team": "Odette — Cyno — Yae Miko — Qiqi / Alyosha",
+  "rotation": "Yae 3[E] > Odette 2[E] > Qiqi E (Q) > Cyno E N1 Q N2E 4[N4D N4E]",
+  "variant": "Qiqi"
+ },
+ {
+  "guide": "Odette",
+  "url": "https://keqingmains.com/q/odette-quickguide/",
+  "file": "cyno-yaemiko-odette-alyosha",
+  "team": "Odette — Cyno — Yae Miko — Qiqi / Alyosha",
+  "rotation": "Yae 3[E] > Odette 2[E] > Alyosha Q E > Cyno E N1 Q N2E 4[N4D N4E]",
+  "variant": "Alyosha"
+ },
+ {
+  "guide": "Odette",
+  "url": "https://keqingmains.com/q/odette-quickguide/",
+  "file": "luminecryo-odette-alyosha-sucrose",
+  "team": "Odette — Cryo Traveler — Alyosha — Sucrose",
+  "rotation": "Odette 2[E] > Sucrose N1 ED > Alyosha E (Q) > Cryo Traveler E 2[N1CD] N2CD N2C Q N2CD > Odette (Q)",
+  "first": "odette",
+  "notes": [
+   "The guide's last string (Cryo Traveler N2CD N2) is left out: with it the Traveler ran out of stamina."
+  ]
+ },
+ {
+  "guide": "Odette",
+  "url": "https://keqingmains.com/q/odette-quickguide/",
+  "file": "mizuki-sucrose-odette-luminecryo",
+  "team": "Odette — Yumemizuki Mizuki — Cryo Traveler — C6 Faruzan/Sucrose",
+  "rotation": "Odette 2[E] > Sucrose ED (Q) > Cryo Traveler EQ N1C > Mizuki combo",
+  "variant": "Sucrose",
+  "combos": {
+   "yumemizukimizuki": "@mizuki"
+  }
+ },
+ {
+  "guide": "Odette",
+  "url": "https://keqingmains.com/q/odette-quickguide/",
+  "file": "ifa-odette-luminecryo-sucrose",
+  "team": "Odette — Cryo Traveler — Ifa — Sucrose",
+  "rotation": "Odette 2[E] > Sucrose ED (Q) > Cryo Traveler EQ N1C > Ifa combo",
+  "combos": {
+   "ifa": "@ifa"
+  }
+ },
+ {
+  "guide": "Vodyanitsa",
+  "url": "https://keqingmains.com/q/vodyanitsa-quickguide/",
+  "file": "luminecryo-vodyanitsa-odette-yaemiko",
+  "team": "Vodyanitsa — Cryo Traveler — Odette — Yae Miko",
+  "rotation": "Yae 3[E] > Odette (Q) E (E) > Vodyanitsa E > Cryo Traveler E 2[N2CD] N2C Q D N2C",
+  "notes": [
+   "\"Odette Q/E E\": her burst when ready, otherwise a second skill. The optional ending (Yae E Q, or Traveler D N2C) is left out."
+  ]
+ },
+ {
+  "guide": "Vodyanitsa",
+  "url": "https://keqingmains.com/q/vodyanitsa-quickguide/",
+  "file": "neuvillette-vodyanitsa-furina-escoffier",
+  "team": "Vodyanitsa — Neuvillette — Furina — Escoffier / Xilonen",
+  "rotation": "Neuvillette E > Furina ED N3 > Escoffier EQ > Vodyanitsa E Q > Furina Q > Neuvillette C E C Q > Escoffier E N1 > Vodyanitsa E Q > Neuvillette 2[C]",
+  "variant": "Escoffier"
+ },
+ {
+  "guide": "Vodyanitsa",
+  "url": "https://keqingmains.com/q/vodyanitsa-quickguide/",
+  "file": "neuvillette-vodyanitsa-furina-xilonen",
+  "team": "Vodyanitsa — Neuvillette — Furina — Escoffier / Xilonen",
+  "rotation": "Neuvillette E > Furina ED N3 > Xilonen EQ N2 > Vodyanitsa E Q > Furina Q > Neuvillette C E C Q > Xilonen E N2 > Vodyanitsa E Q > Neuvillette 2[C]",
+  "variant": "Xilonen"
+ },
+ {
+  "guide": "Vodyanitsa",
+  "url": "https://keqingmains.com/q/vodyanitsa-quickguide/",
+  "file": "neuvillette-vodyanitsa-xilonen-kazuha",
+  "team": "Vodyanitsa — Neuvillette — Xilonen — Kazuha",
+  "rotation": "Neuvillette E > Kazuha tEP > Xilonen EQ N2 > Vodyanitsa E Q > Kazuha Q tEP > Neuvillette C E C Q > Xilonen E N2 > Vodyanitsa E Q > Kazuha tEP > Neuvillette 2[C]"
+ },
+ {
+  "guide": "Vodyanitsa",
+  "url": "https://keqingmains.com/q/vodyanitsa-quickguide/",
+  "file": "luminehydro-vodyanitsa-mona-albedo",
+  "team": "Vodyanitsa — Hydro Traveler — Mona — Albedo",
+  "rotation": "Albedo E N1 > Mona Q N1 > Vodyanitsa E > Mona N1 E N1 > Hydro Traveler hE N1C (Q) > Vodyanitsa (Q)",
+  "notes": [
+   "Bursts: Traveler's and Vodyanitsa's when ready (the guide alternates them)."
+  ]
+ },
+ {
+  "guide": "Vodyanitsa",
+  "url": "https://keqingmains.com/q/vodyanitsa-quickguide/",
+  "file": "ayato-vodyanitsa-citlali-escoffier",
+  "team": "Vodyanitsa — Ayato — Citlali — Escoffier",
+  "rotation": "Ayato Q > Escoffier E > Vodyanitsa E Q > Citlali EQ > Ayato E N15 > Escoffier Q E > Vodyanitsa E Q > Citlali E > Ayato E N15"
+ },
+ {
+  "guide": "Vodyanitsa",
+  "url": "https://keqingmains.com/q/vodyanitsa-quickguide/",
+  "file": "chasca-vodyanitsa-furina-mavuika",
+  "team": "Vodyanitsa — Chasca — Furina — Mavuika",
+  "rotation": "Furina (E) D (Q) > Mavuika Q C E > Vodyanitsa E > Chasca combo",
+  "combos": {
+   "chasca": "@chasca"
+  },
+  "notes": [
+   "Furina every other rotation in the guide; here her skill and burst when ready. Chasca's combo starts with her skill."
+  ]
+ },
+ {
+  "guide": "Vodyanitsa",
+  "url": "https://keqingmains.com/q/vodyanitsa-quickguide/",
+  "file": "mizuki-vodyanitsa-odette-luminecryo",
+  "team": "Vodyanitsa — Vesna / Mizuki — Odette — Cryo Traveler",
+  "rotation": "Vodyanitsa E > Odette (Q) E (E) > Cryo Traveler E N1C Q > Mizuki combo",
+  "variant": "Mizuki",
+  "combos": {
+   "yumemizukimizuki": "@mizuki"
+  },
+  "notes": [
+   "\"Odette Q/E E\": her burst when ready, otherwise a second skill."
+  ]
+ },
+ {
+  "guide": "Vodyanitsa",
+  "url": "https://keqingmains.com/q/vodyanitsa-quickguide/",
+  "file": "mizuki-vodyanitsa-luminecryo-diona",
+  "team": "Vodyanitsa — Mizuki — Cryo Traveler — Diona",
+  "rotation": "Diona hE (Q) > Vodyanitsa E > Cryo Traveler E N1C Q > Mizuki combo",
+  "combos": {
+   "yumemizukimizuki": "@mizuki"
+  }
+ },
+ {
+  "guide": "Vodyanitsa",
+  "url": "https://keqingmains.com/q/vodyanitsa-quickguide/",
+  "file": "nilou-vodyanitsa-lauma-nahida",
+  "team": "Vodyanitsa — Nilou — Lauma — Nahida",
+  "rotation": "Vodyanitsa (E) > Nahida E Q N1 > Nilou (E) N2 (Q) > Lauma Q hE > Vodyanitsa N1 (Q) N2C N2C N2C",
+  "notes": [
+   "Nilou's burst when ready (the guide alternates a second skill and her burst); Vodyanitsa's N2C repeated three times.",
+   "Nilou's and Vodyanitsa's skills when ready: the rotation is shorter than their cooldowns."
+  ]
+ }
+]

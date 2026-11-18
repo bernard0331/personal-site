@@ -21,7 +21,8 @@ SPEC.json is a list of teams:
    "combo_source": "the guide's Q E N13 (P)",        # credit for the combo
    "first": "furina",                                # active character at the start
    "notes": ["..."],                                 # extra comment lines
-   "loops": 6}
+   "loops": 6,
+   "builds": {"lohen": ["lohen char ...;", ...]}}    # example build, when no file has one
 
 Notation (KQM's): E skill, tE tap skill, hE hold skill, shE short hold skill,
 Q burst, sQ special burst, Nk k normal attacks, C charged attack, A aimed shot,
@@ -235,7 +236,10 @@ def write(spec, out_dir):
         raise SystemExit(f"{spec['file']}: {len(members)} members {members}")
     build_lines, sources = [], {}
     for m in members:
-        lines, src = builds(m)
+        if m in spec.get("builds", {}):  # a character the database and our files lack
+            lines, src = spec["builds"][m], "this spec (see notes)"
+        else:
+            lines, src = builds(m)
         sources[m] = src
         if m in spec.get("cons", {}):
             lines = [re.sub(r"cons=\d", f"cons={spec['cons'][m]}", l) for l in lines]
@@ -272,4 +276,7 @@ if __name__ == "__main__":
     specs = json.load(open(sys.argv[1]))
     out = sys.argv[2] if len(sys.argv) > 2 else OWN
     for s in specs:
-        print(write(s, out))
+        try:
+            print(write(s, out))
+        except SystemExit as e:  # e.g. no example build: skip this team, keep going
+            print(f"SKIPPED {s['file']}: {e}", file=sys.stderr)

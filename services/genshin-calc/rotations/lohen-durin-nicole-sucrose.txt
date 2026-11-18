@@ -1,0 +1,59 @@
+# Team: Nicole, Durin, Sucrose, Lohen
+# Written for this project with tools/guide_rotation.py. Not from the KQM Sim Database.
+# Source: KQM's Lohen quick guide, https://keqingmains.com/q/lohen-quickguide/
+#   Team "Lohen — Durin — Nicole — Citlali / Xilonen / Mona (C4+) / Sucrose", sample rotation (Sucrose):
+#     Nicole EQ > Durin E N1 (Q) > Sucrose ED N1 > Lohen combo
+#   Combo: KQM's Lohen guide, standard combo (average gameplay): E 2[N1C] E/Q 4[N1C] E 5[N1C] E.
+#   Supports burst when ready (the guide assumes enough ER to burst every rotation).
+#   Durin's "E N1 Q / Q E N1": E N1, then his burst when ready.
+#   Lohen's example build (no database rotation has him): his guide's best weapon and set (Disaster and Remorse R1, 4pc Rising Winds), ATK%/Cryo/CRIT DMG main stats, and the KQM-standard substats of a database build with the same main stats (Ningguang, dtqBmffDMjpC).
+#   Example builds (KQM-standard substats) from KQM Sim Database rotations: nicole Md8hLn8jNNLJ, durin Md8hLn8jNNLJ, sucrose KkHQq8qkfjdW, lohen this spec (see notes).
+#   The optimizer replaces them with each player's own.
+
+options swap_delay=12 iteration=1000;
+
+nicole char lvl=90/90 cons=6 talent=10,10,10;
+nicole add weapon="angelosheptades" refine=5 lvl=90/90;
+nicole add set="gift" count=4;
+nicole add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 atk%=0.466;
+nicole add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=165.4 atk%=0.2976 er=0.1102 em=39.64 cr=0.2979 cd=0.1986;
+
+durin char lvl=90/90 cons=6 talent=10,10,10;
+durin add weapon="athameartis" refine=5 lvl=90/90;
+durin add set="risingwinds" count=4;
+durin add stats hp=4780 atk=311 atk%=0.466 pyro%=0.466 cd=0.622;
+durin add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.0992 er=0.1102 em=79.28 cr=0.3972 cd=0.662;
+
+sucrose char lvl=90/90 cons=6 talent=10,10,10;
+sucrose add weapon="evenstar" refine=5 lvl=90/90;
+sucrose add set="viridescentvenerer" count=4;
+sucrose add stats hp=4780 atk=311 em=561;
+sucrose add stats hp=507.88 atk=33.08 def=39.36 hp%=0.0992 atk%=0.1984 def%=0.124 em=118.92 er=0.6612 cr=0.1324 cd=0.2648;
+
+lohen char lvl=90/90 cons=0 talent=10,10,10;
+lohen add weapon="disasterandremorse" refine=1 lvl=90/90;
+lohen add set="adaycarvedfromrisingwinds" count=4;
+lohen add stats hp=4780 atk=311 atk%=0.466 cryo%=0.466 cd=0.622;
+lohen add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.248 er=0.1102 em=39.64 cr=0.3641 cd=0.662;
+
+target lvl=100 resist=0.1 radius=2 pos=0,2.4 hp=999999999;
+energy every interval=480,720 amount=1;
+
+active nicole;
+for let i=0; i<6; i=i+1 {
+  nicole skill;
+  if .nicole.burst.ready { nicole burst; }
+  durin skill;
+  durin attack:1;
+  if .durin.burst.ready { durin burst; }
+  sucrose skill;
+  sucrose dash;
+  sucrose attack:1;
+  lohen skill;
+  for let r=0; r<2; r=r+1 { lohen attack, charge; }
+  if .lohen.burst.ready { lohen burst; } else { lohen skill; }
+  for let r=0; r<4; r=r+1 { lohen attack, charge; }
+  lohen skill;
+  for let r=0; r<5; r=r+1 { lohen attack, charge; }
+  lohen skill;
+}

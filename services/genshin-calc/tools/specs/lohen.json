@@ -1,0 +1,281 @@
+[
+ {
+  "guide": "Lohen",
+  "url": "https://keqingmains.com/q/lohen-quickguide/",
+  "file": "lohen-durin-nicole-citlali",
+  "team": "Lohen — Durin — Nicole — Citlali / Xilonen / Mona (C4+) / Sucrose",
+  "rotation": "Nicole EQ > Citlali EQ > Durin E N1 (Q) > Lohen combo",
+  "combos": {
+   "lohen": "@lohen"
+  },
+  "builds": {
+   "lohen": [
+    "lohen char lvl=90/90 cons=0 talent=10,10,10;",
+    "lohen add weapon=\"disasterandremorse\" refine=1 lvl=90/90;",
+    "lohen add set=\"adaycarvedfromrisingwinds\" count=4;",
+    "lohen add stats hp=4780 atk=311 atk%=0.466 cryo%=0.466 cd=0.622;",
+    "lohen add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.248 er=0.1102 em=39.64 cr=0.3641 cd=0.662;"
+   ]
+  },
+  "notes": [
+   "Durin's \"E N1 Q / Q E N1\": E N1, then his burst when ready.",
+   "Lohen's example build (no database rotation has him): his guide's best weapon and set (Disaster and Remorse R1, 4pc Rising Winds), ATK%/Cryo/CRIT DMG main stats, and the KQM-standard substats of a database build with the same main stats (Ningguang, dtqBmffDMjpC)."
+  ],
+  "variant": "Citlali"
+ },
+ {
+  "guide": "Lohen",
+  "url": "https://keqingmains.com/q/lohen-quickguide/",
+  "file": "lohen-durin-nicole-xilonen",
+  "team": "Lohen — Durin — Nicole — Citlali / Xilonen / Mona (C4+) / Sucrose",
+  "rotation": "Nicole EQ > Xilonen E N2 (Q) > Durin E N1 (Q) > Lohen combo",
+  "combos": {
+   "lohen": "@lohen"
+  },
+  "builds": {
+   "lohen": [
+    "lohen char lvl=90/90 cons=0 talent=10,10,10;",
+    "lohen add weapon=\"disasterandremorse\" refine=1 lvl=90/90;",
+    "lohen add set=\"adaycarvedfromrisingwinds\" count=4;",
+    "lohen add stats hp=4780 atk=311 atk%=0.466 cryo%=0.466 cd=0.622;",
+    "lohen add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.248 er=0.1102 em=39.64 cr=0.3641 cd=0.662;"
+   ]
+  },
+  "notes": [
+   "Durin's \"E N1 Q / Q E N1\": E N1, then his burst when ready.",
+   "Lohen's example build (no database rotation has him): his guide's best weapon and set (Disaster and Remorse R1, 4pc Rising Winds), ATK%/Cryo/CRIT DMG main stats, and the KQM-standard substats of a database build with the same main stats (Ningguang, dtqBmffDMjpC)."
+  ],
+  "variant": "Xilonen"
+ },
+ {
+  "guide": "Lohen",
+  "url": "https://keqingmains.com/q/lohen-quickguide/",
+  "file": "lohen-durin-nicole-mona",
+  "team": "Lohen — Durin — Nicole — Citlali / Xilonen / Mona (C4+) / Sucrose",
+  "rotation": "Mona E > Nicole EQ > Durin E N1 (Q) > Mona Q N4 > Lohen combo",
+  "combos": {
+   "lohen": "@lohen"
+  },
+  "builds": {
+   "lohen": [
+    "lohen char lvl=90/90 cons=0 talent=10,10,10;",
+    "lohen add weapon=\"disasterandremorse\" refine=1 lvl=90/90;",
+    "lohen add set=\"adaycarvedfromrisingwinds\" count=4;",
+    "lohen add stats hp=4780 atk=311 atk%=0.466 cryo%=0.466 cd=0.622;",
+    "lohen add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.248 er=0.1102 em=39.64 cr=0.3641 cd=0.662;"
+   ]
+  },
+  "notes": [
+   "Durin's \"E N1 Q / Q E N1\": E N1, then his burst when ready.",
+   "Lohen's example build (no database rotation has him): his guide's best weapon and set (Disaster and Remorse R1, 4pc Rising Winds), ATK%/Cryo/CRIT DMG main stats, and the KQM-standard substats of a database build with the same main stats (Ningguang, dtqBmffDMjpC)."
+  ],
+  "variant": "Mona"
+ },
+ {
+  "guide": "Lohen",
+  "url": "https://keqingmains.com/q/lohen-quickguide/",
+  "file": "lohen-durin-nicole-sucrose",
+  "team": "Lohen — Durin — Nicole — Citlali / Xilonen / Mona (C4+) / Sucrose",
+  "rotation": "Nicole EQ > Durin E N1 (Q) > Sucrose ED N1 > Lohen combo",
+  "combos": {
+   "lohen": "@lohen"
+  },
+  "builds": {
+   "lohen": [
+    "lohen char lvl=90/90 cons=0 talent=10,10,10;",
+    "lohen add weapon=\"disasterandremorse\" refine=1 lvl=90/90;",
+    "lohen add set=\"adaycarvedfromrisingwinds\" count=4;",
+    "lohen add stats hp=4780 atk=311 atk%=0.466 cryo%=0.466 cd=0.622;",
+    "lohen add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.248 er=0.1102 em=39.64 cr=0.3641 cd=0.662;"
+   ]
+  },
+  "notes": [
+   "Durin's \"E N1 Q / Q E N1\": E N1, then his burst when ready.",
+   "Lohen's example build (no database rotation has him): his guide's best weapon and set (Disaster and Remorse R1, 4pc Rising Winds), ATK%/Cryo/CRIT DMG main stats, and the KQM-standard substats of a database build with the same main stats (Ningguang, dtqBmffDMjpC)."
+  ],
+  "variant": "Sucrose"
+ },
+ {
+  "guide": "Lohen",
+  "url": "https://keqingmains.com/q/lohen-quickguide/",
+  "file": "lohen-mavuika-nicole-citlali",
+  "team": "Lohen — Mavuika — Nicole — Citlali / Xilonen / Iansan",
+  "rotation": "Nicole EQ > Citlali EQ > Mavuika QE > Lohen combo",
+  "combos": {
+   "lohen": "@lohen"
+  },
+  "builds": {
+   "lohen": [
+    "lohen char lvl=90/90 cons=0 talent=10,10,10;",
+    "lohen add weapon=\"disasterandremorse\" refine=1 lvl=90/90;",
+    "lohen add set=\"adaycarvedfromrisingwinds\" count=4;",
+    "lohen add stats hp=4780 atk=311 atk%=0.466 cryo%=0.466 cd=0.622;",
+    "lohen add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.248 er=0.1102 em=39.64 cr=0.3641 cd=0.662;"
+   ]
+  },
+  "notes": [
+   "Lohen's example build (no database rotation has him): his guide's best weapon and set (Disaster and Remorse R1, 4pc Rising Winds), ATK%/Cryo/CRIT DMG main stats, and the KQM-standard substats of a database build with the same main stats (Ningguang, dtqBmffDMjpC)."
+  ],
+  "variant": "Citlali"
+ },
+ {
+  "guide": "Lohen",
+  "url": "https://keqingmains.com/q/lohen-quickguide/",
+  "file": "lohen-mavuika-nicole-xilonen",
+  "team": "Lohen — Mavuika — Nicole — Citlali / Xilonen / Iansan",
+  "rotation": "Nicole EQ > Mavuika E > Xilonen E N2 (Q) > Lohen combo > Mavuika Q",
+  "combos": {
+   "lohen": "@lohen"
+  },
+  "builds": {
+   "lohen": [
+    "lohen char lvl=90/90 cons=0 talent=10,10,10;",
+    "lohen add weapon=\"disasterandremorse\" refine=1 lvl=90/90;",
+    "lohen add set=\"adaycarvedfromrisingwinds\" count=4;",
+    "lohen add stats hp=4780 atk=311 atk%=0.466 cryo%=0.466 cd=0.622;",
+    "lohen add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.248 er=0.1102 em=39.64 cr=0.3641 cd=0.662;"
+   ]
+  },
+  "notes": [
+   "Lohen's example build (no database rotation has him): his guide's best weapon and set (Disaster and Remorse R1, 4pc Rising Winds), ATK%/Cryo/CRIT DMG main stats, and the KQM-standard substats of a database build with the same main stats (Ningguang, dtqBmffDMjpC)."
+  ],
+  "variant": "Xilonen"
+ },
+ {
+  "guide": "Lohen",
+  "url": "https://keqingmains.com/q/lohen-quickguide/",
+  "file": "lohen-mavuika-nicole-iansan",
+  "team": "Lohen — Mavuika — Nicole — Citlali / Xilonen / Iansan",
+  "rotation": "Nicole EQ > Mavuika E > Iansan E (C) Q > Lohen combo > Mavuika Q",
+  "combos": {
+   "lohen": "@lohen"
+  },
+  "builds": {
+   "lohen": [
+    "lohen char lvl=90/90 cons=0 talent=10,10,10;",
+    "lohen add weapon=\"disasterandremorse\" refine=1 lvl=90/90;",
+    "lohen add set=\"adaycarvedfromrisingwinds\" count=4;",
+    "lohen add stats hp=4780 atk=311 atk%=0.466 cryo%=0.466 cd=0.622;",
+    "lohen add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.248 er=0.1102 em=39.64 cr=0.3641 cd=0.662;"
+   ]
+  },
+  "notes": [
+   "Lohen's example build (no database rotation has him): his guide's best weapon and set (Disaster and Remorse R1, 4pc Rising Winds), ATK%/Cryo/CRIT DMG main stats, and the KQM-standard substats of a database build with the same main stats (Ningguang, dtqBmffDMjpC)."
+  ],
+  "variant": "Iansan"
+ },
+ {
+  "guide": "Lohen",
+  "url": "https://keqingmains.com/q/lohen-quickguide/",
+  "file": "lohen-durin-albedo-xilonen",
+  "team": "Lohen — Durin — Albedo — Xilonen",
+  "rotation": "Albedo E > Durin E N1 (Q) > Xilonen E N2 (Q) > Albedo (Q) > Lohen combo",
+  "combos": {
+   "lohen": "@lohen"
+  },
+  "builds": {
+   "lohen": [
+    "lohen char lvl=90/90 cons=0 talent=10,10,10;",
+    "lohen add weapon=\"disasterandremorse\" refine=1 lvl=90/90;",
+    "lohen add set=\"adaycarvedfromrisingwinds\" count=4;",
+    "lohen add stats hp=4780 atk=311 atk%=0.466 cryo%=0.466 cd=0.622;",
+    "lohen add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.248 er=0.1102 em=39.64 cr=0.3641 cd=0.662;"
+   ]
+  },
+  "notes": [
+   "Durin's \"E N1 Q / Q E N1\": E N1, then his burst when ready.",
+   "Lohen's example build (no database rotation has him): his guide's best weapon and set (Disaster and Remorse R1, 4pc Rising Winds), ATK%/Cryo/CRIT DMG main stats, and the KQM-standard substats of a database build with the same main stats (Ningguang, dtqBmffDMjpC)."
+  ]
+ },
+ {
+  "guide": "Lohen",
+  "url": "https://keqingmains.com/q/lohen-quickguide/",
+  "file": "lohen-durin-escoffier-furina",
+  "team": "Lohen — Durin — Escoffier — Furina",
+  "rotation": "Furina ED N1 Q > Escoffier EQ > Durin E N1 (Q) > Lohen combo",
+  "combos": {
+   "lohen": "@lohen"
+  },
+  "builds": {
+   "lohen": [
+    "lohen char lvl=90/90 cons=0 talent=10,10,10;",
+    "lohen add weapon=\"disasterandremorse\" refine=1 lvl=90/90;",
+    "lohen add set=\"adaycarvedfromrisingwinds\" count=4;",
+    "lohen add stats hp=4780 atk=311 atk%=0.466 cryo%=0.466 cd=0.622;",
+    "lohen add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.248 er=0.1102 em=39.64 cr=0.3641 cd=0.662;"
+   ]
+  },
+  "notes": [
+   "Durin's \"E N1 Q / Q E N1\": E N1, then his burst when ready.",
+   "Lohen's example build (no database rotation has him): his guide's best weapon and set (Disaster and Remorse R1, 4pc Rising Winds), ATK%/Cryo/CRIT DMG main stats, and the KQM-standard substats of a database build with the same main stats (Ningguang, dtqBmffDMjpC)."
+  ]
+ },
+ {
+  "guide": "Lohen",
+  "url": "https://keqingmains.com/q/lohen-quickguide/",
+  "file": "lohen-xiangling-bennett-kaeya",
+  "team": "Lohen — Xiangling — Bennett — Kaeya / Rosaria",
+  "rotation": "Bennett QE > Xiangling QED > Kaeya (E)Q > Lohen combo > Bennett E > Xiangling N3 > Kaeya (E)",
+  "combos": {
+   "lohen": "@lohen"
+  },
+  "builds": {
+   "lohen": [
+    "lohen char lvl=90/90 cons=0 talent=10,10,10;",
+    "lohen add weapon=\"disasterandremorse\" refine=1 lvl=90/90;",
+    "lohen add set=\"adaycarvedfromrisingwinds\" count=4;",
+    "lohen add stats hp=4780 atk=311 atk%=0.466 cryo%=0.466 cd=0.622;",
+    "lohen add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.248 er=0.1102 em=39.64 cr=0.3641 cd=0.662;"
+   ]
+  },
+  "notes": [
+   "Lohen's example build (no database rotation has him): his guide's best weapon and set (Disaster and Remorse R1, 4pc Rising Winds), ATK%/Cryo/CRIT DMG main stats, and the KQM-standard substats of a database build with the same main stats (Ningguang, dtqBmffDMjpC)."
+  ],
+  "variant": "Kaeya"
+ },
+ {
+  "guide": "Lohen",
+  "url": "https://keqingmains.com/q/lohen-quickguide/",
+  "file": "lohen-xiangling-bennett-rosaria",
+  "team": "Lohen — Xiangling — Bennett — Kaeya / Rosaria",
+  "rotation": "Bennett QE > Rosaria EQ > Xiangling QED > Lohen combo > Rosaria (E) > Bennett E > Xiangling N3",
+  "combos": {
+   "lohen": "@lohen"
+  },
+  "builds": {
+   "lohen": [
+    "lohen char lvl=90/90 cons=0 talent=10,10,10;",
+    "lohen add weapon=\"disasterandremorse\" refine=1 lvl=90/90;",
+    "lohen add set=\"adaycarvedfromrisingwinds\" count=4;",
+    "lohen add stats hp=4780 atk=311 atk%=0.466 cryo%=0.466 cd=0.622;",
+    "lohen add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.248 er=0.1102 em=39.64 cr=0.3641 cd=0.662;"
+   ]
+  },
+  "notes": [
+   "Lohen's example build (no database rotation has him): his guide's best weapon and set (Disaster and Remorse R1, 4pc Rising Winds), ATK%/Cryo/CRIT DMG main stats, and the KQM-standard substats of a database build with the same main stats (Ningguang, dtqBmffDMjpC)."
+  ],
+  "variant": "Rosaria"
+ },
+ {
+  "guide": "Vodyanitsa",
+  "url": "https://keqingmains.com/q/vodyanitsa-quickguide/",
+  "file": "lohen-vodyanitsa-mona-escoffier",
+  "team": "Vodyanitsa — Lohen — Mona — Escoffier",
+  "rotation": "Vodyanitsa E > Escoffier E > Mona Q N1 E N1 > Lohen combo",
+  "combos": {
+   "lohen": "@lohen"
+  },
+  "builds": {
+   "lohen": [
+    "lohen char lvl=90/90 cons=0 talent=10,10,10;",
+    "lohen add weapon=\"disasterandremorse\" refine=1 lvl=90/90;",
+    "lohen add set=\"adaycarvedfromrisingwinds\" count=4;",
+    "lohen add stats hp=4780 atk=311 atk%=0.466 cryo%=0.466 cd=0.622;",
+    "lohen add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.248 er=0.1102 em=39.64 cr=0.3641 cd=0.662;"
+   ]
+  },
+  "notes": [
+   "Lohen's example build (no database rotation has him): his guide's best weapon and set (Disaster and Remorse R1, 4pc Rising Winds), ATK%/Cryo/CRIT DMG main stats, and the KQM-standard substats of a database build with the same main stats (Ningguang, dtqBmffDMjpC)."
+  ]
+ }
+]
