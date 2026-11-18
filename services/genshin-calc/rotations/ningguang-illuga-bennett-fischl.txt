@@ -1,0 +1,59 @@
+# Team: Illuga, Bennett, Fischl, Ningguang
+# Written for this project with tools/guide_rotation.py. Not from the KQM Sim Database.
+# Source: KQM's Illuga quick guide, https://keqingmains.com/q/illuga-quickguide/
+#   Team "Illuga — Ningguang — Bennett — Dahlia / Fischl", sample rotation (Fischl):
+#     Illuga (E) Q > Bennett EQ > Fischl (E) (Q) > Ningguang N1 ED N1C Q C > Bennett E > Ningguang N2C
+#   Supports burst when ready (the guide assumes enough ER to burst every rotation).
+#   "Fischl E/Q": her skill or her burst, whichever is ready (skill first). The first-rotation-only Fischl E is left out.
+#   Illuga's skill when ready: this rotation is shorter than its cooldown.
+#   Example builds (KQM-standard substats) from KQM Sim Database rotations: illuga own:aratakiitto-illuga-columbina-gorou, bennett PDDjMrPMCmQz, fischl HhmB8bBH97GH, ningguang dtqBmffDMjpC.
+#   The optimizer replaces them with each player's own.
+
+options swap_delay=12 iteration=1000;
+
+illuga char lvl=90/90 cons=6 talent=10,10,10;
+illuga add weapon="dragonsbane" refine=5 lvl=90/90;
+illuga add set="silkenmoonsserenade" count=4;
+illuga add stats hp=4780 atk=311 em=187 em=187 em=187;
+illuga add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*10 em=19.82*6 cr=0.0331*2 cd=0.0662*2;
+
+bennett char lvl=90/90 cons=6 talent=10,10,10;
+bennett add weapon="aquila" refine=5 lvl=90/90;
+bennett add set="no" count=4;
+bennett add stats hp=4780 atk=311 er=0.518 pyro%=0.466 cr=0.311;
+bennett add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.0992 er=0.4408 em=39.64 cr=0.2317 cd=0.7282;
+
+fischl char lvl=90/90 cons=6 talent=10,10,10;
+fischl add weapon="elegy" refine=5 lvl=90/90;
+fischl add set="deepwood" count=4;
+fischl add stats hp=4780 atk=311 atk%=0.466 electro%=0.466 cr=0.311;
+fischl add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.0992 er=0.1653 em=59.46 cr=0.331 cd=0.7944;
+
+ningguang char lvl=90/90 cons=6 talent=10,10,10;
+ningguang add weapon="cashflowsupervision" refine=5 lvl=90/90;
+ningguang add set="mh" count=4;
+ningguang add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622;
+ningguang add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.248 er=0.1102 em=39.64 cr=0.3641 cd=0.662;
+
+target lvl=100 resist=0.1 radius=2 pos=0,2.4 hp=999999999;
+energy every interval=480,720 amount=1;
+
+active illuga;
+for let i=0; i<6; i=i+1 {
+  if .illuga.skill.ready { illuga skill; }
+  if .illuga.burst.ready { illuga burst; }
+  bennett skill;
+  if .bennett.burst.ready { bennett burst; }
+  if .fischl.skill.ready { fischl skill; }
+  if .fischl.burst.ready { fischl burst; }
+  ningguang attack:1;
+  ningguang skill;
+  ningguang dash;
+  ningguang attack:1;
+  ningguang charge;
+  if .ningguang.burst.ready { ningguang burst; }
+  ningguang charge;
+  bennett skill;
+  ningguang attack:2;
+  ningguang charge;
+}

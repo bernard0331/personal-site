@@ -6,7 +6,7 @@
 #   Combo: our zibai-illuga-linnea-columbina rotation (KQM's Zibai guide).
 #   Supports burst when ready (the guide assumes enough ER to burst every rotation).
 #   "Linnea E / Q": her burst only if healing is needed, so her skill here.
-#   Example builds (KQM-standard substats) from KQM Sim Database rotations: columbina JFwBcLbqDR9j, linnea own:aratakiitto-gorou-linnea-columbina, gorou CtQDRw9pt6f6, zibai own:zibai-illuga-linnea-columbina.
+#   Example builds (KQM-standard substats) from KQM Sim Database rotations: columbina JFwBcLbqDR9j, linnea own:aratakiitto-gorou-linnea-columbina, gorou CtQDRw9pt6f6, zibai own:zibai-aino-luminegeo-lanyan.
 #   The optimizer replaces them with each player's own.
 
 options swap_delay=12 iteration=1000;
@@ -40,12 +40,16 @@ energy every interval=480,720 amount=1;
 
 # Zibai's combo (our zibai-illuga-linnea-columbina rotation, from KQM's Zibai guide):
 # C1+: EE 4[N4E]. C0: E 4[N4E]. Either way, N1 Q replaces an N4 when Q is ready.
+# Spirit Steed's Stride needs 70 Phase Shift Radiance; in teams that trigger
+# Lunar-Crystallize less often she attacks (up to 4 more hits) until she has it.
 fn zibai_combo() {
   zibai skill;
-  if .zibai.cons >= 1 { zibai skill; }
+  if .zibai.cons >= 1 && .zibai.radiance >= 70 { zibai skill; }
   for let j=0; j<4; j=j+1 {
     if .zibai.burst.ready { zibai attack, burst; } else { zibai attack:4; }
-    zibai skill;
+    let k = 0;
+    while .zibai.status.zibai-skill > 0 && .zibai.radiance < 70 && k < 4 { zibai attack; k = k + 1; }
+    if .zibai.radiance >= 70 { zibai skill; }
   }
 }
 

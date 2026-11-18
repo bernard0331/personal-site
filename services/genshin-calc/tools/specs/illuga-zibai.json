@@ -1,0 +1,335 @@
+[
+ {
+  "guide": "Zibai",
+  "url": "https://keqingmains.com/q/zibai-quickguide/",
+  "file": "zibai-illuga-columbina-zhongli",
+  "team": "Zibai — Illuga — Zhongli/Chiori — Columbina",
+  "rotation": "Columbina E (Q) > Illuga EQ > Zhongli hED N1 > Zibai combo",
+  "combos": {
+   "zibai": "@zibai"
+  },
+  "variant": "Zhongli"
+ },
+ {
+  "guide": "Zibai",
+  "url": "https://keqingmains.com/q/zibai-quickguide/",
+  "file": "zibai-illuga-columbina-chiori",
+  "team": "Zibai — Illuga — Zhongli/Chiori — Columbina",
+  "rotation": "Columbina E (Q) > Chiori 2[E] > Illuga Q E > Zibai combo",
+  "combos": {
+   "zibai": "@zibai"
+  },
+  "variant": "Chiori"
+ },
+ {
+  "guide": "Illuga",
+  "url": "https://keqingmains.com/q/illuga-quickguide/",
+  "file": "zibai-illuga-columbina-gorou",
+  "team": "Illuga — Zibai — Columbina — Zhongli / Chiori / Gorou / Xilonen (C2)",
+  "rotation": "Columbina E (Q) > Illuga EQ > Gorou (Q) E > Zibai combo",
+  "combos": {
+   "zibai": "@zibai"
+  },
+  "variant": "Gorou"
+ },
+ {
+  "guide": "Illuga",
+  "url": "https://keqingmains.com/q/illuga-quickguide/",
+  "file": "zibai-illuga-columbina-xilonen",
+  "team": "Illuga — Zibai — Columbina — Zhongli / Chiori / Gorou / Xilonen (C2)",
+  "rotation": "Columbina E (Q) > Xilonen E N2 > Illuga EQ > Zibai combo",
+  "combos": {
+   "zibai": "@zibai"
+  },
+  "variant": "C2 Xilonen"
+ },
+ {
+  "guide": "Zibai",
+  "url": "https://keqingmains.com/q/zibai-quickguide/",
+  "file": "zibai-illuga-aino-linnea",
+  "team": "Zibai — Illuga — Linnea — Aino/Yelan/Xingqiu",
+  "rotation": "Linnea (N1) E > Aino EQ > Illuga Q E > Zibai combo",
+  "combos": {
+   "zibai": "@zibai"
+  },
+  "variant": "Aino"
+ },
+ {
+  "guide": "Zibai",
+  "url": "https://keqingmains.com/q/zibai-quickguide/",
+  "file": "zibai-illuga-yelan-linnea",
+  "team": "Zibai — Illuga — Linnea — Aino/Yelan/Xingqiu",
+  "rotation": "Linnea (N1) E > Yelan EQ N1 > Illuga Q E > Zibai combo",
+  "combos": {
+   "zibai": "@zibai"
+  },
+  "variant": "Yelan"
+ },
+ {
+  "guide": "Zibai",
+  "url": "https://keqingmains.com/q/zibai-quickguide/",
+  "file": "zibai-illuga-xingqiu-linnea",
+  "team": "Zibai — Illuga — Linnea — Aino/Yelan/Xingqiu",
+  "rotation": "Linnea (N1) E > Xingqiu ED (Q N1) > Illuga Q E > Zibai combo",
+  "combos": {
+   "zibai": "@zibai"
+  },
+  "variant": "Xingqiu"
+ },
+ {
+  "guide": "Illuga",
+  "url": "https://keqingmains.com/q/illuga-quickguide/",
+  "file": "zibai-illuga-columbina-yelan",
+  "team": "Illuga — Zibai — Columbina — Yelan / Aino (C6)",
+  "rotation": "Columbina E Q > Illuga EQ > Yelan EQ N1 > Zibai combo",
+  "combos": {
+   "zibai": "@zibai"
+  },
+  "variant": "Yelan"
+ },
+ {
+  "guide": "Illuga",
+  "url": "https://keqingmains.com/q/illuga-quickguide/",
+  "file": "zibai-illuga-columbina-aino",
+  "team": "Illuga — Zibai — Columbina — Yelan / Aino (C6)",
+  "rotation": "Aino E > Columbina E Q > Illuga EQ > Aino Q > Zibai combo",
+  "combos": {
+   "zibai": "@zibai"
+  },
+  "variant": "Aino"
+ },
+ {
+  "guide": "Illuga",
+  "url": "https://keqingmains.com/q/illuga-quickguide/",
+  "file": "zibai-illuga-aino-zhongli",
+  "team": "Illuga — Zibai — Aino — Zhongli",
+  "rotation": "Zhongli hED > Aino E N1 > Illuga EQ > Aino Q N1 > Zibai combo",
+  "combos": {
+   "zibai": "@zibai"
+  }
+ },
+ {
+  "guide": "Illuga",
+  "url": "https://keqingmains.com/q/illuga-quickguide/",
+  "file": "zibai-illuga-xingqiu-gorou",
+  "team": "Illuga — Zibai — Xingqiu — Gorou / Geo Traveler",
+  "rotation": "Xingqiu EQ N1 > Illuga EQ N1 > Gorou EQ N1 > Zibai combo > Gorou N2",
+  "combos": {
+   "zibai": "@zibai"
+  },
+  "variant": "Gorou"
+ },
+ {
+  "guide": "Illuga",
+  "url": "https://keqingmains.com/q/illuga-quickguide/",
+  "file": "zibai-illuga-aino-dahlia",
+  "team": "Illuga — Zibai — Aino — Dahlia / Ningguang",
+  "rotation": "Dahlia EQ > Illuga EQ > Aino EQ > Zibai combo",
+  "combos": {
+   "zibai": "@zibai"
+  },
+  "variant": "Dahlia"
+ },
+ {
+  "guide": "Illuga",
+  "url": "https://keqingmains.com/q/illuga-quickguide/",
+  "file": "zibai-illuga-aino-ningguang",
+  "team": "Illuga — Zibai — Aino — Dahlia / Ningguang",
+  "rotation": "Ningguang EQ > Illuga EQ > Aino EQ > Zibai combo",
+  "combos": {
+   "zibai": "@zibai"
+  },
+  "variant": "Ningguang"
+ },
+ {
+  "guide": "Zibai",
+  "url": "https://keqingmains.com/q/zibai-quickguide/",
+  "file": "zibai-linnea-columbina-xilonen",
+  "team": "Zibai — Linnea — Gorou/Xilonen — Columbina",
+  "rotation": "Columbina E (Q) > Xilonen E N2 > Linnea (N1) E > Zibai combo",
+  "combos": {
+   "zibai": "@zibai"
+  },
+  "variant": "Xilonen",
+  "notes": [
+   "The guide writes just \"Xilonen >\"; read as E N2, as in its other Xilonen rotations."
+  ]
+ },
+ {
+  "guide": "Zibai",
+  "url": "https://keqingmains.com/q/zibai-quickguide/",
+  "file": "zibai-illuga-gorou-aino",
+  "team": "Zibai — Illuga — Gorou — Aino / Yelan",
+  "rotation": "Aino E > Illuga EQ > Aino Q > Gorou (Q) E > Zibai combo",
+  "combos": {
+   "zibai": "@zibai"
+  },
+  "variant": "Aino"
+ },
+ {
+  "guide": "Zibai",
+  "url": "https://keqingmains.com/q/zibai-quickguide/",
+  "file": "zibai-illuga-gorou-yelan",
+  "team": "Zibai — Illuga — Gorou — Aino / Yelan",
+  "rotation": "Illuga EQ > Yelan EQ N1 > Gorou (Q) E > Zibai combo",
+  "combos": {
+   "zibai": "@zibai"
+  },
+  "variant": "Yelan"
+ },
+ {
+  "guide": "Zibai",
+  "url": "https://keqingmains.com/q/zibai-quickguide/",
+  "file": "zibai-xilonen-columbina-furina",
+  "team": "Zibai — Xilonen — Columbina — Furina/Aino",
+  "rotation": "Xilonen E N2 Q > Furina ED Q > Columbina EQ > Xilonen E N2 > Zibai combo",
+  "combos": {
+   "zibai": "@zibai"
+  },
+  "variant": "Furina"
+ },
+ {
+  "guide": "Zibai",
+  "url": "https://keqingmains.com/q/zibai-quickguide/",
+  "file": "zibai-xilonen-columbina-aino",
+  "team": "Zibai — Xilonen — Columbina — Furina/Aino",
+  "rotation": "Columbina E (Q) > Aino EQ > Xilonen (Q) E N2 > Zibai combo",
+  "combos": {
+   "zibai": "@zibai"
+  },
+  "variant": "Aino"
+ },
+ {
+  "guide": "Zibai",
+  "url": "https://keqingmains.com/q/zibai-quickguide/",
+  "file": "zibai-xilonen-columbina-ineffa",
+  "team": "Zibai — Xilonen/Linnea — Columbina — Ineffa",
+  "rotation": "Columbina E (Q) > Ineffa E (Q) > Xilonen E N2 > Zibai combo",
+  "combos": {
+   "zibai": "@zibai"
+  },
+  "variant": "Xilonen"
+ },
+ {
+  "guide": "Zibai",
+  "url": "https://keqingmains.com/q/zibai-quickguide/",
+  "file": "zibai-linnea-columbina-ineffa",
+  "team": "Zibai — Xilonen/Linnea — Columbina — Ineffa",
+  "rotation": "Columbina E (Q) > Ineffa E (Q) > Linnea (N1) E > Zibai combo",
+  "combos": {
+   "zibai": "@zibai"
+  },
+  "variant": "Linnea"
+ },
+ {
+  "guide": "Zibai",
+  "url": "https://keqingmains.com/q/zibai-quickguide/",
+  "file": "zibai-aino-luminegeo-lanyan",
+  "team": "Zibai — Aino — Geo — Geo/Hydro/Flex",
+  "rotation": "Geo Traveler EQ > Aino EQ > Lan Yan 2[E] > Zibai combo",
+  "combos": {
+   "zibai": "@zibai"
+  },
+  "variant": "Geo Traveler – Lan Yan"
+ },
+ {
+  "guide": "Illuga",
+  "url": "https://keqingmains.com/q/illuga-quickguide/",
+  "file": "linnea-illuga-columbina-gorou",
+  "team": "Illuga — Linnea — Columbina — Gorou (C6) / Geo Traveler",
+  "variant": "Gorou",
+  "rotation": "Linnea E > Columbina E (Q) > Gorou EQ > Illuga EQ > Linnea 3[C] > Gorou E > Linnea 5[C]",
+  "notes": [
+   "Linnea's charged shots are aimed shots in the simulator. The guide's \"(Linnea C)\" when Columbina's burst is not ready is left out."
+  ]
+ },
+ {
+  "guide": "Illuga",
+  "url": "https://keqingmains.com/q/illuga-quickguide/",
+  "file": "aratakiitto-illuga-columbina-linnea",
+  "team": "Illuga — Itto — Columbina — Linnea / Gorou (C6) / Zhongli",
+  "variant": "Linnea",
+  "rotation": "Linnea E (Q) > Columbina E (Q) > Illuga EQ > Itto combo",
+  "combos": {
+   "aratakiitto": "@aratakiitto"
+  }
+ },
+ {
+  "guide": "Illuga",
+  "url": "https://keqingmains.com/q/illuga-quickguide/",
+  "file": "aratakiitto-illuga-columbina-gorou",
+  "team": "Illuga — Itto — Columbina — Linnea / Gorou (C6) / Zhongli",
+  "variant": "Gorou",
+  "rotation": "Columbina E Q > Illuga EQ > Gorou Q E > Itto combo",
+  "combos": {
+   "aratakiitto": "@aratakiitto"
+  }
+ },
+ {
+  "guide": "Illuga",
+  "url": "https://keqingmains.com/q/illuga-quickguide/",
+  "file": "navia-illuga-columbina-yelan",
+  "team": "Illuga — Navia — Columbina — Yelan / Chiori",
+  "variant": "Yelan 1E ~18s",
+  "rotation": "Navia Q > Columbina E Q > Illuga EQ > Yelan EQ N1 > Navia tE N3D N2 > Illuga N3 > Navia tE N3D N2"
+ },
+ {
+  "guide": "Illuga",
+  "url": "https://keqingmains.com/q/illuga-quickguide/",
+  "file": "navia-illuga-columbina-chiori",
+  "team": "Illuga — Navia — Columbina — Yelan / Chiori",
+  "variant": "Chiori",
+  "rotation": "Columbina E Q > Chiori 2[E] > Illuga EQ > Navia Q tE N3D N2 > Illuga N3 > Navia tE N3D N2"
+ },
+ {
+  "guide": "Illuga",
+  "url": "https://keqingmains.com/q/illuga-quickguide/",
+  "file": "noelle-illuga-columbina-furina",
+  "team": "Illuga — Noelle — Columbina — Furina",
+  "rotation": "Furina ED Q > Columbina E Q > Illuga EQ > Noelle combo > Illuga N3",
+  "combos": {
+   "noelle": "@noelle"
+  },
+  "notes": [
+   "The guide's Noelle part is EQ 2[N3D N3] > Illuga N3 > Noelle 2[N3D N3]; the database combo below did about twice the DPS on a real account, so it replaces it."
+  ]
+ },
+ {
+  "guide": "Illuga",
+  "url": "https://keqingmains.com/q/illuga-quickguide/",
+  "file": "noelle-illuga-xingqiu-gorou",
+  "team": "Illuga — Noelle — Xingqiu — Geo Traveler / Gorou",
+  "variant": "Gorou",
+  "rotation": "Xingqiu EDQ N1 > Gorou EQ N1 > Illuga Q N1 > Noelle combo > Illuga (E)",
+  "combos": {
+   "noelle": "@noelle"
+  },
+  "notes": [
+   "The guide's Noelle part is EQ N3D N3 > Gorou E N1 > Noelle 2[N2D] N3 > Illuga E > Noelle N3; the database combo replaces it, as in the Furina team.",
+   "Gorou's second skill is left out: his 10 s cooldown is not back by then and waiting cost 5 s a rotation."
+  ]
+ },
+ {
+  "guide": "Illuga",
+  "url": "https://keqingmains.com/q/illuga-quickguide/",
+  "file": "ningguang-illuga-bennett-fischl",
+  "team": "Illuga — Ningguang — Bennett — Dahlia / Fischl",
+  "variant": "Fischl",
+  "rotation": "Illuga (E) Q > Bennett EQ > Fischl (E) (Q) > Ningguang N1 ED N1C Q C > Bennett E > Ningguang N2C",
+  "notes": [
+   "\"Fischl E/Q\": her skill or her burst, whichever is ready (skill first). The first-rotation-only Fischl E is left out.",
+   "Illuga's skill when ready: this rotation is shorter than its cooldown."
+  ]
+ },
+ {
+  "guide": "Illuga",
+  "url": "https://keqingmains.com/q/illuga-quickguide/",
+  "file": "ningguang-illuga-bennett-dahlia",
+  "team": "Illuga — Ningguang — Bennett — Dahlia / Fischl",
+  "variant": "Dahlia",
+  "rotation": "Illuga (E) Q > Bennett EQ > Dahlia EQ > Ningguang N1 ED N1C Q N1C > Bennett E > Ningguang N2C N1",
+  "notes": [
+   "Illuga's skill when ready: this rotation is shorter than its cooldown."
+  ]
+ }
+]
