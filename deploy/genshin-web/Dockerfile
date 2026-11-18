@@ -5,7 +5,9 @@
 # files: the cached KQM Sim Database, the weapon ranking and the images).
 
 # ---- Build: both Go programs, as static Linux binaries ----
-FROM golang:1.27 AS build
+# The exact Go version: the same source must give the same simulator binary,
+# which the shared cache is keyed on.
+FROM golang:1.27.4 AS build
 ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
 WORKDIR /src
 COPY src/ .

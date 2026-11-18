@@ -86,8 +86,61 @@ class Model:
         h.changeObjectiveSense(highspy.ObjSense.kMaximize)
 
     def chosen(self):
+        """The options in HiGHS's best solution; empty if it found none."""
+        if self.h.getInfo().primal_solution_status != 2:  # 2: a feasible solution exists
+            return []
         vals = self.h.getSolution().col_value
         return [i for i, c in self.x.items() if vals[c] > 0.5]
+
+    def hint(self, chosen, extra=()):
+        """Start HiGHS from a known feasible answer (the options in chosen,
+        then values for any extra columns), so that a solve stopped by its
+        time limit still returns at least that answer."""
+        vals = np.zeros(self.h.getNumCol())
+        for i in chosen:
+            if i in self.x:
+                vals[self.x[i]] = 1.0
+        for c, v in extra:
+            vals[c] = v
+        sol = highspy.HighsSolution()
+        sol.col_value = list(vals)
+        sol.value_valid = True
+        self.h.setSolution(sol)
+
+
+def greedy(options, capacity, keep, require, k):
+    """A quick answer: the pinned characters' best teams first, then the
+    strongest teams that still fit, up to k. Feasible unless a pinned
+    character could not be placed."""
+    used, picked = {}, []
+
+    def take(i):
+        need = {}
+        for r in options[i]["uses"]:
+            need[r] = need.get(r, 0) + 1
+        for r, c in need.items():
+            cap = capacity.get(r, 1)
+            if cap >= 0 and used.get(r, 0) + c > cap:
+                return False
+        for r, c in need.items():
+            used[r] = used.get(r, 0) + c
+        picked.append(i)
+        return True
+
+    order = sorted(keep, key=lambda i: -options[i]["dps"])
+    for r in require:
+        if used.get(r):
+            continue
+        for i in order:
+            if r in options[i]["uses"] and i not in picked and take(i):
+                break
+    for i in order:
+        if len(picked) >= k:
+            break
+        if i not in picked:
+            take(i)
+    ok = all(used.get(r) for r in require)
+    return picked, ok
 
 
 def solve(m, time_limit):
@@ -113,20 +166,28 @@ def main():
         print(json.dumps({"chosen": [], "optimal": True, "status": "empty"}))
         return
 
-    # 1. The most teams that fit together, at most k.
-    m = Model(options, capacity, every, req)
-    m.count(-INF, k)
-    m.maximize([1.0] * m.n)
-    status, optimal = solve(m, limit)
-    if status == "Infeasible":
-        print(json.dumps({"chosen": [], "optimal": True, "status": status, "infeasible": True}))
-        return
-    n = len(m.chosen())
+    # 1. The most teams that fit together, at most k. When the greedy answer
+    # already has k, that is the most there can be, and no solve is needed.
+    start, start_ok = greedy(options, capacity, every, req, k)
+    if start_ok and len(start) == k:
+        base, optimal = start, True
+    else:
+        m = Model(options, capacity, every, req)
+        m.count(-INF, k)
+        m.maximize([1.0] * m.n)
+        if start_ok:
+            m.hint(start)
+        status, optimal = solve(m, limit)
+        if status == "Infeasible":
+            print(json.dumps({"chosen": [], "optimal": True, "status": status, "infeasible": True}))
+            return
+        base = m.chosen() or (start if start_ok else [])
+    n = len(base)
     if n == 0:
-        print(json.dumps({"chosen": [], "optimal": optimal, "status": status}))
+        print(json.dumps({"chosen": [], "optimal": optimal, "status": "no teams"}))
         return
 
-    keep = every
+    keep, best = every, base
     if p["objective"] == "min":
         # 2. The strongest weakest team among n fitting teams: an extra column
         # z with z <= dps_i + big (1 - x_i), i.e. z + big x_i <= dps_i + big.
@@ -142,17 +203,21 @@ def main():
         m.add_rows(lo, hi, starts, idx, vals)
         costs = [0.0] * (m.n + 1); costs[z] = 1.0
         m.maximize(costs)
+        m.hint(base, [(z, min(options[i]["dps"] for i in base))])
         status, ok = solve(m, limit)
         optimal = optimal and ok
-        weakest = min(options[i]["dps"] for i in m.chosen())
+        best = m.chosen() or base
+        weakest = min(options[i]["dps"] for i in best)
         keep = [i for i in every if options[i]["dps"] >= weakest or req.intersection(options[i]["uses"])]
 
     # 3. The highest total (among teams at least as strong as the weakest).
     m = Model(options, capacity, keep, req)
     m.count(n, n)
     m.maximize([options[i]["dps"] for i in m.keep])
+    m.hint(best)
     status, ok = solve(m, limit)
-    print(json.dumps({"chosen": sorted(m.chosen()), "optimal": optimal and ok, "status": status}))
+    chosen = m.chosen() or best
+    print(json.dumps({"chosen": sorted(chosen), "optimal": optimal and ok, "status": status}))
 
 if __name__ == "__main__":
     main()

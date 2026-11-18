@@ -81,7 +81,10 @@ func newEngine(cat *catalog.Catalog, dataDir, cachePath, cacheCopy, dbPath, ownD
 		log.Printf("no weapon ranking (%v): using stand-in weapons", err)
 	}
 	if _, err := os.Stat(highsPython); err == nil {
-		e.highs = &solver.HiGHS{Python: highsPython, TimeLimit: 2 * time.Minute}
+		// Per solve; the helper starts from a quick greedy answer, so even
+		// a solve stopped by the limit returns teams (marked not proven best).
+		// Cloud Run's cores are slower than a laptop's: be generous.
+		e.highs = &solver.HiGHS{Python: highsPython, TimeLimit: 5 * time.Minute}
 	} else {
 		log.Printf("no HiGHS Python at %s: using the branch and bound", highsPython)
 	}
@@ -508,6 +511,11 @@ func (e *engine) solve(results []coarse.Result, rule *optimizer.Rule, pins []str
 			}
 		}
 		sort.Slice(bd.Teams, func(i, j int) bool { return bd.Teams[i].DPS > bd.Teams[j].DPS })
+		if len(bd.Teams) == 0 && bd.Error == "" && len(p.Teams) > 0 {
+			// Teams exist but none were chosen: never show that as a result.
+			errs[i] = fmt.Errorf("breakdown %s/%s: the solver chose no teams", bd.Name, bd.Ranking)
+			return
+		}
 		out.Breakdowns[i] = bd
 	}
 	if e.highs != nil {

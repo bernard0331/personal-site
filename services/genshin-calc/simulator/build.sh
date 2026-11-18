@@ -21,8 +21,11 @@ trap 'rm -rf "$WORK"' EXIT
 git clone --quiet --depth 1 --branch "$RELEASE" https://github.com/KQM-git/kqmsim.git "$WORK/kqmsim"
 cd "$WORK/kqmsim"
 for p in "$HERE"/patches/*.patch; do
-  git -c user.name=build -c user.email=build@localhost am --quiet --3way "$p"
+  # Each patch's own date as the commit date, so the same patches always make
+  # the same commits: Go stamps the commit into the binary, and the optimizer
+  # caches results per binary (a rebuild must not throw the cache away).
+  git -c user.name=build -c user.email=build@localhost am --quiet --3way --committer-date-is-author-date "$p"
 done
 mkdir -p "$(dirname "$OUT")"
-go build -o "$OUT" ./cmd/gcsim
+go build -trimpath -o "$OUT" ./cmd/gcsim  # -trimpath: no temporary paths in the binary
 echo "built $OUT from $RELEASE with $(ls "$HERE"/patches/*.patch | wc -l | tr -d ' ') patches"

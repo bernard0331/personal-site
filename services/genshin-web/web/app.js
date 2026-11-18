@@ -344,6 +344,7 @@ async function showRun(id) {
 
 function resultsHTML(result) {
   const bd = result.breakdowns.find(b => b.name === view.name && b.ranking === view.ranking);
+  bd.teams ||= []; // an empty breakdown comes as null
   const dps = bd.teams.map(t => t.dps);
   const avg = dps.length ? dps.reduce((a, b) => a + b, 0) / dps.length : 0;
   const k = n => Math.round(n / 1000) + 'k';
@@ -354,7 +355,7 @@ function resultsHTML(result) {
       <div class="metric"><div class="label">Weakest team</div><div class="value">${dps.length ? k(Math.min(...dps)) : '–'}</div></div>
       <div class="metric"><div class="label">Teams</div><div class="value">${dps.length}</div></div></div>
     ${bd.error ? `<p class="flag">${bd.error}</p>` : ''}${bd.optimal ? '' : '<p class="sub">The solver hit its time limit: this is the best set found, not proven best.</p>'}
-    <div id="teams">${bd.teams.map(teamHTML).join('')}</div>`;
+    <div id="teams">${bd.teams.length ? bd.teams.map(teamHTML).join('') : '<p class="sub">No teams in this breakdown.</p>'}</div>`;
 }
 
 function teamHTML(t, pos) {
