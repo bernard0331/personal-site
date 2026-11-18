@@ -22,12 +22,14 @@ const imgURL = icon => `/img/${icon}.png`;
 let catalog;               // from /api/catalog
 const byKey = { char: {}, weapon: {}, set: {} };
 const STORE = 'team-optimizer-draft';
-let draft = { chars: {}, weapons: {}, unlimited3: true, artifacts: [], options: { energy: 2, pins: [], excluded: [] } };
+const freshOptions = () => ({ energy: 2, pins: [], excluded: [] });
+// all4: weapons "Every 4-star" added, so switching it off removes only those.
+let draft = { chars: {}, weapons: {}, unlimited3: true, all4: [], artifacts: [], options: freshOptions() };
 
 function load() {
   try {
     const saved = JSON.parse(localStorage.getItem(STORE));
-    if (saved && saved.chars) draft = { ...draft, ...saved };
+    if (saved && saved.chars) draft = { ...draft, ...saved, all4: saved.all4 || [], options: { ...freshOptions(), ...saved.options } };
   } catch { /* private window or blocked storage: start empty */ }
 }
 function save() {
@@ -136,6 +138,7 @@ function drawWFilters() {
   const o = document.createElement('button'); o.className = 'chip' + (wOwned ? ' on' : ''); o.textContent = 'Owned only';
   o.onclick = () => { wOwned = !wOwned; again(); }; f.appendChild(o);
   $('unl3').classList.toggle('on', draft.unlimited3);
+  $('all4').classList.toggle('on', draft.all4.length > 0);
 }
 // 3-star and craftable 4-star weapons are cheap to get and refine: with the
 // toggle on (the default) every character can have one at R5.
@@ -305,11 +308,33 @@ async function main() {
   $('import-btn').onclick = () => $('import-file').click();
   $('import-file').onchange = e => { if (e.target.files[0]) importGood(e.target.files[0]); e.target.value = ''; };
   $('export-btn').onclick = exportGood;
+  // "Every 4-star" is a switch: on adds R1 of every 4-star not owned yet;
+  // off removes those copies again, unless they were changed since.
   $('all4').onclick = () => {
-    let n = 0;
-    for (const w of catalog.weapons) if (w.rarity === 4 && !w.craftable && !draft.weapons[w.key]) { draft.weapons[w.key] = [1]; n++; }
-    save(); drawWeapons(); toast(`Added R1 of ${n} 4-star weapons`);
+    if (draft.all4.length) {
+      let n = 0;
+      for (const k of draft.all4) {
+        const list = draft.weapons[k];
+        if (list && list.length === 1 && list[0] === 1) { delete draft.weapons[k]; n++; }
+      }
+      draft.all4 = [];
+      save(); drawWFilters(); drawWeapons(); toast(`Removed ${n} 4-star weapons it had added`);
+      return;
+    }
+    for (const w of catalog.weapons) if (w.rarity === 4 && !w.craftable && !draft.weapons[w.key]) { draft.weapons[w.key] = [1]; draft.all4.push(w.key); }
+    save(); drawWFilters(); drawWeapons(); toast(`Added R1 of ${draft.all4.length} 4-star weapons`);
   };
+  // Clear all, per step. Each asks first: there is no undo.
+  const clears = {
+    chars: ['Remove every character from your account?', () => { draft.chars = {}; drawGrid(); }],
+    weapons: ['Remove every weapon from your account?', () => { draft.weapons = {}; draft.all4 = []; drawWFilters(); drawWeapons(); }],
+    artifacts: ['Remove every artifact from your account?', () => { draft.artifacts = []; drawArtifacts(); }],
+    options: ['Reset energy drops, pins and left-out characters?', () => { draft.options = freshOptions(); drawPins(); }],
+  };
+  document.querySelectorAll('[data-clear]').forEach(b => b.onclick = () => {
+    const [question, clear] = clears[b.dataset.clear];
+    if (confirm(question)) { clear(); save(); }
+  });
   $('unl3').onclick = () => { draft.unlimited3 = !draft.unlimited3; save(); drawWFilters(); drawWeapons(); };
   segmented('energy', i => { draft.options.energy = i === 0 ? 1 : 2; save(); });
   $('optimize').onclick = () => toast('Runs are the next part of the build.');
