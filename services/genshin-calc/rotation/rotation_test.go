@@ -1,6 +1,7 @@
 package rotation
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -193,5 +194,35 @@ func TestScaleEnergy(t *testing.T) {
 	}
 	if got := ScaleEnergy(in, 1); got != in {
 		t.Errorf("rate 1 must not change the config")
+	}
+}
+
+func TestStandardBuildsAndConstellations(t *testing.T) {
+	cat, _ := catalog.Load()
+	team := func(stats string) string {
+		var b strings.Builder
+		for _, c := range []string{"bennett", "xiangling", "xingqiu", "sucrose"} {
+			fmt.Fprintf(&b, "%s char lvl=90/90 cons=%d talent=9,9,9;\n%s add weapon=\"dullblade\" refine=1 lvl=90/90;\n", c, len(c)%7, c)
+			fmt.Fprintf(&b, "%s add stats hp=4780 atk=311 atk%%=0.466 pyro%%=0.466 cr=0.311;\n%s add stats %s;\n", c, c, stats)
+		}
+		return b.String() + "while 1 { bennett attack; }\n"
+	}
+	multiplied := "def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*2 em=19.82*2 cr=0.0331*10 cd=0.0662*10"
+	written := "def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.0992 er=0.1102 em=39.64 cr=0.331 cd=0.662"
+	personal := "def%=0.051 def=16 hp=657 hp%=0.198 atk=33 atk%=0.111 em=63 cr=0.525 cd=0.761"
+	for _, c := range []struct {
+		stats string
+		want  bool
+	}{{multiplied, true}, {written, true}, {personal, false}} {
+		r, err := Parse(team(c.stats), cat)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if r.Standard() != c.want {
+			t.Errorf("Standard() = %v for %q", !c.want, c.stats)
+		}
+		if r.Members[0].Cons != len("bennett")%7 {
+			t.Errorf("bennett's constellation: %d", r.Members[0].Cons)
+		}
 	}
 }

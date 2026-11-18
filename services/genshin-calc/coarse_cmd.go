@@ -229,6 +229,10 @@ type skipReason struct {
 func makeJobs(sources []source, acc *good.Account, cat *catalog.Catalog, rule *weaponRule, iterations int) ([]coarse.Job, []skipReason) {
 	var jobs []coarse.Job
 	reasons := map[string]int{}
+	playerCons := map[string]int{}
+	for _, c := range acc.Characters {
+		playerCons[c.Key] = c.Constellation
+	}
 	for _, s := range sources {
 		if s.targets != 1 {
 			reasons["not single-target"]++
@@ -237,6 +241,12 @@ func makeJobs(sources []source, acc *good.Account, cat *catalog.Catalog, rule *w
 		rot, err := rotation.Parse(s.config, cat)
 		if err != nil {
 			reasons["cannot be read: "+err.Error()]++
+			continue
+		}
+		// Database sims built on someone's personal artifacts rate those
+		// artifacts, not the team. (Our own rotation files are standard.)
+		if s.from == "kqm-db" && !rot.Standard() {
+			reasons["built on personal artifact stats"]++
 			continue
 		}
 		cfg, weapons, err := buildConfig(rot, acc, cat, rule)
@@ -253,10 +263,15 @@ func makeJobs(sources []source, acc *good.Account, cat *catalog.Catalog, rule *w
 			reasons[err.Error()]++
 			continue
 		}
-		jobs = append(jobs, coarse.Job{
+		job := coarse.Job{
 			ID: s.id, Source: s.from, Team: rot.Team(), Weapons: weapons,
 			Config: coarse.SetIterations(cfg, iterations),
-		})
+		}
+		for _, m := range rot.Members {
+			job.RotCons = append(job.RotCons, m.Cons)
+			job.PlayerCons = append(job.PlayerCons, playerCons[m.Key])
+		}
+		jobs = append(jobs, job)
 	}
 	var list []skipReason
 	for r, n := range reasons {

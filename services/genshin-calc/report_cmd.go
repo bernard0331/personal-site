@@ -197,16 +197,7 @@ type alternatives struct {
 // team's four characters, so the solver takes at most one of them. byID finds
 // a team's result again, with a variant's weapons and estimate filled in.
 func problem(results []coarse.Result, alt alternatives) (*solver.Problem, map[string]coarse.Result) {
-	best := map[string]coarse.Result{}
-	for _, r := range results {
-		if r.Error != "" {
-			continue
-		}
-		k := coarse.TeamKey(r.Team)
-		if b, ok := best[k]; !ok || r.DPS > b.DPS {
-			best[k] = r
-		}
-	}
+	best := coarse.BestPerTeam(results)
 	inv := alt.rule.inv
 	p := &solver.Problem{Copies: map[string]int{}}
 	byID := map[string]coarse.Result{}

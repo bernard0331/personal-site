@@ -77,8 +77,8 @@ func weaponsCmd(args []string) error {
 			continue
 		}
 		rot, err := rotation.Parse(s.config, cat)
-		if err != nil {
-			continue
+		if err != nil || (s.from == "kqm-db" && !rot.Standard()) {
+			continue // unreadable, or built on personal artifact stats
 		}
 		for _, m := range rot.Members {
 			if m.Weapon != "" {

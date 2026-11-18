@@ -21,6 +21,7 @@ type Member struct {
 	Name   string // the name the script uses, which may be a short name
 	Key    string // the catalog key
 	Weapon string // catalog key of the example weapon
+	Cons   int    // the constellation the rotation was written for
 	// WeaponLocked means the script depends on the example weapon, e.g. it
 	// waits for ".jean.mods.favonius-cd", which never appears with another
 	// weapon, so the loop never ends. Such a member must keep the weapon.
@@ -51,6 +52,7 @@ var (
 	addLine    = regexp.MustCompile(`^\s*(\w+)\s+add\s+(weapon|set|stats)\b([^;]*);`)
 	weaponName = regexp.MustCompile(`weapon=\s*"(\w+)"`)
 	paramsPart = regexp.MustCompile(`\+params=\[[^\]]*\]`)
+	consPart   = regexp.MustCompile(`cons\s*=\s*(\d)`)
 	// ".jean.mods.favonius-cd": a script checking a weapon's own cooldown
 	// (including the database's "favnoius" typo).
 	weaponCheck = regexp.MustCompile(`\.(\w+)\.mods\.(fav\w*|sacrificial)-cd`)
@@ -77,7 +79,11 @@ func Parse(text string, cat *catalog.Catalog) (*Rotation, error) {
 				return nil, fmt.Errorf("rotation defines character %q twice", m[1])
 			}
 			index[ch.Key] = len(r.Members)
-			r.Members = append(r.Members, Member{Name: m[1], Key: ch.Key, params: paramsPart.FindString(m[2])})
+			cons := 0
+			if c := consPart.FindStringSubmatch(m[2]); c != nil {
+				cons, _ = strconv.Atoi(c[1])
+			}
+			r.Members = append(r.Members, Member{Name: m[1], Key: ch.Key, Cons: cons, params: paramsPart.FindString(m[2])})
 			continue
 		}
 		if m := addLine.FindStringSubmatch(line); m != nil {

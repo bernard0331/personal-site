@@ -142,7 +142,8 @@ type Picks struct {
 }
 
 // Select chooses the teams worth simulating carefully. Each team is
-// represented by its best rotation; failed results are ignored. A team is
+// represented by its best rotation by Better (constellation match first, then
+// DPS); failed results are ignored. A team is
 // taken if it is among the best overall, the best of its element, or the best
 // for any one of its members. The last rule matters for the solver: no
 // character is used twice, so every character needs good teams to choose
@@ -150,16 +151,7 @@ type Picks struct {
 //
 // The result is ordered by quick-pass DPS, best first.
 func Select(results []Result, p Picks) []Result {
-	best := map[string]Result{}
-	for _, r := range results {
-		if r.Error != "" {
-			continue
-		}
-		k := TeamKey(r.Team)
-		if b, ok := best[k]; !ok || r.DPS > b.DPS {
-			best[k] = r
-		}
-	}
+	best := BestPerTeam(results)
 	teams := make([]Result, 0, len(best))
 	for _, r := range best {
 		teams = append(teams, r)
