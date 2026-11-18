@@ -67,3 +67,35 @@ func nonzero(ts []Team) []Team {
 	}
 	return out
 }
+
+func TestHiGHSRequiresPinnedCharacters(t *testing.T) {
+	h := highsForTest(t)
+	team := func(id string, dps float64, el string, m ...string) Team {
+		return Team{ID: id, Members: m, Element: el, DPS: dps}
+	}
+	p := &Problem{Teams: []Team{
+		team("strong", 300, "pyro", "a", "b", "c", "d"),
+		team("withpin", 100, "pyro", "a", "x", "y", "z"), // the only team with x; clashes with strong
+		team("other", 200, "hydro", "e", "f", "g", "h"),
+	}}
+	got, err := p.BestHiGHS(h, 2, Sum)
+	if err != nil || ids(got.Teams)[0] != "strong" {
+		t.Fatalf("without a pin: %v %v", ids(got.Teams), err)
+	}
+	p.Require = []string{"x"}
+	got, err = p.BestHiGHS(h, 2, Sum)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := "[other withpin]"; fmt.Sprint(ids(got.Teams)) != want {
+		t.Errorf("pinned x: %v, want %s", ids(got.Teams), want)
+	}
+	el, err := p.ByElementHiGHS(h, []string{"pyro", "hydro"}, Min)
+	if err != nil || el.Teams[0].ID != "withpin" {
+		t.Errorf("by element with pin: %v %v", ids(el.Teams), err)
+	}
+	p.Require = []string{"nobody"}
+	if _, err := p.BestHiGHS(h, 2, Sum); err != ErrInfeasible {
+		t.Errorf("impossible pin: want ErrInfeasible, got %v", err)
+	}
+}

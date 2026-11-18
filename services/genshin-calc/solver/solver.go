@@ -45,6 +45,10 @@ type Problem struct {
 	// Copies is how many copies of each weapon the player has; a weapon
 	// missing from the map, or with a negative count, is unlimited.
 	Copies map[string]int
+	// Require lists characters every answer must include (pinned by the
+	// player). Only the HiGHS solver honours it; if no answer can include
+	// them all, HiGHS reports the problem as infeasible.
+	Require []string
 	// MaxSteps bounds each search (0: no bound). A search that reaches it
 	// returns the best answer found so far and sets Exhausted.
 	MaxSteps int

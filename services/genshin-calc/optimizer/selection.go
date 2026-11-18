@@ -9,7 +9,7 @@ import (
 	"github.com/bernard0331/personal-site/services/genshin-calc/weapons"
 )
 
-// The seven Elements a team can be counted under. A team whose largest damage
+// Elements are the seven a team can be counted under. A team whose largest damage
 // share is physical belongs to none of them.
 var Elements = []string{"pyro", "hydro", "electro", "cryo", "anemo", "geo", "dendro"}
 
@@ -20,7 +20,7 @@ type Alternatives struct {
 	Max    int
 }
 
-// problem turns results into solver teams: each team's best successful
+// Problem turns results into solver teams: each team's best successful
 // rotation, in its simulated weapons and in the weapon variants the trials
 // rank close behind (DPS estimated from the trials). The variants share the
 // team's four characters, so the solver takes at most one of them. byID finds

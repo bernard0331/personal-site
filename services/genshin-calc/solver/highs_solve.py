@@ -7,7 +7,8 @@ Python interface, MIT licence): pip install highspy.
 Input:
   {"options": [{"dps": 213000.0, "uses": ["c:bennett", "w:azurelight", ...]}, ...],
    "capacity": {"c:bennett": 1, "w:azurelight": 1, ...},
-   "k": 10, "objective": "sum" | "min", "time_limit": 300}
+   "k": 10, "objective": "sum" | "min", "time_limit": 300,
+   "require": ["c:arlecchino", ...]}   (optional: resources every answer must use)
 
 Each option is one team with one choice of weapons; "uses" lists what it uses
 up (characters, limited weapon copies, and for one team per element the
@@ -21,7 +22,7 @@ element). The model:
   "min": maximise z with z <= dps_i + M (1 - x_i) for every i  (best weakest),
          then, keeping only options with dps >= z, maximise the sum.
 
-Output: {"chosen": [indices], "optimal": true|false, "status": "..."}
+Output: {"chosen": [indices], "optimal": true|false, "status": "...", "infeasible": true|false}
 """
 
 import json
@@ -31,8 +32,9 @@ import sys
 import highspy
 
 
-def build(options, capacity, keep):
-    """A model over the options in keep, with the resource rows."""
+def build(options, capacity, keep, require=()):
+    """A model over the options in keep, with the resource rows; each required
+    resource (a pinned character) is used by exactly one chosen option."""
     h = highspy.Highs()
     h.setOptionValue("output_flag", False)
     x = {i: h.addBinary() for i in keep}
@@ -42,8 +44,13 @@ def build(options, capacity, keep):
             rows.setdefault(r, []).append(x[i])
     for r, xs in rows.items():
         cap = capacity.get(r, 1)
-        if cap >= 0 and len(xs) > cap:
+        if r in require:
+            h.addConstr(sum(xs) == 1)
+        elif cap >= 0 and len(xs) > cap:
             h.addConstr(sum(xs) <= cap)
+    for r in require:
+        if r not in rows:  # no team has this character at all
+            h.addConstr(h.addBinary() + 1 <= 0)  # infeasible
     return h, x
 
 
@@ -68,6 +75,7 @@ def main():
     print = lambda s: answer.write(s + "\n") or answer.flush()
     p = json.load(sys.stdin)
     options, capacity, k = p["options"], p["capacity"], p["k"]
+    req = set(p.get("require") or [])
     limit = p.get("time_limit", 300)
     every = list(range(len(options)))
     if not options:
@@ -75,10 +83,13 @@ def main():
         return
 
     # 1. The most teams that fit together, at most k.
-    h, x = build(options, capacity, every)
+    h, x = build(options, capacity, every, req)
     h.addConstr(sum(x.values()) <= k)
     h.maximize(sum(x.values()))
     status, optimal = solve(h, limit)
+    if status == "Infeasible":
+        print(json.dumps({"chosen": [], "optimal": True, "status": status, "infeasible": True}))
+        return
     n = len(chosen(h, x))
     if n == 0:
         print(json.dumps({"chosen": [], "optimal": optimal, "status": status}))
@@ -87,7 +98,7 @@ def main():
     keep = every
     if p["objective"] == "min":
         # 2. The strongest weakest team among n fitting teams.
-        h, x = build(options, capacity, every)
+        h, x = build(options, capacity, every, req)
         h.addConstr(sum(x.values()) == n)
         big = max(o["dps"] for o in options)
         z = h.addVariable(lb=0, ub=big)
@@ -97,10 +108,10 @@ def main():
         status, ok = solve(h, limit)
         optimal = optimal and ok
         weakest = min(options[i]["dps"] for i in chosen(h, x))
-        keep = [i for i in every if options[i]["dps"] >= weakest]
+        keep = [i for i in every if options[i]["dps"] >= weakest or req.intersection(options[i]["uses"])]
 
     # 3. The highest total (among teams at least as strong as the weakest).
-    h, x = build(options, capacity, keep)
+    h, x = build(options, capacity, keep, req)
     h.addConstr(sum(x.values()) == n)
     h.maximize(sum(options[i]["dps"] * x[i] for i in keep))
     status, ok = solve(h, limit)

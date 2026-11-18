@@ -5,6 +5,7 @@ import (
 	"context"
 	_ "embed"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -29,6 +30,10 @@ type Result struct {
 	Teams   []Team
 	Optimal bool
 }
+
+// ErrInfeasible means no set of teams satisfies the requirements, e.g. two
+// pinned characters only ever appear in the same team.
+var ErrInfeasible = errors.New("no set of teams includes every pinned character")
 
 // BestHiGHS is Best, solved by HiGHS.
 func (p *Problem) BestHiGHS(h *HiGHS, n int, o Objective) (Result, error) {
@@ -65,7 +70,11 @@ func (p *Problem) solveHiGHS(h *HiGHS, n int, o Objective, elements []string) (R
 		K         int            `json:"k"`
 		Objective string         `json:"objective"`
 		TimeLimit float64        `json:"time_limit"`
+		Require   []string       `json:"require,omitempty"` // resources every answer must use once
 	}{Capacity: map[string]int{}, K: n, Objective: "sum", TimeLimit: h.TimeLimit.Seconds()}
+	for _, c := range p.Require {
+		in.Require = append(in.Require, "c:"+c)
+	}
 	if o == Min {
 		in.Objective = "min"
 	}
@@ -118,11 +127,15 @@ func (p *Problem) solveHiGHS(h *HiGHS, n int, o Objective, elements []string) (R
 		return Result{}, fmt.Errorf("HiGHS helper: %v: %s", err, bytes.TrimSpace(stderr.Bytes()))
 	}
 	var out struct {
-		Chosen  []int `json:"chosen"`
-		Optimal bool  `json:"optimal"`
+		Chosen     []int `json:"chosen"`
+		Optimal    bool  `json:"optimal"`
+		Infeasible bool  `json:"infeasible"`
 	}
 	if err := json.Unmarshal(stdout.Bytes(), &out); err != nil {
 		return Result{}, fmt.Errorf("HiGHS helper output: %w", err)
+	}
+	if out.Infeasible {
+		return Result{}, ErrInfeasible
 	}
 	var r Result
 	for _, i := range out.Chosen {
