@@ -1,0 +1,60 @@
+# Team: Yae Miko, Escoffier, mitya, Sandrone
+# Written for this project with tools/guide_rotation.py. Not from the KQM Sim Database.
+# Source: Prydwen's Mitya guide, https://www.prydwen.gg/genshin-impact/characters/mitya
+#   Team "Sandrone (Yae + Mitya, Odetteless)", sample rotation:
+#     Yae 3[E] > Escoffier E > Mitya E > Sandrone combo
+#   Combo: our sandrone rotations (KQM's Sandrone guide).
+#   Supports burst when ready (the guide assumes enough ER to burst every rotation).
+#   Sandrone combo as in the Alyosha + Mitya team.
+#   Mitya's example build: Prydwen's team gear (Etherlight Spindlelute R1, 2pc+2pc EM sets) and main stats (EM/EM/CRIT); KQM-standard substats from database rotation LLntnMBNJmf7 (same main stats).
+#   Example builds (KQM-standard substats) from KQM Sim Database rotations: yaemiko CktbDtBmrqtT, escoffier dJjdJBRLgqD8, mitya this spec (see notes), sandrone own:sandrone-alyosha-charlotte-sucrose.
+#   The optimizer replaces them with each player's own.
+
+options swap_delay=12 iteration=1000;
+
+yaemiko char lvl=90/90 cons=6 talent=10,10,10;
+yaemiko add weapon="kagurasverity" refine=5 lvl=90/90;
+yaemiko add set="mh" count=5;
+yaemiko add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622;
+yaemiko add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.1984 er=0.1102 em=39.64 cr=0.3972 cd=0.662;
+
+escoffier char lvl=90/90 cons=6 talent=10,10,10;
+escoffier add weapon="symphonistofscents" refine=5 lvl=90/90;
+escoffier add set="tom" count=4;
+escoffier add stats hp=4780 atk=311 atk%=0.466 cryo%=0.466 cr=0.311;
+escoffier add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*8 em=19.82*2 cr=0.0331*8 cd=0.0662*10;
+
+mitya char lvl=90/90 cons=0 talent=10,10,10;
+mitya add weapon="etherlightspindlelute" refine=1 lvl=90/90;
+mitya add set="gildeddreams" count=2;
+mitya add set="flowerofparadiselost" count=2;
+mitya add stats hp=4780 atk=311 em=187 em=187 cr=0.311;
+mitya add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*2 em=19.82*4 cr=0.0331*10 cd=0.0662*12;
+
+sandrone char lvl=90/90 cons=0 talent=10,10,10;
+sandrone add weapon="ateaspoonoftranscendence" refine=1 lvl=90/90;
+sandrone add set="disenchantmentindeepshadow" count=4;
+sandrone add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622;
+sandrone add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*4 em=19.82*2 cr=0.0331*10 cd=0.0662*8;
+
+target lvl=100 resist=0.1 radius=2 pos=0,2.4 hp=999999999;
+energy every interval=480,720 amount=1;
+
+# Sandrone's combo (our sandrone rotations, from KQM's Sandrone guide): 3[C E] (2 at C1+),
+# bursting between when ready.
+fn sandrone_combo() {
+  let n = 3;
+  if .sandrone.cons >= 1 { n = 2; }
+  for let j=0; j<n; j=j+1 {
+    sandrone charge, skill;
+    if j < n - 1 && .sandrone.burst.ready { sandrone burst; }
+  }
+}
+
+active yaemiko;
+for let i=0; i<6; i=i+1 {
+  for let r=0; r<3; r=r+1 { yaemiko skill; }
+  escoffier skill;
+  mitya skill;
+  sandrone_combo();
+}

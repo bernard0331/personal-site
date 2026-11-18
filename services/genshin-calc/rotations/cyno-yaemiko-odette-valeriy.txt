@@ -1,0 +1,56 @@
+# Team: Yae Miko, Odette, valeriy, Cyno
+# Written for this project with tools/guide_rotation.py. Not from the KQM Sim Database.
+# Source: Prydwen's Valeriy guide, https://www.prydwen.gg/genshin-impact/characters/valeriy
+#   Team "Cyno (Valeriy C6)", sample rotation:
+#     Yae 3[E] > Odette 2[E] > Valeriy QEC > Cyno EQ N4E N5 N2E 2[N4D N4E]
+#   Supports burst when ready (the guide assumes enough ER to burst every rotation).
+#   Cyno's string is Prydwen's own.
+#   Valeriy's example build (C6, as Prydwen's teams): Finale of the Deep R5 (craftable), 4pc Noblesse, ATK% main stats; KQM-standard substats from database rotation kqm-532f5039 (same main stats).
+#   Example builds (KQM-standard substats) from KQM Sim Database rotations: yaemiko CktbDtBmrqtT, odette kqm-cb9466b0-5d3e-4ed0-87b7-2360bbc64514, valeriy this spec (see notes), cyno cnMmbLfdTQTT.
+#   The optimizer replaces them with each player's own.
+
+options swap_delay=12 iteration=1000;
+
+yaemiko char lvl=90/90 cons=6 talent=10,10,10;
+yaemiko add weapon="kagurasverity" refine=5 lvl=90/90;
+yaemiko add set="mh" count=5;
+yaemiko add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622;
+yaemiko add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.1984 er=0.1102 em=39.64 cr=0.3972 cd=0.662;
+
+odette char lvl=90/90 cons=0 talent=9,9,9;
+odette add weapon="exaiphanesblade" refine=5 lvl=90/90;
+odette add set="heartofthefurnace" count=4;
+odette add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 cd=0.622;
+odette add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*5 er=0.0551*2 em=19.82*2 cr=0.0331*12 cd=0.0662*9;
+
+valeriy char lvl=90/90 cons=6 talent=10,10,10;
+valeriy add weapon="finaleofthedeep" refine=5 lvl=90/90;
+valeriy add set="noblesseoblige" count=4;
+valeriy add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 atk%=0.466;
+valeriy add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*6 er=0.0551*7 em=19.82*2 cr=0.0331*12 cd=0.0662*3;
+
+cyno char lvl=90/90 cons=6 talent=10,10,10;
+cyno add weapon="staffofthescarletsands" refine=5 lvl=90/90;
+cyno add set="marechausseehunter" count=4;
+cyno add stats hp=4780 atk=311 em=186.5 em=186.5 cd=0.622;
+cyno add stats hp=507.88 hp%=0.0991 atk=33.07 atk%=0.2477 def=39.35 def%=0.1239 em=158.52 er=0.1101 cr=0.1652 cd=0.6605;
+
+target lvl=100 resist=0.1 radius=2 pos=0,2.4 hp=999999999;
+energy every interval=480,720 amount=1;
+
+active yaemiko;
+for let i=0; i<6; i=i+1 {
+  for let r=0; r<3; r=r+1 { yaemiko skill; }
+  for let r=0; r<2; r=r+1 { odette skill; }
+  if .valeriy.burst.ready { valeriy burst; }
+  valeriy skill;
+  valeriy charge;
+  cyno skill;
+  if .cyno.burst.ready { cyno burst; }
+  cyno attack:4;
+  cyno skill;
+  cyno attack:5;
+  cyno attack:2;
+  cyno skill;
+  for let r=0; r<2; r=r+1 { cyno attack:4; cyno dash; cyno attack:4; cyno skill; }
+}

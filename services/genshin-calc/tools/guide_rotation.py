@@ -14,6 +14,7 @@ usage: guide_rotation.py SPEC.json [OUT_DIR]
 SPEC.json is a list of teams:
   {"file": "ifa-ororon-furina-sayu",
    "guide": "Ifa", "url": "https://keqingmains.com/q/ifa-quickguide/",
+   "site": "KQM",                                    # whose guide (default KQM; e.g. Prydwen)
    "team": "Ifa — Ororon — Furina — Sayu",          # the guide's team heading
    "variant": "",                                    # e.g. "C6 Faruzan"; optional
    "rotation": "Furina ED Q > Ororon EQ > Sayu shEQ > Ifa combo",
@@ -155,7 +156,7 @@ def actions(member, text):
         if t in ("Q", "sQ") and WHEN_READY:
             out.append(f"if .{member}.burst.ready {{ {member} burst; }}")
             continue
-        act = ONE[t] if t in ONE else "attack:" + t[1:]
+        act = HOLD.get(member, ONE["hE"]) if t == "hE" else ONE[t] if t in ONE else "attack:" + t[1:]
         if t == "C" and member in BOW:
             act = "aim"  # a bow user's charged attack is an aimed shot
         out.append(f"{member} {act};")
@@ -165,6 +166,10 @@ def actions(member, text):
 ONE = {"E": "skill", "tE": "skill", "hE": "skill[hold=1]", "shE": "skill[short_hold=1]", "Q": "burst",
        "sQ": "burst", "C": "charge", "A": "aim", "D": "dash", "J": "jump", "W": "walk",
        "P": "high_plunge", "hP": "high_plunge", "lP": "low_plunge"}
+
+
+# Characters whose hold skill takes another parameter than hold=1.
+HOLD = {"beidou": "skill[counter=2]"}  # counter 2: the full hold (two hits taken)
 
 
 def translate(rotation, combos):
@@ -247,7 +252,7 @@ def write(spec, out_dir):
     team = ", ".join(NAMES_BY_KEY.get(m, m) for m in members)
     head = [f"# Team: {team}",
             "# Written for this project with tools/guide_rotation.py. Not from the KQM Sim Database.",
-            f"# Source: KQM's {spec['guide']} quick guide, {spec['url']}",
+            f"# Source: {spec.get('site', 'KQM')}'s {spec['guide']} {'quick guide' if spec.get('site', 'KQM') == 'KQM' else 'guide'}, {spec['url']}",
             f"#   Team \"{spec['team']}\", sample rotation{(' (' + spec['variant'] + ')') if spec.get('variant') else ''}:",
             f"#     {spec['rotation']}"]
     if spec.get("combo_source"):

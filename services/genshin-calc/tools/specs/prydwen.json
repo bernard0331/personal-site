@@ -1,0 +1,506 @@
+[
+ {
+  "guide": "Mitya",
+  "url": "https://www.prydwen.gg/genshin-impact/characters/mitya",
+  "file": "mitya-yaemiko-odette-valeriy",
+  "team": "Mitya Premium 7.2",
+  "rotation": "Yae 3[E] > Odette 2[E] > Valeriy EQC > Mitya combo",
+  "combos": {
+   "mitya": "@mitya"
+  },
+  "builds": {
+   "mitya": [
+    "mitya char lvl=90/90 cons=0 talent=10,10,10;",
+    "mitya add weapon=\"etherlightspindlelute\" refine=1 lvl=90/90;",
+    "mitya add set=\"gildeddreams\" count=2;",
+    "mitya add set=\"flowerofparadiselost\" count=2;",
+    "mitya add stats hp=4780 atk=311 em=187 em=187 cr=0.311;",
+    "mitya add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*2 em=19.82*4 cr=0.0331*10 cd=0.0662*12;"
+   ],
+   "valeriy": [
+    "valeriy char lvl=90/90 cons=6 talent=10,10,10;",
+    "valeriy add weapon=\"finaleofthedeep\" refine=5 lvl=90/90;",
+    "valeriy add set=\"noblesseoblige\" count=4;",
+    "valeriy add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 atk%=0.466;",
+    "valeriy add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*6 er=0.0551*7 em=19.82*2 cr=0.0331*12 cd=0.0662*3;"
+   ]
+  },
+  "notes": [
+   "Mitya's example build: Prydwen's team gear (Etherlight Spindlelute R1, 2pc+2pc EM sets) and main stats (EM/EM/CRIT); KQM-standard substats from database rotation LLntnMBNJmf7 (same main stats).",
+   "Valeriy's example build (C6, as Prydwen's teams): Finale of the Deep R5 (craftable), 4pc Noblesse, ATK% main stats; KQM-standard substats from database rotation kqm-532f5039 (same main stats)."
+  ],
+  "site": "Prydwen"
+ },
+ {
+  "guide": "Mitya",
+  "url": "https://www.prydwen.gg/genshin-impact/characters/mitya",
+  "file": "mitya-sucrose-odette-valeriy",
+  "team": "Mitya Premium (Yae -> Sucrose Variant)",
+  "rotation": "Odette 2[E] > Valeriy EQC > Sucrose N1 ED > Mitya combo",
+  "combos": {
+   "mitya": "@mitya"
+  },
+  "builds": {
+   "mitya": [
+    "mitya char lvl=90/90 cons=0 talent=10,10,10;",
+    "mitya add weapon=\"etherlightspindlelute\" refine=1 lvl=90/90;",
+    "mitya add set=\"gildeddreams\" count=2;",
+    "mitya add set=\"flowerofparadiselost\" count=2;",
+    "mitya add stats hp=4780 atk=311 em=187 em=187 cr=0.311;",
+    "mitya add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*2 em=19.82*4 cr=0.0331*10 cd=0.0662*12;"
+   ],
+   "valeriy": [
+    "valeriy char lvl=90/90 cons=6 talent=10,10,10;",
+    "valeriy add weapon=\"finaleofthedeep\" refine=5 lvl=90/90;",
+    "valeriy add set=\"noblesseoblige\" count=4;",
+    "valeriy add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 atk%=0.466;",
+    "valeriy add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*6 er=0.0551*7 em=19.82*2 cr=0.0331*12 cd=0.0662*3;"
+   ]
+  },
+  "notes": [
+   "Mitya's example build: Prydwen's team gear (Etherlight Spindlelute R1, 2pc+2pc EM sets) and main stats (EM/EM/CRIT); KQM-standard substats from database rotation LLntnMBNJmf7 (same main stats).",
+   "Valeriy's example build (C6, as Prydwen's teams): Finale of the Deep R5 (craftable), 4pc Noblesse, ATK% main stats; KQM-standard substats from database rotation kqm-532f5039 (same main stats)."
+  ],
+  "site": "Prydwen"
+ },
+ {
+  "guide": "Mitya",
+  "url": "https://www.prydwen.gg/genshin-impact/characters/mitya",
+  "file": "mitya-yaemiko-qiqi-valeriy",
+  "team": "Mitya Premium (Odette -> Qiqi Variant)",
+  "rotation": "Yae 3[E] > Qiqi E N1 > Valeriy EQC > Mitya combo",
+  "combos": {
+   "mitya": "@mitya"
+  },
+  "builds": {
+   "mitya": [
+    "mitya char lvl=90/90 cons=0 talent=10,10,10;",
+    "mitya add weapon=\"etherlightspindlelute\" refine=1 lvl=90/90;",
+    "mitya add set=\"gildeddreams\" count=2;",
+    "mitya add set=\"flowerofparadiselost\" count=2;",
+    "mitya add stats hp=4780 atk=311 em=187 em=187 cr=0.311;",
+    "mitya add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*2 em=19.82*4 cr=0.0331*10 cd=0.0662*12;"
+   ],
+   "valeriy": [
+    "valeriy char lvl=90/90 cons=6 talent=10,10,10;",
+    "valeriy add weapon=\"finaleofthedeep\" refine=5 lvl=90/90;",
+    "valeriy add set=\"noblesseoblige\" count=4;",
+    "valeriy add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 atk%=0.466;",
+    "valeriy add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*6 er=0.0551*7 em=19.82*2 cr=0.0331*12 cd=0.0662*3;"
+   ]
+  },
+  "notes": [
+   "Mitya's example build: Prydwen's team gear (Etherlight Spindlelute R1, 2pc+2pc EM sets) and main stats (EM/EM/CRIT); KQM-standard substats from database rotation LLntnMBNJmf7 (same main stats).",
+   "Valeriy's example build (C6, as Prydwen's teams): Finale of the Deep R5 (craftable), 4pc Noblesse, ATK% main stats; KQM-standard substats from database rotation kqm-532f5039 (same main stats)."
+  ],
+  "site": "Prydwen"
+ },
+ {
+  "guide": "Mitya",
+  "url": "https://www.prydwen.gg/genshin-impact/characters/mitya",
+  "file": "wriothesley-mitya-odette-yaemiko",
+  "team": "Wriothesley (Yae + Mitya)",
+  "rotation": "Yae 3[E] > Odette 2[E] > Mitya E > Wriothesley combo",
+  "combos": {
+   "wriothesley": "@wriothesley-mitya"
+  },
+  "builds": {
+   "mitya": [
+    "mitya char lvl=90/90 cons=0 talent=10,10,10;",
+    "mitya add weapon=\"etherlightspindlelute\" refine=1 lvl=90/90;",
+    "mitya add set=\"gildeddreams\" count=2;",
+    "mitya add set=\"flowerofparadiselost\" count=2;",
+    "mitya add stats hp=4780 atk=311 em=187 em=187 cr=0.311;",
+    "mitya add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*2 em=19.82*4 cr=0.0331*10 cd=0.0662*12;"
+   ]
+  },
+  "notes": [
+   "Prydwen's first rotation (E N5d 3[N5Cd] N1) is left out; every rotation here is the steady-state one.",
+   "Mitya's example build: Prydwen's team gear (Etherlight Spindlelute R1, 2pc+2pc EM sets) and main stats (EM/EM/CRIT); KQM-standard substats from database rotation LLntnMBNJmf7 (same main stats)."
+  ],
+  "site": "Prydwen"
+ },
+ {
+  "guide": "Mitya",
+  "url": "https://www.prydwen.gg/genshin-impact/characters/mitya",
+  "file": "wriothesley-mitya-escoffier-yaemiko",
+  "team": "Wriothesley (Yae + Mitya, Odetteless)",
+  "rotation": "Yae 3[E] > Escoffier E > Mitya E > Wriothesley combo",
+  "combos": {
+   "wriothesley": "@wriothesley-mitya"
+  },
+  "builds": {
+   "mitya": [
+    "mitya char lvl=90/90 cons=0 talent=10,10,10;",
+    "mitya add weapon=\"etherlightspindlelute\" refine=1 lvl=90/90;",
+    "mitya add set=\"gildeddreams\" count=2;",
+    "mitya add set=\"flowerofparadiselost\" count=2;",
+    "mitya add stats hp=4780 atk=311 em=187 em=187 cr=0.311;",
+    "mitya add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*2 em=19.82*4 cr=0.0331*10 cd=0.0662*12;"
+   ]
+  },
+  "notes": [
+   "Steady-state rotation only.",
+   "Mitya's example build: Prydwen's team gear (Etherlight Spindlelute R1, 2pc+2pc EM sets) and main stats (EM/EM/CRIT); KQM-standard substats from database rotation LLntnMBNJmf7 (same main stats)."
+  ],
+  "site": "Prydwen"
+ },
+ {
+  "guide": "Mitya",
+  "url": "https://www.prydwen.gg/genshin-impact/characters/mitya",
+  "file": "wriothesley-mitya-odette-nicole",
+  "team": "Wriothesley (Nicole + Mitya)",
+  "rotation": "Mitya E > Odette 2[E] > Nicole E > Wriothesley combo",
+  "combos": {
+   "wriothesley": "@wriothesley-mitya"
+  },
+  "builds": {
+   "mitya": [
+    "mitya char lvl=90/90 cons=0 talent=10,10,10;",
+    "mitya add weapon=\"etherlightspindlelute\" refine=1 lvl=90/90;",
+    "mitya add set=\"gildeddreams\" count=2;",
+    "mitya add set=\"flowerofparadiselost\" count=2;",
+    "mitya add stats hp=4780 atk=311 em=187 em=187 cr=0.311;",
+    "mitya add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*2 em=19.82*4 cr=0.0331*10 cd=0.0662*12;"
+   ]
+  },
+  "notes": [
+   "Steady-state rotation only.",
+   "Mitya's example build: Prydwen's team gear (Etherlight Spindlelute R1, 2pc+2pc EM sets) and main stats (EM/EM/CRIT); KQM-standard substats from database rotation LLntnMBNJmf7 (same main stats)."
+  ],
+  "site": "Prydwen"
+ },
+ {
+  "guide": "Mitya",
+  "url": "https://www.prydwen.gg/genshin-impact/characters/mitya",
+  "file": "cyno-mitya-odette-alyosha",
+  "team": "Cyno (Alyosha + Mitya)",
+  "rotation": "Mitya E > Odette 2[E] > Alyosha EQ > Cyno EQ 2[N4D] N2E 2[N4D N4E]",
+  "builds": {
+   "mitya": [
+    "mitya char lvl=90/90 cons=0 talent=10,10,10;",
+    "mitya add weapon=\"etherlightspindlelute\" refine=1 lvl=90/90;",
+    "mitya add set=\"gildeddreams\" count=2;",
+    "mitya add set=\"flowerofparadiselost\" count=2;",
+    "mitya add stats hp=4780 atk=311 em=187 em=187 cr=0.311;",
+    "mitya add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*2 em=19.82*4 cr=0.0331*10 cd=0.0662*12;"
+   ]
+  },
+  "notes": [
+   "Cyno's string is Prydwen's own.",
+   "Mitya's example build: Prydwen's team gear (Etherlight Spindlelute R1, 2pc+2pc EM sets) and main stats (EM/EM/CRIT); KQM-standard substats from database rotation LLntnMBNJmf7 (same main stats)."
+  ],
+  "site": "Prydwen"
+ },
+ {
+  "guide": "Mitya",
+  "url": "https://www.prydwen.gg/genshin-impact/characters/mitya",
+  "file": "cyno-mitya-qiqi-yaemiko",
+  "team": "Cyno (Yae + Mitya, Odetteless)",
+  "rotation": "Mitya E > Yae 3[E] > Qiqi E N1 > Cyno QE 2[N4D] N2E 2[N4D N4E]",
+  "builds": {
+   "mitya": [
+    "mitya char lvl=90/90 cons=0 talent=10,10,10;",
+    "mitya add weapon=\"etherlightspindlelute\" refine=1 lvl=90/90;",
+    "mitya add set=\"gildeddreams\" count=2;",
+    "mitya add set=\"flowerofparadiselost\" count=2;",
+    "mitya add stats hp=4780 atk=311 em=187 em=187 cr=0.311;",
+    "mitya add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*2 em=19.82*4 cr=0.0331*10 cd=0.0662*12;"
+   ]
+  },
+  "notes": [
+   "Cyno's string is Prydwen's own.",
+   "Mitya's example build: Prydwen's team gear (Etherlight Spindlelute R1, 2pc+2pc EM sets) and main stats (EM/EM/CRIT); KQM-standard substats from database rotation LLntnMBNJmf7 (same main stats)."
+  ],
+  "site": "Prydwen"
+ },
+ {
+  "guide": "Mitya",
+  "url": "https://www.prydwen.gg/genshin-impact/characters/mitya",
+  "file": "sandrone-mitya-odette-alyosha",
+  "team": "Sandrone (Alyosha + Mitya)",
+  "rotation": "Mitya E > Odette 2[E] > Alyosha EQ > Sandrone combo",
+  "combos": {
+   "sandrone": "@sandrone"
+  },
+  "builds": {
+   "mitya": [
+    "mitya char lvl=90/90 cons=0 talent=10,10,10;",
+    "mitya add weapon=\"etherlightspindlelute\" refine=1 lvl=90/90;",
+    "mitya add set=\"gildeddreams\" count=2;",
+    "mitya add set=\"flowerofparadiselost\" count=2;",
+    "mitya add stats hp=4780 atk=311 em=187 em=187 cr=0.311;",
+    "mitya add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*2 em=19.82*4 cr=0.0331*10 cd=0.0662*12;"
+   ]
+  },
+  "notes": [
+   "Prydwen writes Sandrone 3[C3E] Q; our Sandrone combo (from KQM's guide) is the same shape.",
+   "Mitya's example build: Prydwen's team gear (Etherlight Spindlelute R1, 2pc+2pc EM sets) and main stats (EM/EM/CRIT); KQM-standard substats from database rotation LLntnMBNJmf7 (same main stats)."
+  ],
+  "site": "Prydwen"
+ },
+ {
+  "guide": "Mitya",
+  "url": "https://www.prydwen.gg/genshin-impact/characters/mitya",
+  "file": "sandrone-yaemiko-escoffier-mitya",
+  "team": "Sandrone (Yae + Mitya, Odetteless)",
+  "rotation": "Yae 3[E] > Escoffier E > Mitya E > Sandrone combo",
+  "combos": {
+   "sandrone": "@sandrone"
+  },
+  "builds": {
+   "mitya": [
+    "mitya char lvl=90/90 cons=0 talent=10,10,10;",
+    "mitya add weapon=\"etherlightspindlelute\" refine=1 lvl=90/90;",
+    "mitya add set=\"gildeddreams\" count=2;",
+    "mitya add set=\"flowerofparadiselost\" count=2;",
+    "mitya add stats hp=4780 atk=311 em=187 em=187 cr=0.311;",
+    "mitya add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*2 er=0.0551*2 em=19.82*4 cr=0.0331*10 cd=0.0662*12;"
+   ]
+  },
+  "notes": [
+   "Sandrone combo as in the Alyosha + Mitya team.",
+   "Mitya's example build: Prydwen's team gear (Etherlight Spindlelute R1, 2pc+2pc EM sets) and main stats (EM/EM/CRIT); KQM-standard substats from database rotation LLntnMBNJmf7 (same main stats)."
+  ],
+  "site": "Prydwen"
+ },
+ {
+  "guide": "Valeriy",
+  "url": "https://www.prydwen.gg/genshin-impact/characters/valeriy",
+  "file": "cyno-yaemiko-odette-valeriy",
+  "team": "Cyno (Valeriy C6)",
+  "rotation": "Yae 3[E] > Odette 2[E] > Valeriy QEC > Cyno EQ N4E N5 N2E 2[N4D N4E]",
+  "builds": {
+   "valeriy": [
+    "valeriy char lvl=90/90 cons=6 talent=10,10,10;",
+    "valeriy add weapon=\"finaleofthedeep\" refine=5 lvl=90/90;",
+    "valeriy add set=\"noblesseoblige\" count=4;",
+    "valeriy add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 atk%=0.466;",
+    "valeriy add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*6 er=0.0551*7 em=19.82*2 cr=0.0331*12 cd=0.0662*3;"
+   ]
+  },
+  "notes": [
+   "Cyno's string is Prydwen's own.",
+   "Valeriy's example build (C6, as Prydwen's teams): Finale of the Deep R5 (craftable), 4pc Noblesse, ATK% main stats; KQM-standard substats from database rotation kqm-532f5039 (same main stats)."
+  ],
+  "site": "Prydwen"
+ },
+ {
+  "guide": "Vesna",
+  "url": "https://www.prydwen.gg/genshin-impact/characters/vesna",
+  "file": "vesna-faruzan-odette-luminecryo",
+  "team": "Vesna Premium",
+  "rotation": "Faruzan EQ > Cryo Traveler E N1C (Q) > Odette 2[E] > Vesna combo",
+  "combos": {
+   "vesna": "@vesna"
+  },
+  "builds": {
+   "vesna": [
+    "vesna char lvl=90/90 cons=0 talent=10,10,10;",
+    "vesna add weapon=\"emberwell\" refine=5 lvl=90/90;",
+    "vesna add set=\"scarletproof\" count=4;",
+    "vesna add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 cr=0.311;",
+    "vesna add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*4 er=0.0551*2 em=19.82*2 cr=0.0331*10 cd=0.0662*12;"
+   ]
+  },
+  "notes": [
+   "Prydwen's Traveler CA is N1C here: the simulator needs a normal attack right before Cryo Traveler's charged attack.",
+   "Cryo Traveler's CA Q happens from the second rotation; here the CA always and the burst when ready.",
+   "Vesna's example build: Emberwell R5 (craftable), 4pc Scarlet Proof, ATK%/ATK%/CRIT Rate; KQM-standard substats from database rotation kqm-532f5039 (same main stats)."
+  ],
+  "site": "Prydwen"
+ },
+ {
+  "guide": "Vesna",
+  "url": "https://www.prydwen.gg/genshin-impact/characters/vesna",
+  "file": "vesna-vodyanitsa-odette-luminecryo",
+  "team": "Vesna Premium (C6 Faruzan -> Vodyanitsa Variant)",
+  "rotation": "Cryo Traveler E N1C (Q) > Odette 2[E] > Vodyanitsa E > Vesna combo",
+  "combos": {
+   "vesna": "@vesna"
+  },
+  "builds": {
+   "vesna": [
+    "vesna char lvl=90/90 cons=0 talent=10,10,10;",
+    "vesna add weapon=\"emberwell\" refine=5 lvl=90/90;",
+    "vesna add set=\"scarletproof\" count=4;",
+    "vesna add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 cr=0.311;",
+    "vesna add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*4 er=0.0551*2 em=19.82*2 cr=0.0331*10 cd=0.0662*12;"
+   ]
+  },
+  "notes": [
+   "Prydwen's Traveler CA is N1C here: the simulator needs a normal attack right before Cryo Traveler's charged attack.",
+   "Vesna's example build: Emberwell R5 (craftable), 4pc Scarlet Proof, ATK%/ATK%/CRIT Rate; KQM-standard substats from database rotation kqm-532f5039 (same main stats)."
+  ],
+  "site": "Prydwen"
+ },
+ {
+  "guide": "Vesna",
+  "url": "https://www.prydwen.gg/genshin-impact/characters/vesna",
+  "file": "vesna-faruzan-diona-luminecryo",
+  "team": "Vesna Premium (Odette -> Diona Variant)",
+  "rotation": "Cryo Traveler E N1C (Q) > Faruzan Q > Diona EQ > Vesna combo > Faruzan E",
+  "combos": {
+   "vesna": "@vesna"
+  },
+  "cons": {
+   "diona": 6,
+   "faruzan": 6
+  },
+  "builds": {
+   "vesna": [
+    "vesna char lvl=90/90 cons=0 talent=10,10,10;",
+    "vesna add weapon=\"emberwell\" refine=5 lvl=90/90;",
+    "vesna add set=\"scarletproof\" count=4;",
+    "vesna add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 cr=0.311;",
+    "vesna add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*4 er=0.0551*2 em=19.82*2 cr=0.0331*10 cd=0.0662*12;"
+   ]
+  },
+  "notes": [
+   "Prydwen's Traveler CA is N1C here: the simulator needs a normal attack right before Cryo Traveler's charged attack.",
+   "Vesna's example build: Emberwell R5 (craftable), 4pc Scarlet Proof, ATK%/ATK%/CRIT Rate; KQM-standard substats from database rotation kqm-532f5039 (same main stats)."
+  ],
+  "site": "Prydwen"
+ },
+ {
+  "guide": "Vesna",
+  "url": "https://www.prydwen.gg/genshin-impact/characters/vesna",
+  "file": "vesna-faruzan-odette-vodyanitsa",
+  "team": "Vesna Premium 2",
+  "rotation": "Odette 2[E] > Faruzan EQ > Vodyanitsa E > Vesna E (E) (E) (Q) (E) 2[N3C (E)]",
+  "cons": {
+   "faruzan": 6
+  },
+  "builds": {
+   "vesna": [
+    "vesna char lvl=90/90 cons=0 talent=10,10,10;",
+    "vesna add weapon=\"emberwell\" refine=5 lvl=90/90;",
+    "vesna add set=\"scarletproof\" count=4;",
+    "vesna add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 cr=0.311;",
+    "vesna add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*4 er=0.0551*2 em=19.82*2 cr=0.0331*10 cd=0.0662*12;"
+   ]
+  },
+  "notes": [
+   "The second theorycrafter's simpler Vesna combo, E EE QE 2[N3C E]; her repeated skills when she has Sword Essence.",
+   "Vesna's example build: Emberwell R5 (craftable), 4pc Scarlet Proof, ATK%/ATK%/CRIT Rate; KQM-standard substats from database rotation kqm-532f5039 (same main stats)."
+  ],
+  "site": "Prydwen"
+ },
+ {
+  "guide": "Vesna",
+  "url": "https://www.prydwen.gg/genshin-impact/characters/vesna",
+  "file": "vesna-faruzan-odette-qiqi",
+  "team": "Vesna Premium 2 (Vodyanitsa -> Qiqi Variant)",
+  "rotation": "Odette 2[E] > Faruzan EQ > Qiqi E > Vesna E (E) (E) (Q) (E) 2[N3C (E)]",
+  "cons": {
+   "faruzan": 6
+  },
+  "builds": {
+   "vesna": [
+    "vesna char lvl=90/90 cons=0 talent=10,10,10;",
+    "vesna add weapon=\"emberwell\" refine=5 lvl=90/90;",
+    "vesna add set=\"scarletproof\" count=4;",
+    "vesna add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 cr=0.311;",
+    "vesna add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*4 er=0.0551*2 em=19.82*2 cr=0.0331*10 cd=0.0662*12;"
+   ]
+  },
+  "notes": [
+   "The second theorycrafter's simpler Vesna combo, E EE QE 2[N3C E]; her repeated skills when she has Sword Essence.",
+   "Vesna's example build: Emberwell R5 (craftable), 4pc Scarlet Proof, ATK%/ATK%/CRIT Rate; KQM-standard substats from database rotation kqm-532f5039 (same main stats)."
+  ],
+  "site": "Prydwen"
+ },
+ {
+  "guide": "Vesna",
+  "url": "https://www.prydwen.gg/genshin-impact/characters/vesna",
+  "file": "vesna-faruzan-odette-diona",
+  "team": "Vesna Premium 2 (Vodyanitsa -> Diona Variant)",
+  "rotation": "Diona E > Faruzan EQ > Odette 2[E] > Diona (Q) > Vesna E (E) (E) (Q) (E) 2[N3C (E)]",
+  "cons": {
+   "faruzan": 6,
+   "diona": 6
+  },
+  "builds": {
+   "vesna": [
+    "vesna char lvl=90/90 cons=0 talent=10,10,10;",
+    "vesna add weapon=\"emberwell\" refine=5 lvl=90/90;",
+    "vesna add set=\"scarletproof\" count=4;",
+    "vesna add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 cr=0.311;",
+    "vesna add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*4 er=0.0551*2 em=19.82*2 cr=0.0331*10 cd=0.0662*12;"
+   ]
+  },
+  "notes": [
+   "The second theorycrafter's simpler Vesna combo, E EE QE 2[N3C E]; her repeated skills when she has Sword Essence.",
+   "Vesna's example build: Emberwell R5 (craftable), 4pc Scarlet Proof, ATK%/ATK%/CRIT Rate; KQM-standard substats from database rotation kqm-532f5039 (same main stats)."
+  ],
+  "site": "Prydwen"
+ },
+ {
+  "guide": "Vesna",
+  "url": "https://www.prydwen.gg/genshin-impact/characters/vesna",
+  "file": "vesna-faruzan-odette-nicole",
+  "team": "Vesna Premium 2 (Vodyanitsa -> Nicole Variant)",
+  "rotation": "Nicole E > Odette 2[E] > Faruzan EQ > Vesna E (E) (E) (Q) (E) 2[N3C (E)]",
+  "cons": {
+   "faruzan": 6
+  },
+  "builds": {
+   "vesna": [
+    "vesna char lvl=90/90 cons=0 talent=10,10,10;",
+    "vesna add weapon=\"emberwell\" refine=5 lvl=90/90;",
+    "vesna add set=\"scarletproof\" count=4;",
+    "vesna add stats hp=4780 atk=311 atk%=0.466 atk%=0.466 cr=0.311;",
+    "vesna add stats def%=0.062*2 def=19.68*2 hp=253.94*2 hp%=0.0496*2 atk=16.54*2 atk%=0.0496*4 er=0.0551*2 em=19.82*2 cr=0.0331*10 cd=0.0662*12;"
+   ]
+  },
+  "notes": [
+   "The second theorycrafter's simpler Vesna combo, E EE QE 2[N3C E]; her repeated skills when she has Sword Essence.",
+   "Vesna's example build: Emberwell R5 (craftable), 4pc Scarlet Proof, ATK%/ATK%/CRIT Rate; KQM-standard substats from database rotation kqm-532f5039 (same main stats)."
+  ],
+  "site": "Prydwen"
+ },
+ {
+  "guide": "Wriothesley",
+  "url": "https://www.prydwen.gg/genshin-impact/characters/wriothesley",
+  "file": "wriothesley-yaemiko-odette-nicole",
+  "team": "Wriothesley Premium",
+  "rotation": "Nicole E > Yae 3[E] > Odette 2[E] > Wriothesley combo",
+  "combos": {
+   "wriothesley": "@wriothesley"
+  },
+  "builds": {},
+  "notes": [],
+  "site": "Prydwen"
+ },
+ {
+  "guide": "Wriothesley",
+  "url": "https://www.prydwen.gg/genshin-impact/characters/wriothesley",
+  "file": "wriothesley-beidou-odette-escoffier",
+  "team": "Wriothesley Premium (Foxless Variant)",
+  "rotation": "Escoffier E > Odette Q E > Beidou hEQ > Wriothesley combo",
+  "combos": {
+   "wriothesley": "@wriothesley"
+  },
+  "cons": {
+   "beidou": 6
+  },
+  "builds": {},
+  "notes": [],
+  "site": "Prydwen"
+ },
+ {
+  "guide": "Wriothesley",
+  "url": "https://www.prydwen.gg/genshin-impact/characters/wriothesley",
+  "file": "wriothesley-yaemiko-luminecryo-nicole",
+  "team": "Wriothesley Premium (Odette -> CMC Variant)",
+  "rotation": "Nicole E > Yae 3[E] > Cryo Traveler E N1C Q > Wriothesley combo",
+  "combos": {
+   "wriothesley": "@wriothesley"
+  },
+  "builds": {},
+  "notes": [
+   "Prydwen's Traveler CA is N1C here: the simulator needs a normal attack right before Cryo Traveler's charged attack."
+  ],
+  "site": "Prydwen"
+ }
+]

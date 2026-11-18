@@ -85,5 +85,49 @@
    "lohen skill;"
   ],
   "source": "KQM's Lohen guide, standard combo (average gameplay): E 2[N1C] E/Q 4[N1C] E 5[N1C] E"
+ },
+ "vesna": {
+  "lines": [
+   "vesna skill;",
+   "vesna attack, charge;",
+   "if .vesna.skill.ready { vesna skill; }",
+   "vesna attack, charge;",
+   "if .vesna.skill.ready { vesna skill; }",
+   "if .vesna.burst.ready { vesna burst; } else { vesna attack:3, charge; }",
+   "if .vesna.skill.ready { vesna skill; }",
+   "vesna attack, charge;",
+   "if .vesna.skill.ready { vesna skill; }",
+   "vesna attack, charge;",
+   "if .vesna.skill.ready { vesna skill; }"
+  ],
+  "source": "Prydwen's Vesna guide, premium rotation: E N1C E N1C E N3C/Q E N1C E N1C E (her repeated skills when she has Sword Essence)"
+ },
+ "mitya": {
+  "lines": [
+   "mitya skill[hold=1];",
+   "mitya charge;",
+   "if .mitya.burst.ready { mitya burst; }",
+   "mitya charge;",
+   "mitya attack:2;",
+   "mitya charge;"
+  ],
+  "source": "Prydwen's Mitya guide: hE CA(5) Q CA(5) N2 CA(2); in the simulator one charged attack in his hold state spends all his prisms"
+ },
+ "wriothesley": {
+  "lines": [
+   "wriothesley skill;",
+   "for let r=0; r<2; r=r+1 { wriothesley attack:5, charge, dash; }",
+   "wriothesley attack:5, dash;",
+   "wriothesley attack:2, charge, dash;"
+  ],
+  "source": "Prydwen's Wriothesley guide, premium rotation: E 2[N5Cd] N5d N2Cd"
+ },
+ "wriothesley-mitya": {
+  "lines": [
+   "wriothesley skill;",
+   "for let r=0; r<4; r=r+1 { wriothesley attack:5, charge, dash; }",
+   "wriothesley attack:3;"
+  ],
+  "source": "Prydwen's Mitya guide, Wriothesley teams (steady-state rotation): E 4[N5Cd] N3"
  }
 }
