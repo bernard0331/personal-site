@@ -10,10 +10,11 @@
 # afterwards; the exact source that was built is the tag plus the patch files.
 set -eu
 
-RELEASE=kqmsim-v7.3.3
+RELEASE=kqmsim-v7.3.4
 HERE=$(cd "$(dirname "$0")" && pwd)
 ROOT=$(cd "$HERE/../../.." && pwd)
 OUT=${1:-$ROOT/bin/kqmsim}
+case "$OUT" in /*) ;; *) OUT=$PWD/$OUT ;; esac  # the build runs in a temporary folder
 WORK=$(mktemp -d)
 trap 'rm -rf "$WORK"' EXIT
 

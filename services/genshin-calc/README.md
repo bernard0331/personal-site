@@ -15,7 +15,7 @@ KQM Sim and gcsim are licensed under AGPL-3.0, so this service is too. See
 
 ## The simulator
 
-The service runs KQM Sim as a command-line program: release `kqmsim-v7.3.3` plus
+The service runs KQM Sim as a command-line program: release `kqmsim-v7.3.4` plus
 a few patches from upstream gcsim that the release does not have yet, such as
 Wriothesley's and Cyno's Stellar-Conduct upgrades. See
 [simulator/README.md](simulator/README.md). Every result records the version that
