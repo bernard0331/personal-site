@@ -8,6 +8,7 @@
 //	GET /static/...     the app's scripts and styles (embedded in the binary)
 //	GET /img/<name>.png character, weapon and artifact icons, from -img
 //	GET /api/catalog    every released character, weapon and artifact set
+//	POST /api/good      read an uploaded GOOD file (untrusted) into an account
 //	GET /healthz        "ok", for the cluster's health checks
 package main
 
@@ -18,6 +19,8 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/bernard0331/personal-site/services/genshin-calc/catalog"
 )
 
 // web holds the front end. It is embedded so the binary is the whole site,
@@ -31,7 +34,11 @@ func main() {
 	imgDir := flag.String("img", "local/web-img", "directory of icons (tools/fetch_images.py fills it)")
 	flag.Parse()
 
-	catalog, err := buildCatalog()
+	cat, err := catalog.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+	catalogAPI, err := buildCatalog()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -40,7 +47,8 @@ func main() {
 	mux := http.NewServeMux()
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServerFS(static)))
 	mux.Handle("GET /img/", http.StripPrefix("/img/", imageServer(*imgDir)))
-	mux.HandleFunc("GET /api/catalog", catalog.serve)
+	mux.HandleFunc("GET /api/catalog", catalogAPI.serve)
+	mux.HandleFunc("POST /api/good", importGOOD(cat))
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("ok")) })
 	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFileFS(w, r, static, "index.html")

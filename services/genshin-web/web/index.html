@@ -1,1 +1,100 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Team optimizer</title></head><body><p>Loading…</p></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team optimizer</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <span class="brand">Team optimizer</span>
+  <nav>
+    <button id="home-btn">How it works</button>
+    <button id="import-btn">Import GOOD</button>
+    <button id="export-btn">Export GOOD</button>
+    <input type="file" id="import-file" accept=".json,application/json" hidden>
+  </nav>
+</header>
+
+<main>
+  <section class="page" data-step="-1" id="landing">
+    <div class="hero">
+      <div class="art-row" id="hero-art"></div>
+      <h1>Find your strongest teams</h1>
+      <p>Tell the optimizer which characters, weapons and artifacts you own. It simulates every team you can build and picks the best set, with no character or weapon used twice.</p>
+      <button class="primary" data-go="0" style="font-size:15px;padding:10px 22px">Start</button>
+    </div>
+    <div class="how">
+      <div class="card"><div class="num">1</div><h3>Bring your account</h3><p>Import a GOOD file from a scanner, or tap your characters and weapons in by hand. You can mix both.</p></div>
+      <div class="card"><div class="num">2</div><h3>Check it over</h3><p>Fix constellations and refinements, add anything the scan missed, and exclude artifacts you never want used.</p></div>
+      <div class="card"><div class="num">3</div><h3>Choose how to optimize</h3><p>Pick how generous energy drops are, and characters to always include or leave out.</p></div>
+      <div class="card"><div class="num">4</div><h3>Get your teams</h3><p>Seven teams, one per element, or ten of any element. Ranked by your weakest team or your average.</p></div>
+    </div>
+    <h3 style="text-align:center;margin-top:8px">What the optimizer assumes</h3>
+    <div class="assume"><span>Characters level 90, talents 10</span><span>Weapons level 90 at your refinements</span><span>KQM-standard artifacts</span><span>One target</span><span>Rotations from the KQM Sim Database and guides</span></div>
+    <div class="faq">
+      <details><summary>Why are the numbers different from my damage in game?</summary><p>The simulator plays each team the same way every time, against one standard target, with the assumptions above. It is built to compare teams fairly, not to match a single run.</p></details>
+      <details><summary>Where do the rotations come from?</summary><p>The KQM Sim Database and KQM guides, credited on every team. Teams the database lacks get rotations from trusted guides.</p></details>
+      <details><summary>Quick or refined?</summary><p>Quick simulates every team you can field in minutes. Refined runs the most promising teams again with optimised substats; it is coming soon.</p></details>
+    </div>
+  </section>
+
+  <div class="steps" id="steps"></div>
+
+  <section class="page" data-step="0">
+    <div class="section-head">
+      <div><h2>Characters</h2><div class="sub">Click a portrait to add or remove it, hover an owned one to set its constellation</div></div>
+    </div>
+    <div class="toolbar" id="filters"><input type="search" id="search" placeholder="Search characters"></div>
+    <div class="grid" id="grid"></div>
+    <div class="nav-foot"><span class="sub" id="ccount"></span><button class="primary" data-go="1">Next: weapons</button></div>
+  </section>
+
+  <section class="page" data-step="1">
+    <div class="section-head">
+      <div><h2>Weapons</h2><div class="sub">Click a weapon to add it, + for another copy, a refinement to change it</div></div>
+      <div style="display:flex;gap:6px"><button class="chip" id="all4">Add every 4-star (R1)</button><button class="chip" id="unl3">Unlimited 3-stars (R5)</button></div>
+    </div>
+    <div class="toolbar" id="wfilters"><input type="search" id="wsearch" placeholder="Search weapons"></div>
+    <div class="wgrid" id="wgrid"></div>
+    <div class="nav-foot"><button data-go="0">Back</button><button class="primary" data-go="2">Next: artifacts</button></div>
+  </section>
+
+  <section class="page" data-step="2">
+    <div class="section-head">
+      <div><h2>Artifacts</h2><div class="sub">From your GOOD file · used when you optimize with your own artifacts. Every piece counts as unequipped.</div></div>
+      <div style="display:flex;gap:8px;align-items:center"><span class="sub" id="acount"></span></div>
+    </div>
+    <div class="toolbar" id="afilters"></div>
+    <div class="agrid" id="agrid"></div>
+    <div class="nav-foot"><button data-go="1">Back</button><button class="primary" data-go="3">Next: optimize</button></div>
+  </section>
+
+  <section class="page" data-step="3">
+    <div class="section-head"><div><h2>Optimize</h2><div class="sub">Choose how teams are built and simulated</div></div></div>
+    <div style="margin-top:16px">
+      <div class="opt"><div><div class="t">Artifacts</div><div class="sub">What every character wears</div></div>
+        <div><div class="seg" id="artmode"><button class="on">KQM standard</button><button disabled>Top 1%</button><button disabled>Your artifacts</button></div>
+        <div class="sub" style="margin-top:6px">Top 1% and your own artifacts arrive with refined runs.</div></div></div>
+      <div class="opt"><div><div class="t">Energy drops</div><div class="sub">Particles from enemies</div></div>
+        <div><div class="seg" id="energy"><button>KQM standard</button><button class="on">Generous (×2)</button></div>
+        <div class="sub" style="margin-top:6px">KQM standard is a particle every 8–12 s. Generous matches dummy tests in the game.</div></div></div>
+      <div class="opt"><div><div class="t">Always include</div><div class="sub">Pinned characters get a team</div></div><div id="pins"></div></div>
+      <div class="opt"><div><div class="t">Leave out</div><div class="sub">Never used in any team</div></div><div id="excl"></div></div>
+    </div>
+    <h3 style="margin:22px 0 10px">Run</h3>
+    <div style="display:flex;gap:12px;flex-wrap:wrap">
+      <div class="runcard on"><div class="t">Quick</div><div class="sub">Every team you can field, rough numbers · a few minutes</div></div>
+      <div class="runcard disabled"><div class="t">Refined</div><div class="sub">Coming soon: the most promising teams again, with optimised substats</div></div>
+    </div>
+    <div class="nav-foot"><button data-go="2">Back</button><button class="primary" id="optimize">Optimize</button></div>
+  </section>
+
+  <section class="page" data-step="4" id="run"></section>
+</main>
+
+<footer>Character, weapon and artifact images belong to HoYoverse. This tool is not affiliated with or endorsed by HoYoverse. Rotations from the KQM Sim Database and KQM guides, credited per team.</footer>
+<script type="module" src="/static/app.js"></script>
+</body>
+</html>
