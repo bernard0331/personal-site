@@ -268,10 +268,14 @@ func (e *engine) solve(results []coarse.Result, rule *optimizer.Rule, pins []str
 	p, byID := optimizer.Problem(results, optimizer.Alternatives{Rule: rule, Within: 0.10, Max: 4})
 	p.Require = pins
 	out := &Result{Teams: len(coarse.BestPerTeam(results))}
-	for _, b := range []struct {
+	type job struct {
 		name string
 		obj  solver.Objective
-	}{{"element", solver.Min}, {"element", solver.Sum}, {"any", solver.Min}, {"any", solver.Sum}} {
+	}
+	jobs := []job{{"element", solver.Min}, {"element", solver.Sum}, {"any", solver.Min}, {"any", solver.Sum}}
+	out.Breakdowns = make([]Breakdown, len(jobs))
+	errs := make([]error, len(jobs))
+	solve := func(i int, b job) {
 		bd := Breakdown{Name: b.name, Ranking: map[solver.Objective]string{solver.Min: "min", solver.Sum: "sum"}[b.obj]}
 		var teams []solver.Team
 		if e.highs != nil {
@@ -285,7 +289,8 @@ func (e *engine) solve(results []coarse.Result, rule *optimizer.Rule, pins []str
 			if errors.Is(err, solver.ErrInfeasible) {
 				bd.Error = err.Error()
 			} else if err != nil {
-				return nil, err
+				errs[i] = err
+				return
 			}
 			teams, bd.Optimal = r.Teams, r.Optimal
 		} else {
@@ -298,13 +303,31 @@ func (e *engine) solve(results []coarse.Result, rule *optimizer.Rule, pins []str
 			bd.Optimal = !p.Exhausted
 		}
 		for _, t := range teams {
-			if t.ID == "" {
-				continue
+			if t.ID != "" {
+				bd.Teams = append(bd.Teams, teamView(byID[t.ID], t))
 			}
-			bd.Teams = append(bd.Teams, teamView(byID[t.ID], t))
 		}
 		sort.Slice(bd.Teams, func(i, j int) bool { return bd.Teams[i].DPS > bd.Teams[j].DPS })
-		out.Breakdowns = append(out.Breakdowns, bd)
+		out.Breakdowns[i] = bd
+	}
+	if e.highs != nil {
+		// Each HiGHS solve is its own process and only reads the problem, so
+		// the four breakdowns are solved at the same time.
+		var wg sync.WaitGroup
+		for i, b := range jobs {
+			wg.Add(1)
+			go func() { defer wg.Done(); solve(i, b) }()
+		}
+		wg.Wait()
+	} else {
+		for i, b := range jobs { // the branch and bound keeps state on the problem
+			solve(i, b)
+		}
+	}
+	for _, err := range errs {
+		if err != nil {
+			return nil, err
+		}
 	}
 	return out, nil
 }
