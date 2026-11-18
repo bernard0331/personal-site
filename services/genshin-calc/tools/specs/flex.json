@@ -1,0 +1,283 @@
+[
+ {
+  "guide": "Linnea",
+  "url": "https://keqingmains.com/q/linnea-quickguide/",
+  "file": "noelle-linnea-aino-luminegeo",
+  "team": "Linnea — Noelle — Aino — Geo Traveler / Gorou",
+  "variant": "Geo Traveler (flex option)",
+  "rotation": "Linnea E > Aino EQ > Geo Traveler EQ > Noelle combo",
+  "combos": {
+   "noelle": "@noelle"
+  },
+  "notes": [
+   "Flex option: the guide lists Geo Traveler for this slot without a sample rotation. This is the Gorou rotation with Geo Traveler in Gorou's place, doing \"Geo Traveler EQ\" (as in KQM's Zibai guide sample rotations)."
+  ]
+ },
+ {
+  "guide": "Illuga",
+  "url": "https://keqingmains.com/q/illuga-quickguide/",
+  "file": "noelle-illuga-xingqiu-luminegeo",
+  "team": "Illuga — Noelle — Xingqiu — Geo Traveler / Gorou",
+  "variant": "Geo Traveler (flex option)",
+  "rotation": "Xingqiu EDQ N1 > Geo Traveler EQ > Illuga Q N1 > Noelle combo > Illuga (E)",
+  "combos": {
+   "noelle": "@noelle"
+  },
+  "notes": [
+   "The guide's Noelle part is EQ N3D N3 > Gorou E N1 > Noelle 2[N2D] N3 > Illuga E > Noelle N3; the database combo replaces it, as in the Furina team.",
+   "Gorou's second skill is left out: his 10 s cooldown is not back by then and waiting cost 5 s a rotation.",
+   "Flex option: the guide lists Geo Traveler for this slot without a sample rotation. This is the Gorou rotation with Geo Traveler in Gorou's place, doing \"Geo Traveler EQ\" (as in KQM's Zibai guide sample rotations)."
+  ]
+ },
+ {
+  "guide": "Illuga",
+  "url": "https://keqingmains.com/q/illuga-quickguide/",
+  "file": "aratakiitto-illuga-columbina-zhongli",
+  "team": "Illuga — Itto — Columbina — Linnea / Gorou (C6) / Zhongli",
+  "variant": "Zhongli (flex option)",
+  "rotation": "Columbina E Q > Illuga EQ > Zhongli hED > Itto combo",
+  "combos": {
+   "aratakiitto": "@aratakiitto"
+  },
+  "notes": [
+   "Flex option: the guide lists Zhongli for this slot without a sample rotation. This is the Gorou rotation with Zhongli in Gorou's place, doing \"Zhongli hED\" (as in KQM's Zibai guide sample rotations)."
+  ]
+ },
+ {
+  "guide": "Illuga",
+  "url": "https://keqingmains.com/q/illuga-quickguide/",
+  "file": "zibai-illuga-xingqiu-luminegeo",
+  "team": "Illuga — Zibai — Xingqiu — Gorou / Geo Traveler",
+  "rotation": "Xingqiu EQ N1 > Illuga EQ N1 > Geo Traveler EQ > Zibai combo",
+  "combos": {
+   "zibai": "@zibai"
+  },
+  "variant": "Geo Traveler (flex option)",
+  "notes": [
+   "Flex option: the guide lists Geo Traveler for this slot without a sample rotation. This is the Gorou rotation with Geo Traveler in Gorou's place, doing \"Geo Traveler EQ\" (as in KQM's Zibai guide sample rotations).",
+   "The base rotation's closing Gorou N2 is left out."
+  ]
+ },
+ {
+  "guide": "Illuga",
+  "url": "https://keqingmains.com/q/illuga-quickguide/",
+  "file": "linnea-illuga-columbina-luminegeo",
+  "team": "Illuga — Linnea — Columbina — Gorou (C6) / Geo Traveler",
+  "variant": "Geo Traveler (flex option)",
+  "rotation": "Linnea E > Columbina E (Q) > Geo Traveler EQ > Illuga EQ > Linnea 3[C] > Geo Traveler (E) > Linnea 5[C]",
+  "notes": [
+   "Linnea's charged shots are aimed shots in the simulator. The guide's \"(Linnea C)\" when Columbina's burst is not ready is left out.",
+   "Flex option: the guide lists Geo Traveler for this slot without a sample rotation. This is the Gorou rotation with Geo Traveler in Gorou's place, doing \"Geo Traveler EQ\" (as in KQM's Zibai guide sample rotations)."
+  ]
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-yaemiko-odette-xilonen",
+  "team": "Sandrone — Yae Miko — Odette — Escoffier / C6 Qiqi / C6 Alyosha / Sucrose",
+  "rotation": "Yae Miko 3[E] > Odette 2[E] (Q) > Xilonen E N2 > Sandrone combo",
+  "variant": "Xilonen (flex option)",
+  "combos": {
+   "sandrone": "@sandrone"
+  },
+  "notes": [
+   "Flex option: the guide lists Xilonen for this slot without a sample rotation. This is the Escoffier rotation with Xilonen in Escoffier's place, doing \"Xilonen E N2\" (as in KQM's Sandrone guide sample rotations)."
+  ]
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-yaemiko-odette-nicole",
+  "team": "Sandrone — Yae Miko — Odette — Escoffier / C6 Qiqi / C6 Alyosha / Sucrose",
+  "rotation": "Yae Miko 3[E] > Odette 2[E] (Q) > Nicole E > Sandrone combo",
+  "variant": "Nicole (flex option)",
+  "combos": {
+   "sandrone": "@sandrone"
+  },
+  "notes": [
+   "Flex option: the guide lists Nicole for this slot without a sample rotation. This is the Escoffier rotation with Nicole in Escoffier's place, doing \"Nicole E\" (as in KQM's Sandrone guide sample rotations)."
+  ]
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-yaemiko-odette-beidou",
+  "team": "Sandrone — Yae Miko — Odette — Escoffier / C6 Qiqi / C6 Alyosha / Sucrose",
+  "rotation": "Yae Miko 3[E] > Odette 2[E] (Q) > Beidou EQ > Sandrone combo",
+  "variant": "Beidou (flex option)",
+  "combos": {
+   "sandrone": "@sandrone"
+  },
+  "notes": [
+   "Flex option: the guide lists Beidou for this slot without a sample rotation. This is the Escoffier rotation with Beidou in Escoffier's place, doing \"Beidou EQ\" (as in KQM's Sandrone guide sample rotations)."
+  ],
+  "cons": {
+   "beidou": 6
+  }
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-yaemiko-odette-lanyan",
+  "team": "Sandrone — Yae Miko — Odette — Escoffier / C6 Qiqi / C6 Alyosha / Sucrose",
+  "rotation": "Yae Miko 3[E] > Odette 2[E] (Q) > Lan Yan 2[E] > Sandrone combo",
+  "variant": "Lan Yan (flex option)",
+  "combos": {
+   "sandrone": "@sandrone"
+  },
+  "notes": [
+   "Flex option: the guide lists Lan Yan for this slot without a sample rotation. This is the Escoffier rotation with Lan Yan in Escoffier's place, doing \"Lan Yan 2[E]\" (as in KQM's Zibai guide sample rotations)."
+  ]
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-alyosha-odette-qiqi",
+  "team": "Sandrone — (C6) Alyosha — Odette — Vodyanitsa / Escoffier",
+  "rotation": "Odette 2[E] (Q) > Alyosha EQ > Qiqi E (Q) > Sandrone combo",
+  "variant": "Qiqi (flex option)",
+  "combos": {
+   "sandrone": "@sandrone"
+  },
+  "notes": [
+   "Flex option: the guide lists Qiqi for this slot without a sample rotation. This is the Escoffier rotation with Qiqi in Escoffier's place, doing \"Qiqi E (Q)\" (as in KQM's Sandrone guide sample rotations)."
+  ]
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-alyosha-odette-sucrose",
+  "team": "Sandrone — (C6) Alyosha — Odette — Vodyanitsa / Escoffier",
+  "rotation": "Odette 2[E] (Q) > Alyosha EQ > Sucrose ED N1 > Sandrone combo",
+  "variant": "Sucrose (flex option)",
+  "combos": {
+   "sandrone": "@sandrone"
+  },
+  "notes": [
+   "Flex option: the guide lists Sucrose for this slot without a sample rotation. This is the Escoffier rotation with Sucrose in Escoffier's place, doing \"Sucrose ED N1\" (as in KQM's Sandrone guide sample rotations)."
+  ]
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-alyosha-odette-xilonen",
+  "team": "Sandrone — (C6) Alyosha — Odette — Vodyanitsa / Escoffier",
+  "rotation": "Odette 2[E] (Q) > Alyosha EQ > Xilonen E N2 > Sandrone combo",
+  "variant": "Xilonen (flex option)",
+  "combos": {
+   "sandrone": "@sandrone"
+  },
+  "notes": [
+   "Flex option: the guide lists Xilonen for this slot without a sample rotation. This is the Escoffier rotation with Xilonen in Escoffier's place, doing \"Xilonen E N2\" (as in KQM's Sandrone guide sample rotations)."
+  ]
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-alyosha-odette-nicole",
+  "team": "Sandrone — (C6) Alyosha — Odette — Vodyanitsa / Escoffier",
+  "rotation": "Odette 2[E] (Q) > Alyosha EQ > Nicole E > Sandrone combo",
+  "variant": "Nicole (flex option)",
+  "combos": {
+   "sandrone": "@sandrone"
+  },
+  "notes": [
+   "Flex option: the guide lists Nicole for this slot without a sample rotation. This is the Escoffier rotation with Nicole in Escoffier's place, doing \"Nicole E\" (as in KQM's Sandrone guide sample rotations)."
+  ]
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-alyosha-odette-beidou",
+  "team": "Sandrone — (C6) Alyosha — Odette — Vodyanitsa / Escoffier",
+  "rotation": "Odette 2[E] (Q) > Alyosha EQ > Beidou EQ > Sandrone combo",
+  "variant": "Beidou (flex option)",
+  "combos": {
+   "sandrone": "@sandrone"
+  },
+  "notes": [
+   "Flex option: the guide lists Beidou for this slot without a sample rotation. This is the Escoffier rotation with Beidou in Escoffier's place, doing \"Beidou EQ\" (as in KQM's Sandrone guide sample rotations)."
+  ],
+  "cons": {
+   "beidou": 6
+  }
+ },
+ {
+  "guide": "Sandrone",
+  "url": "https://keqingmains.com/q/sandrone-quickguide/",
+  "file": "sandrone-alyosha-odette-diona",
+  "team": "Sandrone — (C6) Alyosha — Odette — Vodyanitsa / Escoffier",
+  "rotation": "Odette 2[E] (Q) > Alyosha EQ > Diona hEQ > Sandrone combo",
+  "variant": "Diona (flex option)",
+  "combos": {
+   "sandrone": "@sandrone"
+  },
+  "notes": [
+   "Flex option: the guide lists Diona for this slot without a sample rotation. This is the Escoffier rotation with Diona in Escoffier's place, doing \"Diona hEQ\" (as in KQM's Sandrone guide sample rotations)."
+  ],
+  "cons": {
+   "diona": 6
+  }
+ },
+ {
+  "guide": "Alyosha",
+  "url": "https://keqingmains.com/q/alyosha-quickguide/",
+  "file": "luminecryo-yaemiko-odette-alyosha",
+  "team": "Odette — Yae Miko — Cryo Traveler — Qiqi / Escoffier / Sucrose",
+  "rotation": "Yae 3[E] > Odette E (Q) E > Alyosha EQ > Cryo Traveler E N2CD N1CD N2C Q N2C",
+  "variant": "Alyosha (flex option)",
+  "notes": [
+   "Flex option: the guide lists Alyosha for this slot without a sample rotation. This is the Escoffier rotation with Alyosha in Escoffier's place, doing \"Alyosha EQ\" (as in KQM's Sandrone guide sample rotations)."
+  ]
+ },
+ {
+  "guide": "Alyosha",
+  "url": "https://keqingmains.com/q/alyosha-quickguide/",
+  "file": "luminecryo-yaemiko-odette-beidou",
+  "team": "Odette — Yae Miko — Cryo Traveler — Qiqi / Escoffier / Sucrose",
+  "rotation": "Yae 3[E] > Odette E (Q) E > Beidou EQ > Cryo Traveler E N2CD N1CD N2C Q N2C",
+  "variant": "Beidou (flex option)",
+  "notes": [
+   "Flex option: the guide lists Beidou for this slot without a sample rotation. This is the Escoffier rotation with Beidou in Escoffier's place, doing \"Beidou EQ\" (as in KQM's Sandrone guide sample rotations)."
+  ],
+  "cons": {
+   "beidou": 6
+  }
+ },
+ {
+  "guide": "Alyosha",
+  "url": "https://keqingmains.com/q/alyosha-quickguide/",
+  "file": "luminecryo-yaemiko-odette-nicole",
+  "team": "Odette — Yae Miko — Cryo Traveler — Qiqi / Escoffier / Sucrose",
+  "rotation": "Yae 3[E] > Odette E (Q) E > Nicole E > Cryo Traveler E N2CD N1CD N2C Q N2C",
+  "variant": "Nicole (flex option)",
+  "notes": [
+   "Flex option: the guide lists Nicole for this slot without a sample rotation. This is the Escoffier rotation with Nicole in Escoffier's place, doing \"Nicole E\" (as in KQM's Sandrone guide sample rotations)."
+  ]
+ },
+ {
+  "guide": "Lohen",
+  "url": "https://keqingmains.com/q/lohen-quickguide/",
+  "file": "lohen-durin-nicole-prune",
+  "team": "Lohen — Durin — Nicole — Citlali / Xilonen / Mona (C4+) / Sucrose",
+  "rotation": "Nicole EQ > Durin E N1 (Q) > Prune EQ > Lohen combo",
+  "combos": {
+   "lohen": "@lohen"
+  },
+  "builds": {
+   "lohen": [
+    "lohen char lvl=90/90 cons=0 talent=10,10,10;",
+    "lohen add weapon=\"disasterandremorse\" refine=1 lvl=90/90;",
+    "lohen add set=\"adaycarvedfromrisingwinds\" count=4;",
+    "lohen add stats hp=4780 atk=311 atk%=0.466 cryo%=0.466 cd=0.622;",
+    "lohen add stats def%=0.124 def=39.36 hp=507.88 hp%=0.0992 atk=33.08 atk%=0.248 er=0.1102 em=39.64 cr=0.3641 cd=0.662;"
+   ]
+  },
+  "notes": [
+   "Durin's \"E N1 Q / Q E N1\": E N1, then his burst when ready.",
+   "Lohen's example build (no database rotation has him): his guide's best weapon and set (Disaster and Remorse R1, 4pc Rising Winds), ATK%/Cryo/CRIT DMG main stats, and the KQM-standard substats of a database build with the same main stats (Ningguang, dtqBmffDMjpC).",
+   "Flex option: the guide lists Prune without a sample rotation; Prune does \"Prune EQ\" (from the owner's Hydro Varka rotation; KQM's Vodyanitsa)."
+  ],
+  "variant": "Prune (flex option)"
+ }
+]
