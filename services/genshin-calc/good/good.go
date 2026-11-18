@@ -93,17 +93,19 @@ func (a *Account) AssumeFourStars(cat *catalog.Catalog) int {
 	return added
 }
 
-// AssumeThreeStars treats every 3-star weapon the simulator supports as owned
-// at refinement 5 in unlimited copies: they are cheap to get and refine, so a
-// player can give one to every character who wants it. Listed copies are
-// raised to refinement 5. It returns how many weapons it added to the list.
+// AssumeThreeStars treats every 3-star weapon the simulator supports, and every
+// craftable 4-star (forged at a blacksmith), as owned at refinement 5 in
+// unlimited copies: they are cheap to get and refine, so a player can give one
+// to every character who wants it. Listed copies are raised to refinement 5.
+// It returns how many weapons it added to the list.
 func (a *Account) AssumeThreeStars(cat *catalog.Catalog) int {
 	if a.Unlimited == nil {
 		a.Unlimited = map[string]bool{}
 	}
+	unlimited := func(w catalog.Weapon) bool { return w.Rarity == 3 || w.Craftable }
 	threeStar := map[string]bool{}
 	for _, w := range cat.Weapons {
-		if w.Rarity == 3 {
+		if unlimited(w) {
 			threeStar[w.Key] = true
 			a.Unlimited[w.Key] = true
 		}
@@ -117,7 +119,7 @@ func (a *Account) AssumeThreeStars(cat *catalog.Catalog) int {
 	}
 	added := 0
 	for _, w := range cat.Weapons {
-		if w.Rarity == 3 && !listed[w.Key] {
+		if unlimited(w) && !listed[w.Key] {
 			a.Weapons = append(a.Weapons, Weapon{Key: w.Key, Refinement: 5})
 			added++
 		}

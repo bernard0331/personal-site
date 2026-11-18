@@ -45,7 +45,7 @@ func main() {
 
 	static, _ := fs.Sub(web, "web")
 	mux := http.NewServeMux()
-	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServerFS(static)))
+	mux.Handle("GET /static/", noCache(http.StripPrefix("/static/", http.FileServerFS(static))))
 	mux.Handle("GET /img/", http.StripPrefix("/img/", imageServer(*imgDir)))
 	mux.HandleFunc("GET /api/catalog", catalogAPI.serve)
 	mux.HandleFunc("POST /api/good", importGOOD(cat))
@@ -70,6 +70,15 @@ func imageServer(dir string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Cache-Control", "public, max-age=86400")
 		files.ServeHTTP(w, r)
+	})
+}
+
+// noCache makes browsers check with the server before reusing a file, so a
+// new version of the page's scripts is never hidden behind an old copy.
+func noCache(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-cache")
+		next.ServeHTTP(w, r)
 	})
 }
 

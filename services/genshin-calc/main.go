@@ -81,7 +81,7 @@ type weaponAssumptions struct {
 // flags registers the weapon options on a subcommand.
 func (opt *weaponAssumptions) flags(fs *flag.FlagSet) {
 	fs.BoolVar(&opt.fourStars, "four-stars", false, "assume R1 of every 4-star weapon the file leaves out")
-	fs.BoolVar(&opt.threeStars, "three-stars", false, "assume every 3-star weapon at R5, unlimited copies")
+	fs.BoolVar(&opt.threeStars, "three-stars", false, "assume every 3-star and craftable 4-star weapon at R5, unlimited copies")
 	fs.StringVar(&opt.ranking, "weapons", "", "the weapon trials' ranking (from the weapons subcommand); empty for stand-in weapons")
 	energyFlag(fs, &opt.energyRate)
 }

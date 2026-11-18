@@ -14,6 +14,11 @@ import (
 //go:embed catalog.json
 var raw []byte
 
+// craftable.txt lists the weapons that can be forged, one key per line.
+//
+//go:embed craftable.txt
+var craftableList string
+
 // Engine identifies the simulator release the catalog was generated from.
 type Engine struct {
 	Name    string `json:"name"`
@@ -35,6 +40,9 @@ type Weapon struct {
 	Key        string `json:"key"`
 	WeaponType string `json:"weapon_type"`
 	Rarity     int    `json:"rarity"`
+	// Craftable 4-star weapons can be forged as often as a player likes, so
+	// they are treated like 3-stars: unlimited copies at R5. From craftable.txt.
+	Craftable bool `json:"craftable,omitempty"`
 }
 
 // Catalog is the full list, with lookups by key.
@@ -66,9 +74,23 @@ func Load() (*Catalog, error) {
 	for _, ch := range c.Characters {
 		c.characters[ch.Key] = ch
 	}
+	craftable := map[string]bool{}
+	for _, line := range strings.Split(craftableList, "\n") {
+		if line = strings.TrimSpace(line); line != "" && !strings.HasPrefix(line, "#") {
+			craftable[line] = true
+		}
+	}
 	c.weapons = make(map[string]Weapon, len(c.Weapons))
-	for _, w := range c.Weapons {
+	for i, w := range c.Weapons {
+		if craftable[w.Key] {
+			c.Weapons[i].Craftable = true
+			w.Craftable = true
+			delete(craftable, w.Key)
+		}
 		c.weapons[w.Key] = w
+	}
+	for k := range craftable {
+		return nil, fmt.Errorf("catalog: craftable.txt names %q, which the simulator does not have", k)
 	}
 	c.sets = make(map[string]bool, len(c.ArtifactSets))
 	for _, s := range c.ArtifactSets {

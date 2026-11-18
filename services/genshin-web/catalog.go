@@ -1,7 +1,9 @@
 package main
 
 import (
+	"crypto/sha256"
 	_ "embed"
+	"encoding/hex"
 	"encoding/json"
 	"net/http"
 	"sort"
@@ -41,6 +43,7 @@ type catalogResponse struct {
 	Weapons    []apiWeapon    `json:"weapons"`
 	Sets       []apiSet       `json:"sets"`
 	body       []byte
+	etag       string
 }
 
 type apiCharacter struct {
@@ -58,6 +61,7 @@ type apiWeapon struct {
 	Icon       string `json:"icon,omitempty"`
 	WeaponType string `json:"weapon_type"`
 	Rarity     int    `json:"rarity"`
+	Craftable  bool   `json:"craftable,omitempty"` // forged at a blacksmith: unlimited R5 copies
 }
 
 type apiSet struct {
@@ -95,7 +99,7 @@ func buildCatalog() (*catalogResponse, error) {
 		if name == "" {
 			name = w.Key
 		}
-		out.Weapons = append(out.Weapons, apiWeapon{w.Key, name, dw.Icon, w.WeaponType, w.Rarity})
+		out.Weapons = append(out.Weapons, apiWeapon{w.Key, name, dw.Icon, w.WeaponType, w.Rarity, w.Craftable})
 	}
 	for key, s := range d.Sets {
 		if !cat.HasArtifactSet(key) {
@@ -108,11 +112,21 @@ func buildCatalog() (*catalogResponse, error) {
 	sort.Slice(out.Weapons, func(i, j int) bool { return out.Weapons[i].Name < out.Weapons[j].Name })
 	sort.Slice(out.Sets, func(i, j int) bool { return out.Sets[i].Name < out.Sets[j].Name })
 	out.body, err = json.Marshal(out)
+	sum := sha256.Sum256(out.body)
+	out.etag = `"` + hex.EncodeToString(sum[:8]) + `"`
 	return out, err
 }
 
+// serve sends the catalog with an ETag (a fingerprint of its contents) and
+// asks browsers to check it every time: an unchanged catalog costs a tiny
+// "304 Not Modified", and a new release is picked up at once.
 func (c *catalogResponse) serve(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("ETag", c.etag)
+	if r.Header.Get("If-None-Match") == c.etag {
+		w.WriteHeader(http.StatusNotModified)
+		return
+	}
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Cache-Control", "public, max-age=3600")
 	w.Write(c.body)
 }

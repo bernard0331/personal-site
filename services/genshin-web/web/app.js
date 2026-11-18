@@ -22,7 +22,7 @@ const imgURL = icon => `/img/${icon}.png`;
 let catalog;               // from /api/catalog
 const byKey = { char: {}, weapon: {}, set: {} };
 const STORE = 'team-optimizer-draft';
-let draft = { chars: {}, weapons: {}, unlimited3: false, artifacts: [], options: { energy: 2, pins: [], excluded: [] } };
+let draft = { chars: {}, weapons: {}, unlimited3: true, artifacts: [], options: { energy: 2, pins: [], excluded: [] } };
 
 function load() {
   try {
@@ -137,8 +137,11 @@ function drawWFilters() {
   o.onclick = () => { wOwned = !wOwned; again(); }; f.appendChild(o);
   $('unl3').classList.toggle('on', draft.unlimited3);
 }
+// 3-star and craftable 4-star weapons are cheap to get and refine: with the
+// toggle on (the default) every character can have one at R5.
+const unlimitedKind = w => w.rarity === 3 || w.craftable;
 function copiesOf(w) {
-  if (w.rarity === 3 && draft.unlimited3) return ['∞'];
+  if (unlimitedKind(w) && draft.unlimited3) return ['∞'];
   return draft.weapons[w.key] || [];
 }
 function drawWeapons() {
@@ -153,7 +156,7 @@ function drawWeapons() {
     const d = document.createElement('div');
     d.className = `wtile r${w.rarity}${has ? '' : ' unowned'}`;
     d.innerHTML = `<div class="wart">${art(w.icon, w.name)}</div>
-      <div style="min-width:0"><div class="wname">${w.name}</div><div class="sub" style="font-size:11px">${w.rarity}★ ${cap(w.weapon_type)}${has ? '' : ' · click to add'}</div>
+      <div style="min-width:0"><div class="wname">${w.name}</div><div class="sub" style="font-size:11px">${w.rarity}★ ${cap(w.weapon_type)}${w.craftable ? ' · craftable' : ''}${has ? '' : ' · click to add'}</div>
       ${has ? `<div class="copies">${copies.map((r, i) => `<span class="copy" data-i="${i}" style="background:${unlimited ? RSCALE[4] : RSCALE[r - 1]};color:#fff">${unlimited ? 'R5 · unlimited' : 'R' + r}</span>`).join('')}
       ${unlimited ? '' : '<button class="mini" data-a="add" aria-label="Add a copy">+</button><button class="mini" data-a="rm" aria-label="Remove a copy">−</button>'}</div>` : ''}</div>`;
     if (!has) d.onclick = () => { draft.weapons[w.key] = [1]; save(); drawWeapons(); };
@@ -304,7 +307,7 @@ async function main() {
   $('export-btn').onclick = exportGood;
   $('all4').onclick = () => {
     let n = 0;
-    for (const w of catalog.weapons) if (w.rarity === 4 && !draft.weapons[w.key]) { draft.weapons[w.key] = [1]; n++; }
+    for (const w of catalog.weapons) if (w.rarity === 4 && !w.craftable && !draft.weapons[w.key]) { draft.weapons[w.key] = [1]; n++; }
     save(); drawWeapons(); toast(`Added R1 of ${n} 4-star weapons`);
   };
   $('unl3').onclick = () => { draft.unlimited3 = !draft.unlimited3; save(); drawWFilters(); drawWeapons(); };

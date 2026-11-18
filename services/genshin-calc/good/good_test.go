@@ -196,9 +196,9 @@ func TestAssumeThreeStars(t *testing.T) {
 		t.Fatal(err)
 	}
 	cat, _ := catalog.Load()
-	threeStars := 0
+	threeStars := 0 // 3-stars and craftable 4-stars
 	for _, w := range cat.Weapons {
-		if w.Rarity == 3 {
+		if w.Rarity == 3 || w.Craftable {
 			threeStars++
 		}
 	}
@@ -208,7 +208,7 @@ func TestAssumeThreeStars(t *testing.T) {
 	for _, w := range acc.Weapons {
 		entry, _ := cat.Weapon(w.Key)
 		switch {
-		case entry.Rarity == 3 && w.Refinement != 5:
+		case (entry.Rarity == 3 || entry.Craftable) && w.Refinement != 5:
 			t.Errorf("%s at refinement %d, want 5", w.Key, w.Refinement)
 		case w.Key == "favoniuslance" && w.Refinement != 3:
 			t.Errorf("a 4-star weapon's refinement changed to %d", w.Refinement)
@@ -216,5 +216,32 @@ func TestAssumeThreeStars(t *testing.T) {
 	}
 	if !acc.Unlimited["thrillingtalesofdragonslayers"] || !acc.Unlimited["slingshot"] || acc.Unlimited["favoniuslance"] {
 		t.Errorf("3-star weapons, and only they, should be unlimited: %v", acc.Unlimited)
+	}
+}
+
+func TestCraftableFourStarsAreUnlimited(t *testing.T) {
+	cat, err := catalog.Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if w, _ := cat.Weapon("prototypeamber"); !w.Craftable || w.Rarity != 4 {
+		t.Fatalf("prototypeamber: %+v", w)
+	}
+	if w, _ := cat.Weapon("favoniuslance"); w.Craftable {
+		t.Error("favoniuslance is not craftable")
+	}
+	acc := &Account{Weapons: []Weapon{{Key: "prototypeamber", Refinement: 2}}}
+	acc.AssumeThreeStars(cat)
+	n := 0
+	for _, w := range acc.Weapons {
+		if w.Key == "prototypeamber" {
+			n++
+			if w.Refinement != 5 {
+				t.Errorf("listed copy raised to R5: %+v", w)
+			}
+		}
+	}
+	if n != 1 || !acc.Unlimited["prototypeamber"] || !acc.Unlimited["flowingpurity"] {
+		t.Errorf("copies %d, unlimited %v", n, acc.Unlimited["prototypeamber"])
 	}
 }

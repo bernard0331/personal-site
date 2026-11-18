@@ -1,0 +1,47 @@
+# 4-star weapons that can be forged at a blacksmith, so a player can have as
+# many copies at R5 as they like. One simulator key per line.
+# Source: Genshin Impact Wiki, "Forging" (genshin-impact.fandom.com/wiki/Forging,
+# CC-BY-SA), checked 2026-11-17: 43 weapons.
+amenomakageuchi
+blackmarrowlantern
+bladeofatonement
+chainbreaker
+compoundbow
+covenantoffrostandsnow
+crescentpike
+dragonspinespear
+earthshaker
+echoesoftheheart
+emberwell
+finaleofthedeep
+flowingpurity
+fluteofezpitzal
+footprintoftherainbow
+forestregalia
+frostbearer
+fruitoffulfillment
+hakushinring
+hamayumi
+ironsting
+katsuragikirinagamasa
+kingssquire
+kitaincrossspear
+mappamare
+masterkey
+moonpiercer
+prospectorsshovel
+prototypeamber
+prototypearchaic
+prototypecrescent
+prototyperancour
+prototypestarglitter
+rightfulreward
+ringofyaxche
+sapwoodblade
+serenityscall
+snarehook
+snowtombedstarsilver
+songofstillness
+songofthevigil
+tidalshadow
+whiteblind

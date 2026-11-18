@@ -83,3 +83,23 @@ func TestImportGOOD(t *testing.T) {
 		t.Errorf("bad file: status %d", rec.Code)
 	}
 }
+
+func TestCatalogRevalidates(t *testing.T) {
+	c, err := buildCatalog()
+	if err != nil {
+		t.Fatal(err)
+	}
+	rec := httptest.NewRecorder()
+	c.serve(rec, httptest.NewRequest("GET", "/api/catalog", nil))
+	etag := rec.Header().Get("ETag")
+	if etag == "" || rec.Header().Get("Cache-Control") != "no-cache" {
+		t.Fatalf("headers: %v", rec.Header())
+	}
+	req := httptest.NewRequest("GET", "/api/catalog", nil)
+	req.Header.Set("If-None-Match", etag)
+	rec = httptest.NewRecorder()
+	c.serve(rec, req)
+	if rec.Code != http.StatusNotModified || rec.Body.Len() != 0 {
+		t.Errorf("unchanged catalog: status %d, %d bytes", rec.Code, rec.Body.Len())
+	}
+}
