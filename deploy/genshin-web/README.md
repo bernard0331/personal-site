@@ -53,7 +53,8 @@ runs waiting. More visitors make the queue longer; they cannot add instances.
 ## Cost
 
 Nothing while no instance is up. While one is, Cloud Run bills 8 vCPU and
-8 GiB per second: a run from scratch takes about 8 minutes, and an idle
+8 GiB per second: a run from scratch takes about 5 minutes (about 4 of
+simulating), one with everything cached under a minute, and an idle
 instance stays up to about 15 minutes after the last visit. Cloud Run's
 monthly free tier covers light testing. The bucket and the registry cost
 cents a month. Check the project's budget alerts and the billing report.
@@ -68,6 +69,13 @@ Deleting the bucket and the registry removes saved runs and images too, so do
 that only when they are no longer wanted.
 
 ## Notes
+
+- Rebuilding the same code gives the same simulator binary (build.sh pins
+  patch dates, -trimpath and the exact Go image), so a redeploy keeps the
+  shared cache. Changing the simulator itself starts the cache over.
+- Each HiGHS solve runs on one thread: the four breakdowns are solved at
+  once, and HiGHS's own thread pool oversubscribed the instance (2+ minutes
+  a solve instead of 10-20 s).
 
 - `/healthz` returns 404 on Cloud Run: Google's front end reserves some paths
   ending in "z". Cloud Run checks the port itself, so nothing uses it there.
