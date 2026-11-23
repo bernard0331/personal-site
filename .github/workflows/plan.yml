@@ -24,27 +24,41 @@ jobs:
     # Forks get no secrets and no token for this project.
     if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: terraform/envs/prod
     steps:
-      - uses: actions/checkout@v4
-      - name: Mask project values
+      # Until the repository secrets are set (terraform/README.md, "Plan in
+      # CI"), skip rather than fail.
+      - name: Configured?
+        id: cfg
+        env:
+          WIF_PROVIDER: ${{ secrets.WIF_PROVIDER }}
+        run: |
+          if [ -n "$WIF_PROVIDER" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"
+          else echo "::notice::Plan skipped: repository secrets not set"; fi
+      - if: steps.cfg.outputs.ok == 'true'
+        uses: actions/checkout@v4
+      - if: steps.cfg.outputs.ok == 'true'
+        name: Mask project values
         run: echo "::add-mask::${{ secrets.GCP_PROJECT_NUMBER }}"
-      - uses: google-github-actions/auth@v2
+      - if: steps.cfg.outputs.ok == 'true'
+        uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
           project_id: ${{ secrets.GCP_PROJECT }}
-      - uses: hashicorp/setup-terraform@v3
+      - if: steps.cfg.outputs.ok == 'true'
+        uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.17.2
           terraform_wrapper: false
-      - name: Init
+      - if: steps.cfg.outputs.ok == 'true'
+        name: Init
+        working-directory: terraform/envs/prod
         run: terraform init -input=false -backend-config="bucket=${{ secrets.GCP_PROJECT }}-tfstate"
-      - name: Plan
+      - if: steps.cfg.outputs.ok == 'true'
+        name: Plan
         env:
           TF_VAR_project: ${{ secrets.GCP_PROJECT }}
           TF_VAR_runs_bucket: ${{ secrets.RUNS_BUCKET }}
+        working-directory: terraform/envs/prod
         run: |
           terraform plan -input=false -lock=false -no-color -detailed-exitcode | tee plan.txt || code=$?
           {
