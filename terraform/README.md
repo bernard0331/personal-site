@@ -1,5 +1,10 @@
 # Terraform: the GKE version of the site
 
+**Status: off** (since 2026-11-23). The GKE copy is fully defined here but
+switched off with `gke_enabled = false`, so it costs nothing; only what the
+Cloud Run site uses exists (bucket, image repository, its service account)
+plus Terraform's state bucket. It ran for a day as a test.
+
 Cloud resources for running the sites on Google Kubernetes Engine (design doc
 phases 3 and 4). Terraform owns the cloud resources; what runs inside the
 cluster is in `deploy/` as Kubernetes manifests.
@@ -18,7 +23,7 @@ The Cloud Run service (`deploy/genshin-web/`) keeps running alongside; see
 | `modules/storage` | The runs bucket (90-day rule on `runs/`, never destroyed by Terraform). |
 | `modules/iam` | Object read/write on that bucket for Cloud Run's service account and for the pod's Kubernetes service account (Workload Identity Federation, no keys). |
 | `modules/dns-certs` | Reserved global IP, an sslip.io hostname per site, a Google-managed certificate (load balancer authorization) and the certificate map the Gateway uses. |
-| `envs/prod` | Wires the modules together. `imports.tf` adopts the registry, bucket and service account made by hand for Cloud Run, so they aren't created twice. |
+| `envs/prod` | Wires the modules together. `gke_enabled` (default `false`) switches network, gke and dns-certs on or off. `imports.tf` adopts the registry, bucket and service account made by hand for Cloud Run, so they aren't created twice. |
 
 Values that contain the project id live in `envs/prod/terraform.tfvars` and
 `bootstrap/terraform.tfvars` (gitignored; copy `example.tfvars`).
@@ -43,11 +48,14 @@ applying.
 
 ## Bringing it up
 
-Each `apply` shows its plan and waits for "yes". Read it first.
+Each `apply` shows its plan and waits for "yes". Read it first. The
+bootstrap folder is already applied; on a fresh project, apply it first:
 
 ```bash
 cd terraform/bootstrap && terraform init && terraform apply
 ```
+
+Then set `gke_enabled = true` in `envs/prod/terraform.tfvars` and:
 
 ```bash
 cd terraform/envs/prod && terraform init -backend-config="bucket=$(terraform -chdir=../../bootstrap output -raw state_bucket)" && terraform apply
@@ -92,18 +100,28 @@ Deployment's `-cpus` change that.
 
 ## Taking it down
 
+Delete what runs in the cluster first: the Gateway's load balancer was made
+by GKE, not Terraform, and would be left behind (and keep billing).
+
 ```bash
 kubectl delete -k deploy/overlays/prod
 ```
 
+Then set `gke_enabled = false` in `envs/prod/terraform.tfvars` and apply:
+
 ```bash
-terraform -chdir=terraform/envs/prod destroy -target=module.gke -target=module.network -target=module.dns_certs
+terraform -chdir=terraform/envs/prod apply
 ```
 
-Delete the Gateway (the first command) before destroying the network: the
-load balancer GKE made for it isn't in Terraform's state. The bucket, the
-registry and Cloud Run's service account are left: Cloud Run uses them, and
-the bucket refuses to be destroyed (`prevent_destroy`) so saved runs survive.
+That destroys the cluster, node, network, IP address and certificate (16
+resources) and nothing else. Check with `gcloud compute forwarding-rules
+list` that no load balancer is left. Remaining cost: cents a month for the
+buckets and images, which Cloud Run uses anyway.
+
+Parking instead (`node_count = 0`, Gateway kept) costs about $18 a month for
+the load balancer, so switching off is cheaper; bringing it back is about 15
+minutes plus up to an hour for a new certificate (the IP, and so the
+hostname, will be new).
 
 ## Not done yet
 

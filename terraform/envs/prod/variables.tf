@@ -17,6 +17,12 @@ variable "zone" {
   default     = "us-central1-a"
 }
 
+variable "gke_enabled" {
+  description = "Create the GKE copy of the site (cluster, network, Gateway IP, certificate). Off: only the resources Cloud Run uses remain, and GKE costs nothing"
+  type        = bool
+  default     = false
+}
+
 variable "runs_bucket" {
   description = "The Genshin site's existing bucket (runs and the cache's copy)"
   type        = string

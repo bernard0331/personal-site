@@ -1,11 +1,11 @@
 # deploy/gke/apply.sh reads these to fill in the manifests.
 
 output "cluster" {
-  value = module.gke.name
+  value = one(module.gke[*].name)
 }
 
 output "zone" {
-  value = module.gke.location
+  value = one(module.gke[*].location)
 }
 
 output "image_repository" {
@@ -17,18 +17,18 @@ output "runs_bucket" {
 }
 
 output "gateway_address_name" {
-  value = module.dns_certs.address_name
+  value = one(module.dns_certs[*].address_name)
 }
 
 output "certificate_map" {
-  value = module.dns_certs.certificate_map
+  value = one(module.dns_certs[*].certificate_map)
 }
 
 output "hostnames" {
-  value = module.dns_certs.hostnames
+  value = one(module.dns_certs[*].hostnames)
 }
 
 output "kubectl_credentials" {
   description = "Run this to point kubectl at the cluster"
-  value       = "gcloud container clusters get-credentials ${module.gke.name} --zone ${module.gke.location} --project ${var.project}"
+  value       = var.gke_enabled ? "gcloud container clusters get-credentials ${module.gke[0].name} --zone ${module.gke[0].location} --project ${var.project}" : "GKE is off (gke_enabled = false)"
 }

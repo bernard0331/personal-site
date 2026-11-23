@@ -4,8 +4,9 @@ variable "bucket" {
 }
 
 variable "workload_pool" {
-  description = "The cluster's Workload Identity pool (PROJECT.svc.id.goog)"
+  description = "The cluster's Workload Identity pool (PROJECT.svc.id.goog); null while there's no cluster"
   type        = string
+  default     = null
 }
 
 variable "kubernetes_service_accounts" {

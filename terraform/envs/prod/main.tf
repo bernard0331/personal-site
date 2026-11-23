@@ -1,4 +1,6 @@
 # The production environment: everything the GKE version of the site needs.
+# The GKE parts (network, gke, dns_certs) exist only with gke_enabled = true;
+# the rest is what the Cloud Run site uses and always stays.
 #
 #   network    VPC and subnet with pod and Service ranges
 #   gke        the zonal cluster, its spot node pool and the nodes' identity
@@ -13,23 +15,28 @@
 
 locals {
   name = "personal-site"
+  # 1 when the GKE copy is on, 0 when off. count = 0 on a module means none
+  # of its resources exist; switching to 0 and applying destroys them.
+  gke = var.gke_enabled ? 1 : 0
 }
 
 module "network" {
+  count  = local.gke
   source = "../../modules/network"
   name   = local.name
   region = var.region
 }
 
 module "gke" {
+  count               = local.gke
   source              = "../../modules/gke"
   project             = var.project
   name                = local.name
   zone                = var.zone
-  network             = module.network.network
-  subnetwork          = module.network.subnetwork
-  pods_range          = module.network.pods_range
-  services_range      = module.network.services_range
+  network             = module.network[0].network
+  subnetwork          = module.network[0].subnetwork
+  pods_range          = module.network[0].pods_range
+  services_range      = module.network[0].services_range
   machine_type        = var.machine_type
   node_count          = var.node_count
   authorized_networks = var.authorized_networks
@@ -49,15 +56,17 @@ module "storage" {
 }
 
 module "iam" {
-  source        = "../../modules/iam"
-  bucket        = module.storage.name
-  workload_pool = module.gke.workload_pool
-  kubernetes_service_accounts = [
+  source = "../../modules/iam"
+  bucket = module.storage.name
+  # The pod's bucket access exists only while the cluster does.
+  workload_pool = one(module.gke[*].workload_pool)
+  kubernetes_service_accounts = var.gke_enabled ? [
     { namespace = "genshin", name = "genshin-web" },
-  ]
+  ] : []
 }
 
 module "dns_certs" {
+  count  = local.gke
   source = "../../modules/dns-certs"
   name   = "sites"
   sites  = ["genshin"]
