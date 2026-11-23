@@ -1,0 +1,8 @@
+# The site's own namespace. The label lets its HTTPRoute attach to the shared
+# Gateway, which accepts routes only from namespaces carrying it.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: home
+  labels:
+    personal-site/gateway: "true"

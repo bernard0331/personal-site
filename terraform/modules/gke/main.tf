@@ -29,9 +29,22 @@ resource "google_project_iam_member" "nodes" {
   member  = google_service_account.nodes.member
 }
 
+data "google_project" "this" {}
+
 resource "google_container_cluster" "this" {
   name     = var.name
   location = var.zone
+
+  # With the service mesh: register the cluster in the project's fleet and
+  # tag it with the mesh id, which Cloud Service Mesh requires (the mesh
+  # module then turns the mesh on for this fleet membership).
+  dynamic "fleet" {
+    for_each = var.mesh ? [1] : []
+    content {
+      project = var.project
+    }
+  }
+  resource_labels = var.mesh ? { mesh_id = "proj-${data.google_project.this.number}" } : {}
 
   # No default node pool: the node pool below is its own resource, so it can
   # be replaced or resized without touching the cluster. (Older GKE versions

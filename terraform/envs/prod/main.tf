@@ -48,6 +48,7 @@ module "gke" {
   machine_type        = var.machine_type
   node_count          = var.node_count
   authorized_networks = var.authorized_networks
+  mesh                = var.mesh_enabled
 }
 
 module "registry" {
@@ -88,4 +89,20 @@ module "monitoring" {
   namespace          = "genshin"
   cluster            = module.gke[0].name
   notification_email = var.alert_email
+}
+
+# Cloud Service Mesh (managed Istio), only with the cluster and mesh_enabled.
+module "mesh" {
+  count               = var.gke_enabled && var.mesh_enabled ? 1 : 0
+  source              = "../../modules/mesh"
+  membership_id       = module.gke[0].fleet_membership.id
+  membership_location = module.gke[0].fleet_membership.location
+}
+
+# GitHub Actions may plan (read-only, no keys). Always on: it costs nothing.
+module "github_ci" {
+  source        = "../../modules/github-ci"
+  repository    = "bernard0331/personal-site"
+  repository_id = "1458545744"
+  state_bucket  = "${var.project}-tfstate"
 }

@@ -1,0 +1,17 @@
+# Puts a site's namespace in the service mesh, as a Kustomize component
+# (listed under `components:` after network-isolation).
+#
+# With Cloud Service Mesh on (terraform mesh_enabled), the label makes Istio
+# add an Envoy sidecar to each new pod: calls between pods then use mutual
+# TLS, each side proving its Kubernetes service account, and Istio
+# AuthorizationPolicies (deploy/mesh) decide which identities may call.
+# Without the mesh the label does nothing, so the sites deploy either way.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+patches:
+  - target:
+      kind: Namespace
+    patch: |-
+      - op: add
+        path: /metadata/labels/istio-injection
+        value: enabled

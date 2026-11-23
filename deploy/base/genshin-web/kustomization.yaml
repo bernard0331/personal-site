@@ -6,5 +6,7 @@ resources:
   - serviceaccount.yaml
   - workload
   - httproute.yaml
+  - allow-from-home.yaml
 components:
   - ../../components/network-isolation
+  - ../../components/mesh

@@ -12,6 +12,7 @@ coverage.*
 *.tfvars
 *.tfvars.json
 !example.tfvars
+!switches.auto.tfvars
 crash.log
 
 # Secrets and credentials

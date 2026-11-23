@@ -51,3 +51,9 @@ variable "alert_email" {
   type        = string
   default     = null
 }
+
+variable "mesh_enabled" {
+  description = "Cloud Service Mesh on the cluster (about $0.07 an hour while on); needs gke_enabled"
+  type        = bool
+  default     = false
+}

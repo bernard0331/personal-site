@@ -1,0 +1,27 @@
+# Who may call genshin-web from inside the cluster: only the landing page
+# (namespace home), which checks the optimizer's health.
+#
+# This is the network layer (Dataplane V2, by namespace, pod and port). With
+# the service mesh on, deploy/mesh adds the identity layer: an Istio
+# AuthorizationPolicy that accepts only home's mutual-TLS identity.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-from-home
+spec:
+  podSelector:
+    matchLabels:
+      app: genshin-web
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: home
+          podSelector:
+            matchLabels:
+              app: home
+      ports:
+        - protocol: TCP
+          port: 8080

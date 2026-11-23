@@ -1,0 +1,7 @@
+# Istio policies for the sites, applied by deploy/gke/apply.sh only when the
+# service mesh is installed (they're Istio resources).
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - genshin-web.yaml
+  - home.yaml

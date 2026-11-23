@@ -54,3 +54,9 @@ variable "deletion_protection" {
   type        = bool
   default     = false
 }
+
+variable "mesh" {
+  description = "Register the cluster in the fleet for Cloud Service Mesh"
+  type        = bool
+  default     = false
+}

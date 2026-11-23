@@ -32,3 +32,8 @@ output "kubectl_credentials" {
   description = "Run this to point kubectl at the cluster"
   value       = var.gke_enabled ? "gcloud container clusters get-credentials ${module.gke[0].name} --zone ${module.gke[0].location} --project ${var.project}" : "GKE is off (gke_enabled = false)"
 }
+
+output "github_workload_identity_provider" {
+  description = "Repository secret WIF_PROVIDER for the plan workflow"
+  value       = module.github_ci.workload_identity_provider
+}

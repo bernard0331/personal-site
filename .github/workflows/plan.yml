@@ -1,0 +1,56 @@
+# terraform plan against the real project, on every push to main and every
+# pull request from this repository. Read-only: it never applies.
+#
+# No key: GitHub's OIDC token is exchanged for short-lived Google
+# credentials through Workload Identity Federation
+# (terraform/modules/github-ci), which accepts only this repository and
+# grants only read roles. Values that would put the project id in the logs
+# are repository secrets, which GitHub masks wherever they appear.
+name: plan
+
+on:
+  push:
+    branches: [main]
+    paths: ["terraform/**", ".github/workflows/plan.yml"]
+  pull_request:
+    paths: ["terraform/**", ".github/workflows/plan.yml"]
+
+permissions:
+  contents: read
+  id-token: write # to request the OIDC token
+
+jobs:
+  plan:
+    # Forks get no secrets and no token for this project.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform/envs/prod
+    steps:
+      - uses: actions/checkout@v4
+      - name: Mask project values
+        run: echo "::add-mask::${{ secrets.GCP_PROJECT_NUMBER }}"
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          project_id: ${{ secrets.GCP_PROJECT }}
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.17.2
+          terraform_wrapper: false
+      - name: Init
+        run: terraform init -input=false -backend-config="bucket=${{ secrets.GCP_PROJECT }}-tfstate"
+      - name: Plan
+        env:
+          TF_VAR_project: ${{ secrets.GCP_PROJECT }}
+          TF_VAR_runs_bucket: ${{ secrets.RUNS_BUCKET }}
+        run: |
+          terraform plan -input=false -lock=false -no-color -detailed-exitcode | tee plan.txt || code=$?
+          {
+            echo '### terraform plan'
+            echo
+            grep -E '^(Plan:|No changes)' plan.txt || true
+          } >> "$GITHUB_STEP_SUMMARY"
+          # 0: no changes, 2: changes (drift or unapplied commits), else error.
+          [ "${code:-0}" -ne 1 ]

@@ -17,7 +17,7 @@ func testRepo(t *testing.T) Repo {
 		t.Fatal(err)
 	}
 	dst := t.TempDir()
-	for _, p := range []string{servicesFile, overlayFile, "deploy/base/gateway", "deploy/base/genshin-web", componentDir} {
+	for _, p := range []string{servicesFile, overlayFile, "deploy/base/gateway", "deploy/base/genshin-web", "deploy/base/home", componentDir, meshDir} {
 		copyPath(t, filepath.Join(real, p), filepath.Join(dst, p))
 	}
 	return Repo{Root: dst}
@@ -59,7 +59,7 @@ func TestRepositoryIsConsistent(t *testing.T) {
 
 func TestAdd(t *testing.T) {
 	r := testRepo(t)
-	s := Service{Name: "home", Namespace: "home", Site: "www", Port: 8080}
+	s := Service{Name: "blog", Namespace: "blog", Site: "blog", Port: 8080}
 	if _, err := r.Add(s); err != nil {
 		t.Fatal(err)
 	}
@@ -67,20 +67,20 @@ func TestAdd(t *testing.T) {
 		t.Fatalf("after add: %v", problems)
 	}
 	svcs, _ := r.load()
-	if len(svcs) != 2 || svcs[1] != s {
+	if len(svcs) != 3 || svcs[2] != s {
 		t.Fatalf("services.json: %+v", svcs)
 	}
-	route, _ := os.ReadFile(r.path(baseDir, "home", "httproute.yaml"))
-	if !strings.Contains(string(route), "WWW_HOSTNAME") {
-		t.Errorf("route has no WWW_HOSTNAME:\n%s", route)
+	route, _ := os.ReadFile(r.path(baseDir, "blog", "httproute.yaml"))
+	if !strings.Contains(string(route), "BLOG_HOSTNAME") {
+		t.Errorf("route has no BLOG_HOSTNAME:\n%s", route)
 	}
-	dep, _ := os.ReadFile(r.path(baseDir, "home", "deployment.yaml"))
+	dep, _ := os.ReadFile(r.path(baseDir, "blog", "deployment.yaml"))
 	if strings.Contains(string(dep), "gcsfuse") {
 		t.Error("a service without -bucket mounts the bucket")
 	}
 	overlay, _ := os.ReadFile(r.path(overlayFile))
-	if !strings.Contains(string(overlay), "- ../../base/home\n") || !strings.Contains(string(overlay), "newName: IMAGE_REPOSITORY/home\n") {
-		t.Errorf("overlay misses home:\n%s", overlay)
+	if !strings.Contains(string(overlay), "- ../../base/blog\n") || !strings.Contains(string(overlay), "newName: IMAGE_REPOSITORY/blog\n") {
+		t.Errorf("overlay misses blog:\n%s", overlay)
 	}
 
 	// With kubectl available, the whole overlay must render, with the
@@ -90,8 +90,8 @@ func TestAdd(t *testing.T) {
 		if err != nil {
 			t.Fatalf("kubectl kustomize: %v\n%s", err, out)
 		}
-		if !strings.Contains(string(out), "name: default-deny\n  namespace: home\n") {
-			t.Error("rendered overlay has no default-deny policy in namespace home")
+		if !strings.Contains(string(out), "name: default-deny\n  namespace: blog\n") {
+			t.Error("rendered overlay has no default-deny policy in namespace blog")
 		}
 	}
 }

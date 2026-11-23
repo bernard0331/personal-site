@@ -1,0 +1,29 @@
+# genshin-web accepts, by identity:
+#   - the landing page: its sidecar presents a mutual-TLS certificate for the
+#     Kubernetes service account home/home
+#   - the load balancer's ranges: HTTPS ends at the load balancer, which
+#     isn't in the mesh, so its requests arrive as plain HTTP with no identity
+# Anything else in the cluster is refused, even from an address the
+# NetworkPolicies allow. PERMISSIVE mTLS (the default) is what lets the load
+# balancer's plain HTTP in; the AuthorizationPolicy is what keeps everyone
+# else out.
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: genshin-web
+  namespace: genshin
+spec:
+  selector:
+    matchLabels:
+      app: genshin-web
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/home/sa/home
+    - from:
+        - source:
+            ipBlocks:
+              - 35.191.0.0/16
+              - 130.211.0.0/22

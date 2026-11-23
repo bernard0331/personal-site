@@ -1,0 +1,24 @@
+# Out: the landing page may call genshin-web (its health check) on the
+# app's port. genshin-web's own policies decide whether to accept. (With the
+# mesh's sidecars the mutual-TLS connection uses the same port.)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-to-genshin
+spec:
+  podSelector:
+    matchLabels:
+      app: home
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: genshin
+          podSelector:
+            matchLabels:
+              app: genshin-web
+      ports:
+        - protocol: TCP
+          port: 8080

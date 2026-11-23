@@ -6,6 +6,13 @@
       "site": "genshin",
       "port": 8080,
       "bucket": true
+    },
+    {
+      "name": "home",
+      "namespace": "home",
+      "site": "www",
+      "port": 8080,
+      "bucket": false
     }
   ]
 }

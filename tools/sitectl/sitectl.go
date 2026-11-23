@@ -24,6 +24,7 @@ const (
 	baseDir      = "deploy/base"
 	overlayFile  = "deploy/overlays/prod/kustomization.yaml"
 	componentDir = "deploy/components/network-isolation"
+	meshDir      = "deploy/components/mesh"
 )
 
 // Service is one site behind the shared Gateway, as listed in services.json.
@@ -273,6 +274,9 @@ func (r Repo) Check() []error {
 		}
 		if !bytes.Contains(kust, []byte("../../components/network-isolation")) {
 			problems = append(problems, fmt.Errorf("%s: its kustomization doesn't include %s (default-deny NetworkPolicies)", s.Name, componentDir))
+		}
+		if !bytes.Contains(kust, []byte("../../components/mesh")) {
+			problems = append(problems, fmt.Errorf("%s: its kustomization doesn't include deploy/components/mesh (mutual TLS)", s.Name))
 		}
 		if !bytes.Contains(kust, []byte("namespace: "+s.Namespace+"\n")) {
 			problems = append(problems, fmt.Errorf("%s: its kustomization doesn't set namespace: %s", s.Name, s.Namespace))

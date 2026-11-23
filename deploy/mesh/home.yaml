@@ -1,0 +1,17 @@
+# The landing page is called only by the load balancer.
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: home
+  namespace: home
+spec:
+  selector:
+    matchLabels:
+      app: home
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            ipBlocks:
+              - 35.191.0.0/16
+              - 130.211.0.0/22

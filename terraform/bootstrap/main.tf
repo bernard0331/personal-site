@@ -12,8 +12,10 @@ locals {
     "compute.googleapis.com",            # VPC, subnet, static IP, load balancer
     "container.googleapis.com",          # GKE
     "dns.googleapis.com",                # private googleapis.com zone
+    "gkehub.googleapis.com",             # fleet membership (service mesh)
     "iam.googleapis.com",                # service accounts
     "iamcredentials.googleapis.com",     # Workload Identity token exchange
+    "mesh.googleapis.com",               # Cloud Service Mesh
     "monitoring.googleapis.com",         # alert policies and the dashboard
     "storage.googleapis.com",            # buckets
   ]

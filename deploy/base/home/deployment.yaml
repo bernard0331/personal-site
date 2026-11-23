@@ -1,0 +1,62 @@
+# home: scaffolded by tools/sitectl. Change the image's arguments,
+# resources and replicas to suit the service.
+#
+# The container must serve HTTP on port 8080 and answer GET /healthz.
+# The pod runs as a non-root user with no extra privileges.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: home
+  namespace: home
+  labels:
+    app: home
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: home
+  template:
+    metadata:
+      labels:
+        app: home
+    spec:
+      serviceAccountName: home
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: home
+          image: home # the overlay sets the registry path and tag
+          # The optimizer's public address for the link; apply.sh fills in
+          # GENSHIN_HOSTNAME. Its health is checked in-cluster through the
+          # mesh (the default -genshin-health).
+          args:
+            - -genshin-url=https://GENSHIN_HOSTNAME
+          ports:
+            - name: http
+              containerPort: 8080
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 20
+            failureThreshold: 3

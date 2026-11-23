@@ -39,6 +39,12 @@ kubectl kustomize "$ROOT/deploy/overlays/prod" |
       -e "$HOSTS" |
   kubectl apply -f -
 
+# Istio's identity policies, when the service mesh is installed (its
+# AuthorizationPolicy type exists only then).
+if kubectl get crd authorizationpolicies.security.istio.io >/dev/null 2>&1; then
+  kubectl apply -k "$ROOT/deploy/mesh"
+fi
+
 # Wait for every site's Deployment (one site per namespace).
 python3 -c 'import json; [print(s["namespace"], s["name"]) for s in json.load(open("'"$ROOT"'/terraform/envs/prod/services.json"))["services"]]' |
   while read -r NS NAME; do

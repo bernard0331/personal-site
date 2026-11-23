@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>personal-site</title>
+<style>
+  :root { --bg: #fafaf9; --fg: #1c1917; --muted: #57534e; --card: #fff; --line: #e7e5e4; --up: #15803d; --down: #b91c1c; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #1c1917; --fg: #fafaf9; --muted: #a8a29e; --card: #292524; --line: #44403c; --up: #4ade80; --down: #f87171; }
+  }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 system-ui, sans-serif; }
+  main { max-width: 40rem; margin: 0 auto; padding: 3rem 1rem; }
+  h1 { font-size: 1.6rem; margin: 0 0 .5rem; }
+  p { color: var(--muted); }
+  ul { list-style: none; padding: 0; }
+  li { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 1rem; margin: 1rem 0; }
+  a { color: inherit; font-weight: 600; }
+  .status { font-size: .85rem; margin-left: .5rem; }
+  .up { color: var(--up); } .down { color: var(--down); }
+</style>
+</head>
+<body>
+<main>
+  <h1>personal-site</h1>
+  <p>Small sites I run on Google Kubernetes Engine to learn Kubernetes networking, Terraform and Go.</p>
+  <ul>
+  {{range .}}
+    <li>
+      {{if .URL}}<a href="{{.URL}}">{{.Name}}</a>{{else}}<strong>{{.Name}}</strong>{{end}}
+      {{with .Status}}<span class="status {{.}}">● {{.}}</span>{{end}}
+      <p>{{.Description}}</p>
+    </li>
+  {{end}}
+  </ul>
+</main>
+</body>
+</html>

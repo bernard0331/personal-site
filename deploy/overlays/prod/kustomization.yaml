@@ -11,7 +11,11 @@ kind: Kustomization
 resources:
   - ../../base/gateway
   - ../../base/genshin-web
+  - ../../base/home
 images:
   - name: genshin-web
     newName: IMAGE_REPOSITORY/genshin-web
+    newTag: IMAGE_TAG
+  - name: home
+    newName: IMAGE_REPOSITORY/home
     newTag: IMAGE_TAG

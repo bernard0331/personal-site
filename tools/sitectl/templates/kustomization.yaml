@@ -1,5 +1,6 @@
 # Scaffolded by tools/sitectl. The network-isolation component puts the
-# default-deny NetworkPolicies and their allow rules in this namespace.
+# default-deny NetworkPolicies and their allow rules in this namespace; the
+# mesh component enrols it in the Istio ambient mesh (mutual TLS).
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: {{.Namespace}}
@@ -12,3 +13,4 @@ resources:
   - httproute.yaml
 components:
   - ../../components/network-isolation
+  - ../../components/mesh
