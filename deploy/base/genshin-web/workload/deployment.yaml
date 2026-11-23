@@ -8,6 +8,10 @@
 #
 # When a spot node is taken back the pod is restarted on the other node; on
 # start-up it resumes unfinished runs from the bucket and the cache.
+#
+# track: stable marks this as the stable version. During a canary release
+# (deploy/gke/canary.sh) a second Deployment with track: canary runs beside
+# it, and the Service selects only its own track.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -22,10 +26,12 @@ spec:
   selector:
     matchLabels:
       app: genshin-web
+      track: stable
   template:
     metadata:
       labels:
         app: genshin-web
+        track: stable
       annotations:
         # Inject the Cloud Storage FUSE sidecar that mounts the bucket, with
         # small requests (its defaults reserve more than this node size has
@@ -54,6 +60,8 @@ spec:
           #                    Cloud Run it was 7 of 8)
           #   -proxy-hops 2    the visitor's address is 2 from the end of
           #                    X-Forwarded-For behind the Gateway
+          #   -track stable    sets the cookie that keeps a visitor on this
+          #                    version during a canary release
           args:
             - -addr=:8080
             - -img=/app/data/img
@@ -68,6 +76,7 @@ spec:
             - -cpus=2
             - -trust-proxy
             - -proxy-hops=2
+            - -track=stable
           ports:
             - name: http
               containerPort: 8080

@@ -19,7 +19,7 @@ resource "google_storage_bucket" "runs" {
     }
     condition {
       age            = 90
-      matches_prefix = ["runs/", "gke/runs/"]
+      matches_prefix = ["runs/", "gke/runs/", "gke-canary/runs/"]
     }
   }
 

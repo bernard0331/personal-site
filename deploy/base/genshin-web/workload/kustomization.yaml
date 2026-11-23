@@ -1,0 +1,8 @@
+# The site's pods, Service and health check: the part a canary release runs
+# twice. deploy/canary/genshin-web builds the canary copy from this folder.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - deployment.yaml
+  - service.yaml
+  - healthcheck.yaml

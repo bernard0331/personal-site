@@ -4,9 +4,7 @@ namespace: genshin
 resources:
   - namespace.yaml
   - serviceaccount.yaml
-  - deployment.yaml
-  - service.yaml
-  - healthcheck.yaml
+  - workload
   - httproute.yaml
 components:
   - ../../components/network-isolation

@@ -1,0 +1,47 @@
+# genshin-web's route during a canary release, replacing the base route of
+# the same name. deploy/gke/canary.sh fills in the hostname and the weights.
+#
+# Rules are tried most specific first:
+#   1. a visitor with the track=canary cookie stays on the canary
+#   2. a visitor with track=stable stays on stable
+#   3. everyone else (new visitors) is split by weight, and the version that
+#      answers sets their cookie
+#
+# Rolling back is applying the base route again: every visitor goes to
+# stable, which moves canary visitors' cookies over to track=stable.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: genshin-web
+  namespace: genshin
+spec:
+  parentRefs:
+    - name: sites
+      namespace: gateway
+      sectionName: https
+  hostnames:
+    - GENSHIN_HOSTNAME
+  rules:
+    - matches:
+        - headers:
+            - name: Cookie
+              type: RegularExpression
+              value: "(^|.*; ?)track=canary(;.*|$)"
+      backendRefs:
+        - name: genshin-web-canary
+          port: 80
+    - matches:
+        - headers:
+            - name: Cookie
+              type: RegularExpression
+              value: "(^|.*; ?)track=stable(;.*|$)"
+      backendRefs:
+        - name: genshin-web
+          port: 80
+    - backendRefs:
+        - name: genshin-web
+          port: 80
+          weight: STABLE_WEIGHT
+        - name: genshin-web-canary
+          port: 80
+          weight: CANARY_WEIGHT

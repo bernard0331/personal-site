@@ -1,0 +1,79 @@
+# The canary: a second copy of genshin-web's workload (Deployment, Service,
+# health check) for trying a new image on a share of visitors. Used only by
+# deploy/gke/canary.sh, never by the prod overlay.
+#
+# Differences from stable, each patched below:
+#   names          -canary suffix (genshin-web-canary)
+#   track          label and Service selector track: canary, and -track=canary
+#                  so its visitors get the track=canary cookie
+#   bucket folder  only-dir=gke-canary: its own runs and cache, so the two
+#                  versions never resume or overwrite each other's runs
+#                  (canary.sh seeds its cache from stable's)
+#   size           a quarter CPU and 1 GiB reserved, one simulation at a
+#                  time, so it fits on the single node beside stable
+#
+# It keeps stable's Kubernetes service account (same bucket access through
+# Workload Identity) and the namespace's NetworkPolicies apply to it too.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: genshin
+resources:
+  - ../../base/genshin-web/workload
+nameSuffix: -canary
+images:
+  - name: genshin-web
+    newName: IMAGE_REPOSITORY/genshin-web
+    newTag: CANARY_TAG
+patches:
+  - target:
+      kind: Deployment
+      name: genshin-web
+    patch: |-
+      - op: replace
+        path: /spec/selector/matchLabels/track
+        value: canary
+      - op: replace
+        path: /spec/template/metadata/labels/track
+        value: canary
+      - op: test
+        path: /spec/template/spec/containers/0/args/10
+        value: -cpus=2
+      - op: replace
+        path: /spec/template/spec/containers/0/args/10
+        value: -cpus=1
+      - op: test
+        path: /spec/template/spec/containers/0/args/13
+        value: -track=stable
+      - op: replace
+        path: /spec/template/spec/containers/0/args/13
+        value: -track=canary
+      - op: replace
+        path: /spec/template/spec/containers/0/resources
+        value:
+          requests:
+            cpu: 250m
+            memory: 1Gi
+            ephemeral-storage: 1Gi
+          limits:
+            memory: 2Gi
+            ephemeral-storage: 4Gi
+      - op: test
+        path: /spec/template/spec/volumes/0/csi/volumeAttributes/mountOptions
+        value: only-dir=gke,implicit-dirs,uid=10001,gid=10001,file-mode=0644,dir-mode=0755
+      - op: replace
+        path: /spec/template/spec/volumes/0/csi/volumeAttributes/mountOptions
+        value: only-dir=gke-canary,implicit-dirs,uid=10001,gid=10001,file-mode=0644,dir-mode=0755
+  - target:
+      kind: Service
+      name: genshin-web
+    patch: |-
+      - op: replace
+        path: /spec/selector/track
+        value: canary
+  - target:
+      kind: HealthCheckPolicy
+      name: genshin-web
+    patch: |-
+      - op: replace
+        path: /spec/targetRef/name
+        value: genshin-web-canary
