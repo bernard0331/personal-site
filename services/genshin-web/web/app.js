@@ -22,7 +22,16 @@ const imgURL = icon => `/img/${icon}.png`;
 let catalog;               // from /api/catalog
 const byKey = { char: {}, weapon: {}, set: {} };
 const STORE = 'team-optimizer-draft';
-const freshOptions = () => ({ energy: 1, pins: [], excluded: [] }); // energy 1: KQM standard
+// energy 1: KQM standard. run: quick or refined; level: light, standard or
+// thorough; adv: a thorough run's settings (the server's defaults).
+const freshAdv = () => ({ top: 100, per_element: 20, per_character: 3, iterations: 1000, skip_waiting: false });
+const freshOptions = () => ({ energy: 1, pins: [], excluded: [], run: 'quick', level: 'light', artifacts: 'kqm', adv: freshAdv() });
+const LEVELS = ['light', 'standard', 'thorough'];
+const LEVEL_NOTES = {
+  light: 'The quick run\'s picks and the best few teams of each element: about 30–40 teams, roughly 15 minutes.',
+  standard: 'Also each character\'s best team: about 120 teams, roughly 45 minutes.',
+  thorough: 'With the settings below, up to about 370 teams on a large account: 2–3 hours. Change them to trade time for coverage.',
+};
 // all4: weapons "Every 4-star" added, so switching it off removes only those.
 let draft = { chars: {}, weapons: {}, unlimited3: true, all4: [], artifacts: [], options: freshOptions() };
 
@@ -245,6 +254,49 @@ function drawPins() {
   pickList('pins', draft.options.pins);
   pickList('excl', draft.options.excluded);
   document.querySelectorAll('#energy button').forEach((b, i) => b.classList.toggle('on', (i === 0 ? 1 : 2) === draft.options.energy));
+  drawRunChoice();
+}
+
+// The run choice: quick or refined, how much to refine, a thorough run's
+// settings, and the artifact mode (top 1% only for refined runs).
+function drawRunChoice() {
+  const o = draft.options, refined = o.run === 'refined';
+  if (!refined && o.artifacts === 'top1') o.artifacts = 'kqm';
+  document.querySelectorAll('#runkind .runcard').forEach(c => c.classList.toggle('on', c.dataset.kind === o.run));
+  $('refined-opts').style.display = refined ? '' : 'none';
+  document.querySelectorAll('#level button').forEach((b, i) => b.classList.toggle('on', LEVELS[i] === o.level));
+  $('level-note').textContent = LEVEL_NOTES[o.level];
+  $('advanced').style.display = refined && o.level === 'thorough' ? '' : 'none';
+  $('adv-top').value = o.adv.top; $('adv-el').value = o.adv.per_element; $('adv-char').value = o.adv.per_character;
+  $('adv-it').value = String(o.adv.iterations); $('adv-wait').checked = o.adv.skip_waiting;
+  const art = document.querySelectorAll('#artmode button');
+  art[0].classList.toggle('on', o.artifacts !== 'top1'); art[1].classList.toggle('on', o.artifacts === 'top1');
+  art[1].disabled = !refined;
+  $('artnote').textContent = refined ? 'Top 1% gives the substat optimiser more rolls to place, as in the best builds players have. Your own artifacts come later.'
+    : 'Top 1% needs a refined run. Your own artifacts come later.';
+}
+
+function wireRunChoice() {
+  const o = () => draft.options;
+  document.querySelectorAll('#runkind .runcard').forEach(c => c.onclick = () => { o().run = c.dataset.kind; save(); drawRunChoice(); });
+  document.querySelectorAll('#level button').forEach((b, i) => b.onclick = () => { o().level = LEVELS[i]; save(); drawRunChoice(); });
+  document.querySelectorAll('#artmode button').forEach((b, i) => b.onclick = () => {
+    if (b.disabled || i > 1) return;
+    o().artifacts = i === 1 ? 'top1' : 'kqm'; save(); drawRunChoice();
+  });
+  const num = (id, key, lo, hi) => $(id).onchange = () => {
+    const v = Math.max(lo, Math.min(hi, Math.round(+$(id).value || 0)));
+    o().adv[key] = v; save(); drawRunChoice();
+  };
+  num('adv-top', 'top', 0, 500); num('adv-el', 'per_element', 0, 50); num('adv-char', 'per_character', 0, 5);
+  $('adv-it').onchange = () => { o().adv.iterations = +$('adv-it').value; save(); };
+  $('adv-wait').onchange = () => { o().adv.skip_waiting = $('adv-wait').checked; save(); };
+}
+
+// runLabel names a snapshot's run: "Quick run" or e.g. "Light refined run (top 1%)".
+function runLabel(snap) {
+  if (!snap.mode || snap.mode === 'quick') return 'Quick run';
+  return `${cap(snap.mode)} refined run${snap.artifacts === 'top1' ? ' (top 1% artifacts)' : ''}`;
 }
 
 // ---------- GOOD import and export ----------
@@ -286,8 +338,11 @@ function exportGood() {
 let runTimer = null, runData = null, view = { name: 'element', ranking: 'min' };
 
 async function optimize() {
+  const o = draft.options, refined = o.run === 'refined';
   const snapshot = { characters: draft.chars, weapons: draft.weapons, unlimited: draft.unlimited3,
-    energy: draft.options.energy, pins: draft.options.pins, excluded: draft.options.excluded };
+    energy: o.energy, pins: o.pins, excluded: o.excluded,
+    mode: refined ? o.level : 'quick', artifacts: refined ? o.artifacts : 'kqm' };
+  if (refined && o.level === 'thorough') snapshot.refine = o.adv;
   const res = await fetch('/api/runs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(snapshot) });
   const body = await res.json();
   if (!res.ok) { toast(body.error || 'The run could not be started.'); return; }
@@ -300,46 +355,75 @@ function routeFromHash() {
   return false;
 }
 
+// shown is what the run page last drew: while the result is unchanged, a
+// poll redraws only the progress, so open Details panels stay open.
+let shown = '';
+
 async function showRun(id) {
   clearTimeout(runTimer);
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('on', p.id === 'run'));
   $('steps').style.display = 'none';
   const box = $('run');
   const res = await fetch(`/api/runs/${id}`);
-  if (!res.ok) { box.innerHTML = '<h2>Run not found</h2><p class="sub">The link may be mistyped, or the run has been removed.</p>'; return; }
+  if (!res.ok) { box.innerHTML = '<h2>Run not found</h2><p class="sub">The link may be mistyped, or the run has been removed.</p>'; shown = ''; return; }
   runData = await res.json();
-  const st = runData.status, snap = runData.snapshot || {};
+  const st = runData.status, snap = runData.snapshot || {}, result = runData.result;
+  const over = st.state === 'done' || st.state === 'failed';
   const link = `${location.origin}/#/runs/${id}`;
-  const weaponCopies = Object.values(snap.weapons || {}).reduce((n, rs) => n + rs.length, 0);
-  const pins = (snap.pins || []).map(k => byKey.char[k]?.name || k);
-  const head = `<div class="runhead"><div style="display:flex;flex-direction:column;gap:6px">
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="urlbar">${link}</span><button class="mini" id="copy-link">Copy link</button></div>
-      <span class="lock">Locked snapshot · ${Object.keys(snap.characters || {}).length} characters · ${weaponCopies} weapon copies${snap.unlimited ? ' + unlimited 3-stars and craftables' : ''} · energy ${snap.energy === 2 ? '×2' : 'KQM standard'}${pins.length ? ' · pinned: ' + pins.join(', ') : ''}</span>
-    </div><button id="rerun">Edit and run again</button></div>`;
-
-  if (st.state === 'done' && runData.result) {
-    box.innerHTML = head + resultsHTML(runData.result);
-    wireResults();
-  } else if (st.state === 'failed') {
-    box.innerHTML = head + `<h2>The run failed</h2><p class="sub">${st.error || 'Something went wrong.'}</p>`;
+  const status = statusHTML(st, result);
+  const sig = [id, result ? `${result.mode}${result.refining ? '+' : ''}` : '-', over, view.name, view.ranking].join('|');
+  if (sig === shown && $('run-status')) {
+    $('run-status').innerHTML = status;
   } else {
-    const pct = st.total ? Math.round(100 * st.done / st.total) : 0;
-    const what = st.state === 'queued' ? (st.queue ? `Waiting: ${st.queue} run${st.queue > 1 ? 's' : ''} ahead` : 'Starting…')
-      : st.state === 'solving' ? 'Choosing the best teams…'
-      : `Simulating teams: ${st.done.toLocaleString()} of ${st.total.toLocaleString()}${st.cached ? ` (${st.cached.toLocaleString()} already known)` : ''}`;
-    box.innerHTML = head + `<h2>Optimizing</h2><p class="sub">${what}</p>
-      <div style="height:10px;border-radius:5px;background:var(--border);overflow:hidden;margin:14px 0"><div style="height:100%;width:${pct}%;background:var(--accent);transition:width .4s"></div></div>
-      <p class="sub">You can leave this page and come back with the link above.</p>`;
-    runTimer = setTimeout(() => showRun(id), 2000);
+    const weaponCopies = Object.values(snap.weapons || {}).reduce((n, rs) => n + rs.length, 0);
+    const pins = (snap.pins || []).map(k => byKey.char[k]?.name || k);
+    const head = `<div class="runhead"><div style="display:flex;flex-direction:column;gap:6px">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><span class="urlbar">${link}</span><button class="mini" id="copy-link">Copy link</button></div>
+        <span class="lock">${runLabel(snap)} · locked snapshot · ${Object.keys(snap.characters || {}).length} characters · ${weaponCopies} weapon copies${snap.unlimited ? ' + unlimited 3-stars and craftables' : ''} · energy ${snap.energy === 2 ? '×2' : 'KQM standard'}${pins.length ? ' · pinned: ' + pins.join(', ') : ''}</span>
+      </div><button id="rerun">Edit and run again</button></div>`;
+    box.innerHTML = head + `<div id="run-status">${status}</div>` + (result ? resultsHTML(result) : '');
+    if (result) wireResults();
+    shown = sig;
+    $('copy-link').onclick = () => { navigator.clipboard?.writeText(link).then(() => toast('Link copied'), () => toast(link)); };
+    $('rerun').onclick = () => {
+      draft.chars = { ...(snap.characters || {}) }; draft.weapons = JSON.parse(JSON.stringify(snap.weapons || {}));
+      draft.unlimited3 = !!snap.unlimited;
+      const refined = snap.mode && snap.mode !== 'quick';
+      draft.options = { ...freshOptions(), energy: snap.energy || 1, pins: [...(snap.pins || [])], excluded: [...(snap.excluded || [])],
+        run: refined ? 'refined' : 'quick', level: refined ? snap.mode : 'light', artifacts: snap.artifacts || 'kqm',
+        adv: snap.refine ? { ...snap.refine } : freshAdv() };
+      save(); history.pushState(null, '', '/'); clearTimeout(runTimer); shown = '';
+      drawGrid(); drawWFilters(); drawWeapons(); drawPins(); go(0);
+    };
   }
-  $('copy-link').onclick = () => { navigator.clipboard?.writeText(link).then(() => toast('Link copied'), () => toast(link)); };
-  $('rerun').onclick = () => {
-    draft.chars = { ...(snap.characters || {}) }; draft.weapons = JSON.parse(JSON.stringify(snap.weapons || {}));
-    draft.unlimited3 = !!snap.unlimited;
-    draft.options = { energy: snap.energy || 1, pins: [...(snap.pins || [])], excluded: [...(snap.excluded || [])] };
-    save(); history.pushState(null, '', '/'); clearTimeout(runTimer);
-    drawGrid(); drawWFilters(); drawWeapons(); go(0);
-  };
+  if (!over) runTimer = setTimeout(() => showRun(id), result ? 5000 : 2000);
+}
+
+// statusHTML is the run's progress above the teams (empty once done).
+function statusHTML(st, result) {
+  const bar = pct => `<div style="height:10px;border-radius:5px;background:var(--border);overflow:hidden;margin:12px 0"><div style="height:100%;width:${pct}%;background:var(--accent);transition:width .4s"></div></div>`;
+  const pause = 'You can leave and come back with the link above. If no one has the page open for about 15 minutes, the server pauses the run; opening the link again continues it.';
+  if (st.state === 'done') return '';
+  if (st.state === 'failed') {
+    return result ? `<p class="flag">Refining failed: ${st.error || 'something went wrong'}. These are the quick run's teams.</p>`
+      : `<h2>The run failed</h2><p class="sub">${st.error || 'Something went wrong.'}</p>`;
+  }
+  const pct = st.total ? Math.round(100 * st.done / st.total) : 0;
+  if (result && result.refining) {
+    const what = st.state === 'solving' ? 'Choosing teams from the refined numbers…'
+      : st.state === 'refining' ? `Refining teams: ${st.done.toLocaleString()} of ${st.total.toLocaleString()}${st.cached ? ` (${st.cached.toLocaleString()} already known)` : ''}`
+      : 'Starting again…';
+    return `<div class="refining"><b>${what}</b>${st.state === 'refining' ? bar(pct) : ''}<div class="sub">Below are the quick run's teams; the refined ones replace them when ready. ${pause}</div></div>`;
+  }
+  const what = st.state === 'queued' ? (st.queue ? `Waiting: ${st.queue} run${st.queue > 1 ? 's' : ''} ahead` : 'Starting…')
+    : st.state === 'solving' ? 'Choosing the best teams…'
+    : `Simulating teams: ${st.done.toLocaleString()} of ${st.total.toLocaleString()}${st.cached ? ` (${st.cached.toLocaleString()} already known)` : ''}`;
+  return `<h2>Optimizing</h2><p class="sub">${what}</p>${bar(pct)}<p class="sub">${pause}</p>`;
+}
+
+function resultNote(r) {
+  if (!r.mode || r.mode === 'quick') return 'quick run (rough numbers)' + (r.refining ? ', refined numbers on the way' : '');
+  return `${r.mode} refined run: ${r.refined.toLocaleString()} teams simulated again with optimised substats (${r.artifacts === 'top1' ? 'top 1%' : 'KQM standard'})`;
 }
 
 function resultsHTML(result) {
@@ -349,7 +433,7 @@ function resultsHTML(result) {
   const avg = dps.length ? dps.reduce((a, b) => a + b, 0) / dps.length : 0;
   const k = n => Math.round(n / 1000) + 'k';
   const seg = (id, opts, cur) => `<div class="seg" id="${id}">${opts.map(([v, t]) => `<button data-v="${v}" class="${cur === v ? 'on' : ''}">${t}</button>`).join('')}</div>`;
-  return `<div class="section-head"><div><h2>Best teams</h2><div class="sub">${result.teams.toLocaleString()} teams your account can field · quick run (rough numbers)</div></div>
+  return `<div class="section-head"><div><h2>Best teams</h2><div class="sub">${result.teams.toLocaleString()} teams your account can field · ${resultNote(result)}</div></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">${seg('bd-name', [['element', '7 teams, one per element'], ['any', '5 teams, any element']], view.name)}${seg('bd-rank', [['min', 'Best weakest team'], ['sum', 'Highest average']], view.ranking)}</div></div>
     <div class="metrics"><div class="metric"><div class="label">Average</div><div class="value">${k(avg)}</div></div>
       <div class="metric"><div class="label">Weakest team</div><div class="value">${dps.length ? k(Math.min(...dps)) : '–'}</div></div>
@@ -384,7 +468,8 @@ function detailsHTML(t) {
   const source = d.source_url ? `<a href="${esc(d.source_url)}" target="_blank" rel="noopener" style="color:var(--accent)">${esc(d.source_name)}</a>` : esc(d.source_name);
   const builds = d.builds.map(b => {
     const sets = Object.entries(b.sets || {}).map(([k, n]) => `${n}pc ${esc(byKey.set[k]?.name || k)}`).join(' + ');
-    return `<div class="row"><span>${esc(name(b.key))}</span><span>${[sets, esc(b.main || '')].filter(Boolean).join(' · ') || '—'}</span></div>`;
+    const subs = d.substats?.[b.key];
+    return `<div class="row"><span>${esc(name(b.key))}</span><span>${[sets, esc(b.main || '')].filter(Boolean).join(' · ') || '—'}${subs ? `<br><span class="sub">Optimised rolls: ${esc(subs)}</span>` : ''}</span></div>`;
   }).join('');
   const els = Object.entries(d.element_dps || {}).filter(([, v]) => v >= 500).sort((a, b) => b[1] - a[1]);
   const top = Math.max(1, ...els.map(([, v]) => v));
@@ -392,7 +477,8 @@ function detailsHTML(t) {
   const notes = [`Fight ${Math.round(d.duration)} s · ${d.iterations} iterations · ±${(t.sd / 1000).toFixed(1)}k`];
   for (const [why, s] of Object.entries(d.waits || {})) if (s >= 0.5) notes.push(`Waits ${s.toFixed(1)} s in all: ${esc(why.replace(/_/g, ' '))}`);
   if (d.rot_cons) notes.push('Rotation written for ' + t.members.map((m, i) => `${name(m.key)} C${d.rot_cons[i] ?? '?'}`).join(', '));
-  notes.push('Builds are the rotation\'s example builds (KQM-standard substats); a refined run will use yours.');
+  notes.push(d.substats ? 'Sets and main stats are the rotation\'s; KQM Sim\'s optimiser chose the substats for your weapons and constellations.'
+    : 'Builds are the rotation\'s example builds (KQM-standard substats); a refined run optimises the substats.');
   return `<div class="details">
     <div><h4>Rotation</h4><div class="sub" style="font-size:12px;margin-bottom:6px">${source}</div>${(d.credit || []).map(c => `<div class="sub" style="font-size:12px;margin-bottom:4px">${esc(c)}</div>`).join('')}
       <pre class="script">${esc(d.script.join('\n'))}</pre></div>
@@ -484,6 +570,7 @@ async function main() {
   });
   $('unl3').onclick = () => { draft.unlimited3 = !draft.unlimited3; save(); drawWFilters(); drawWeapons(); };
   segmented('energy', i => { draft.options.energy = i === 0 ? 1 : 2; save(); });
+  wireRunChoice(); drawRunChoice();
   $('optimize').onclick = optimize;
   window.addEventListener('hashchange', () => { if (!routeFromHash()) { clearTimeout(runTimer); go(0); } });
   if (!routeFromHash()) go(Object.keys(draft.chars).length ? 0 : -1);
