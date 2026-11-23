@@ -1,0 +1,3 @@
+output "web_service_account" {
+  value = google_service_account.web.email
+}
