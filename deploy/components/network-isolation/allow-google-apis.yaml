@@ -1,0 +1,41 @@
+# Out: Google APIs, and only through their private addresses.
+#
+#   169.254.169.254:80   GKE's metadata server, which hands the pod its own
+#   169.254.169.252:988  Workload Identity tokens (the second address is the
+#                        server itself on Dataplane V2)
+#   199.36.153.8/30:443  private.googleapis.com. A private DNS zone in the
+#                        VPC (terraform/modules/network) points every
+#                        *.googleapis.com name there, so Cloud Storage (the
+#                        bucket mount) is reached on these four addresses
+#                        only, through Private Google Access.
+#
+# The nodes have no public addresses and there is no Cloud NAT, so the
+# internet is unreachable anyway; this also keeps a compromised pod from
+# probing the VPC or other Google services' public addresses.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-google-apis
+spec:
+  podSelector: {}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: 169.254.169.254/32
+      ports:
+        - protocol: TCP
+          port: 80
+    - to:
+        - ipBlock:
+            cidr: 169.254.169.252/32
+      ports:
+        - protocol: TCP
+          port: 988
+    - to:
+        - ipBlock:
+            cidr: 199.36.153.8/30
+      ports:
+        - protocol: TCP
+          port: 443

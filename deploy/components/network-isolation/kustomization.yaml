@@ -1,0 +1,15 @@
+# Network isolation for one site's namespace, as a Kustomize component: a
+# site's kustomization lists it under `components:` and its policies land in
+# that site's namespace (the including kustomization sets `namespace:`).
+#
+# Default deny in both directions, then only what a site behind the shared
+# Gateway needs. GKE Dataplane V2 (Cilium, eBPF) enforces these; with no
+# policy at all, every pod could reach every other pod and anything the VPC
+# routes to.
+apiVersion: kustomize.config.k8s.io/v1alpha1
+kind: Component
+resources:
+  - default-deny.yaml
+  - allow-load-balancer.yaml
+  - allow-dns.yaml
+  - allow-google-apis.yaml

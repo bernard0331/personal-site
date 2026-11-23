@@ -11,8 +11,10 @@ locals {
     "certificatemanager.googleapis.com", # the Gateway's TLS certificate
     "compute.googleapis.com",            # VPC, subnet, static IP, load balancer
     "container.googleapis.com",          # GKE
+    "dns.googleapis.com",                # private googleapis.com zone
     "iam.googleapis.com",                # service accounts
     "iamcredentials.googleapis.com",     # Workload Identity token exchange
+    "monitoring.googleapis.com",         # alert policies and the dashboard
     "storage.googleapis.com",            # buckets
   ]
 }

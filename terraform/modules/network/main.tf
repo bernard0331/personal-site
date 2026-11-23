@@ -50,3 +50,57 @@ resource "google_compute_firewall" "lb_to_pods" {
     ports    = [tostring(var.app_port)]
   }
 }
+
+# Google APIs on private addresses. Private Google Access alone reaches
+# Google APIs on their usual public addresses (many, and they change), which
+# a NetworkPolicy can't list. Instead, a private DNS zone visible only in
+# this VPC answers every *.googleapis.com name with private.googleapis.com,
+# four fixed addresses (199.36.153.8/30) that are reachable only through
+# Private Google Access, never the internet. The pods' egress policy
+# (deploy/components/network-isolation) then allows exactly those four.
+#
+# A managed zone costs about $0.20 a month; it exists only with the cluster.
+
+locals {
+  private_googleapis = ["199.36.153.8", "199.36.153.9", "199.36.153.10", "199.36.153.11"]
+}
+
+resource "google_dns_managed_zone" "googleapis" {
+  name        = "${var.name}-googleapis"
+  dns_name    = "googleapis.com."
+  description = "Google APIs on private.googleapis.com for the ${var.name} VPC"
+  visibility  = "private"
+  private_visibility_config {
+    networks {
+      network_url = google_compute_network.this.id
+    }
+  }
+}
+
+resource "google_dns_record_set" "private_googleapis" {
+  managed_zone = google_dns_managed_zone.googleapis.name
+  name         = "private.googleapis.com."
+  type         = "A"
+  ttl          = 300
+  rrdatas      = local.private_googleapis
+}
+
+resource "google_dns_record_set" "googleapis_wildcard" {
+  managed_zone = google_dns_managed_zone.googleapis.name
+  name         = "*.googleapis.com."
+  type         = "CNAME"
+  ttl          = 300
+  rrdatas      = [google_dns_record_set.private_googleapis.name]
+}
+
+# The route to those addresses. A new VPC already has a default route to the
+# internet gateway, which covers them; this one says so explicitly and keeps
+# them reachable if that default route is ever removed. (Traffic to them
+# never leaves Google's network.)
+resource "google_compute_route" "private_googleapis" {
+  name             = "${var.name}-private-googleapis"
+  network          = google_compute_network.this.id
+  dest_range       = "199.36.153.8/30"
+  next_hop_gateway = "default-internet-gateway"
+  priority         = 900
+}
