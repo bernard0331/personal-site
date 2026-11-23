@@ -16,6 +16,7 @@ import (
 type limiter struct {
 	perHour    int
 	trustProxy bool // read the client's address from X-Forwarded-For (behind Cloud Run's front end)
+	proxyHops  int  // if > 0: the client is this many entries from the end of X-Forwarded-For
 
 	mu     sync.Mutex
 	active map[string]string      // ip -> its latest run id
@@ -30,11 +31,21 @@ func newLimiter(perHour int, trustProxy bool) *limiter {
 // it saw (Cloud Run does), the first X-Forwarded-For entry is the client's; it
 // is only trusted when the server is told it runs behind such a proxy, since
 // anyone can send the header.
+//
+// With proxyHops set, the client is that many entries from the end instead.
+// Google Cloud's external Application Load Balancer (GKE's Gateway) appends
+// "CLIENT_IP,LOAD_BALANCER_IP" to whatever the visitor sent, so there the
+// client is 2 from the end, and a visitor can't choose it by sending a header.
 func (l *limiter) clientIP(r *http.Request) string {
 	if l.trustProxy {
 		if xff := r.Header.Get("X-Forwarded-For"); xff != "" {
-			first, _, _ := strings.Cut(xff, ",")
-			return strings.TrimSpace(first)
+			parts := strings.Split(xff, ",")
+			if l.proxyHops <= 0 {
+				return strings.TrimSpace(parts[0])
+			}
+			if len(parts) >= l.proxyHops {
+				return strings.TrimSpace(parts[len(parts)-l.proxyHops])
+			}
 		}
 	}
 	host, _, err := net.SplitHostPort(r.RemoteAddr)

@@ -49,6 +49,7 @@ func main() {
 	variants := flag.Int("variants", 4, "weapon alternatives per team the solver may choose from")
 	perHour := flag.Int("runs-per-hour", 6, "runs one visitor (IP address) may start per hour; 0 for no limit")
 	trustProxy := flag.Bool("trust-proxy", false, "take visitors' addresses from X-Forwarded-For (set behind Cloud Run or a load balancer)")
+	proxyHops := flag.Int("proxy-hops", 0, "with -trust-proxy: the visitor is this many X-Forwarded-For entries from the end (2 behind GKE's Gateway); 0 takes the first")
 	flag.Parse()
 
 	cat, err := catalog.Load()
@@ -66,6 +67,7 @@ func main() {
 	}
 	eng.variants = *variants
 	eng.runs.limit = newLimiter(*perHour, *trustProxy)
+	eng.runs.limit.proxyHops = *proxyHops
 	eng.runs.resume()
 	go eng.loop()
 

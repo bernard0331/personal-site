@@ -40,4 +40,20 @@ func TestClientIP(t *testing.T) {
 	if got := newLimiter(1, true).clientIP(r); got != "203.0.113.7" {
 		t.Errorf("behind a proxy: got %s, want the first X-Forwarded-For entry", got)
 	}
+
+	// Behind GKE's Gateway: "<what the visitor sent>,CLIENT_IP,LOAD_BALANCER_IP".
+	gke := newLimiter(1, true)
+	gke.proxyHops = 2
+	r.Header.Set("X-Forwarded-For", "1.1.1.1, 203.0.113.7,34.1.2.3")
+	if got := gke.clientIP(r); got != "203.0.113.7" {
+		t.Errorf("behind GKE's Gateway with a forged entry: got %s, want 203.0.113.7", got)
+	}
+	r.Header.Set("X-Forwarded-For", "203.0.113.7,34.1.2.3")
+	if got := gke.clientIP(r); got != "203.0.113.7" {
+		t.Errorf("behind GKE's Gateway: got %s, want 203.0.113.7", got)
+	}
+	r.Header.Set("X-Forwarded-For", "203.0.113.7")
+	if got := gke.clientIP(r); got != "10.0.0.1" {
+		t.Errorf("too few entries: got %s, want the connection's address", got)
+	}
 }
