@@ -1,8 +1,7 @@
 # Out: Google APIs, and only through their private addresses.
 #
 #   169.254.169.254:80   GKE's metadata server, which hands the pod its own
-#   169.254.169.252:988  Workload Identity tokens (the second address is the
-#                        server itself on Dataplane V2)
+#                        Workload Identity tokens
 #   199.36.153.8/30:443  private.googleapis.com. A private DNS zone in the
 #                        VPC (terraform/modules/network) points every
 #                        *.googleapis.com name there, so Cloud Storage (the
@@ -27,12 +26,6 @@ spec:
       ports:
         - protocol: TCP
           port: 80
-    - to:
-        - ipBlock:
-            cidr: 169.254.169.252/32
-      ports:
-        - protocol: TCP
-          port: 988
     - to:
         - ipBlock:
             cidr: 199.36.153.8/30

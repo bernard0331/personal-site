@@ -1,5 +1,10 @@
-# Out: name lookups through the cluster's DNS (kube-dns in kube-system), and
-# nothing else in the cluster.
+# Out: name lookups through the cluster's DNS, and nothing else in the
+# cluster.
+#
+# Two destinations, because GKE runs NodeLocal DNSCache: a pod asks the
+# kube-dns Service, but Dataplane V2 hands the query to the node-local-dns
+# pod on the same node, which forwards misses to kube-dns. A rule naming only
+# kube-dns blocks every lookup (found on the live cluster, 2026-11-23).
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -16,6 +21,12 @@ spec:
           podSelector:
             matchLabels:
               k8s-app: kube-dns
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: node-local-dns
       ports:
         - protocol: UDP
           port: 53

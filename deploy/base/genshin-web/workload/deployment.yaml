@@ -47,7 +47,7 @@ spec:
         # metadata server's Workload Identity tokens) go straight out, not
         # through the Envoy sidecar. They are already TLS, and the bucket
         # mount starts before the sidecar is ready.
-        traffic.sidecar.istio.io/excludeOutboundIPRanges: "199.36.153.8/30,169.254.169.254/32,169.254.169.252/32"
+        traffic.sidecar.istio.io/excludeOutboundIPRanges: "199.36.153.8/30,169.254.169.254/32"
     spec:
       serviceAccountName: genshin-web
       terminationGracePeriodSeconds: 25 # spot VMs get 30 s notice
