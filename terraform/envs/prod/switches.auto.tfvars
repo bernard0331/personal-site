@@ -6,5 +6,5 @@
 #   mesh_enabled  Cloud Service Mesh on that cluster (about $0.07 an hour)
 #   node_count    spot nodes (about $0.04 an hour each)
 gke_enabled  = true
-mesh_enabled = false
+mesh_enabled = true
 node_count   = 2
