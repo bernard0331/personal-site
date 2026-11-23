@@ -47,6 +47,15 @@ visitor ──HTTPS──▶ global external Application Load Balancer
   health-check ranges (35.191.0.0/16, 130.211.0.0/22) on the app's port.
 - **Dataplane V2**: GKE's eBPF dataplane, based on Cilium, which also
   enforces Kubernetes NetworkPolicies.
+- **Default-deny NetworkPolicies** in every site's namespace
+  ([deploy/components/network-isolation](deploy/components/network-isolation)):
+  ingress is allowed only from the load balancer's ranges, on the serving
+  port. Egress is allowed only to kube-dns, the GKE metadata server
+  (Workload Identity tokens) and private.googleapis.com.
+- **Google APIs on private addresses**: a private Cloud DNS zone answers
+  `*.googleapis.com` with private.googleapis.com (199.36.153.8/30). Pods'
+  calls to Google APIs therefore go to four fixed addresses, reached
+  through Private Google Access, and the egress policy can name them exactly.
 - **Gateway API**: one shared `Gateway` (class
   `gke-l7-global-external-managed`) on a reserved global IP. Each site's
   `HTTPRoute` attaches to its HTTPS listener from its own namespace, allowed
@@ -71,6 +80,61 @@ visitor ──HTTPS──▶ global external Application Load Balancer
   GKE CSI driver, limited to its own folder so the GKE and Cloud Run copies
   never share data.
 
+### Self-serve sites
+
+[tools/sitectl](tools/sitectl) is a Go CLI that adds a site behind the shared
+Gateway in one command:
+
+```bash
+go run ./tools/sitectl add -name home -site www
+```
+
+It records the site in `terraform/envs/prod/services.json`, which is the one
+list of sites. It also scaffolds the site's manifests: a namespace labelled
+for the Gateway, a Kubernetes service account, a hardened Deployment, a
+Service, a health check, an HTTPRoute, and the default-deny NetworkPolicies.
+
+Terraform reads the same file and gives each site:
+
+- a hostname;
+- its own TLS certificate and certificate map entry;
+- a firewall opening for its port;
+- optionally, Workload Identity access to its own folder of the runs bucket.
+
+`sitectl check` validates the repository against the list, for use in CI.
+
+### Canary releases
+
+[deploy/gke/canary.sh](deploy/gke/canary.sh) runs a new image beside the
+stable one and splits new visitors between them with weighted
+`backendRefs` on the HTTPRoute (Gateway API). The split happens in the
+load balancer, with no mesh. A `track` cookie keeps each visitor on one
+version, because a version's runs live in its own memory and bucket folder.
+
+```bash
+deploy/gke/canary.sh start <image> 10    # 10% of new visitors
+deploy/gke/canary.sh weight 50
+deploy/gke/canary.sh promote             # or: rollback
+```
+
+Rollback puts the base route back and deletes the canary. Promote sends
+everyone to the canary while stable is replaced, so pages keep loading. See
+[deploy/gke/README.md](deploy/gke/README.md).
+
+### Alerts and dashboard
+
+[terraform/modules/monitoring](terraform/modules/monitoring) defines Cloud
+Monitoring alert policies in PromQL:
+
+- the 5xx share of requests at the load balancer;
+- p95 latency;
+- container restarts.
+
+Each one fires only once there is a minimum of traffic, and each carries a
+runbook note. The module also defines a dashboard for request rate by
+response class, error share, latency, and pod CPU, memory and restarts. All
+of it is created and removed with the cluster.
+
 ### Compute
 
 - One zonal GKE Standard cluster (the free tier covers its management fee)
@@ -91,10 +155,14 @@ visitor ──HTTPS──▶ global external Application Load Balancer
 | `terraform/modules/iam` | Bucket access for the Cloud Run and Kubernetes identities |
 | `terraform/modules/registry` | Artifact Registry repository with cleanup policies |
 | `terraform/modules/storage` | Runs bucket with lifecycle rules |
-| `terraform/modules/dns-certs` | Reserved IP, hostnames, certificate and certificate map |
+| `terraform/modules/dns-certs` | Reserved IP, hostnames, a certificate per site and the certificate map |
+| `terraform/modules/monitoring` | Alert policies (PromQL) and a dashboard |
 | `terraform/envs/prod` | The environment that wires the modules together (GCS backend) |
 | `deploy/base`, `deploy/overlays/prod` | Kustomize manifests: Gateway, namespace, Deployment, Service, HTTPRoute, health check |
-| `deploy/gke/apply.sh` | Renders the overlay with Terraform's outputs and applies it |
+| `deploy/components/network-isolation` | Default-deny NetworkPolicies, included by every site |
+| `deploy/canary/genshin-web` | The canary copy of the workload and the weighted route |
+| `deploy/gke/apply.sh`, `canary.sh` | Render with Terraform's outputs and apply; canary releases |
+| `tools/sitectl` | The self-serve CLI for adding a site |
 | `deploy/genshin-web` | Image build (Cloud Build) and the Cloud Run deployment |
 
 ## Bringing it up and down
@@ -118,8 +186,10 @@ are in [terraform/README.md](terraform/README.md) and
 
 - A landing page and a Terraforming Mars site, as further routes on the same
   Gateway.
-- CI: `terraform plan` and manifest validation in GitHub Actions, using
-  GitHub OIDC (no keys).
+- CI: `terraform plan`, `sitectl check` and manifest validation in GitHub
+  Actions, using GitHub OIDC (no keys).
+- A service mesh (Istio ambient or Cloud Service Mesh) with mTLS, once a
+  second service talks to the optimizer.
 - GitOps deploys with Argo CD in place of `apply.sh`.
 - Identity-Aware Proxy for admin pages.
 

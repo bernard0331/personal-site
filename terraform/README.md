@@ -17,13 +17,14 @@ The Cloud Run service (`deploy/genshin-web/`) keeps running alongside; see
 | Folder | What it makes |
 | :- | :- |
 | `bootstrap/` | Turns on the APIs and makes the bucket that holds Terraform's state. Applied once, state kept on the laptop. |
-| `modules/network` | Custom VPC, one subnet with pod and Service ranges, Private Google Access, a firewall rule for the load balancer. No Cloud NAT. |
+| `modules/network` | Custom VPC, one subnet with pod and Service ranges, Private Google Access, a firewall rule for the load balancer on the sites' ports. No Cloud NAT. A private DNS zone points `*.googleapis.com` at private.googleapis.com (199.36.153.8/30), so the pods' egress NetworkPolicy can allow exactly those four addresses. |
 | `modules/gke` | Zonal Standard cluster (Dataplane V2, Workload Identity, Gateway API, Cloud Storage FUSE driver, private nodes) and one spot node pool with its own least-privilege service account. |
 | `modules/registry` | The `genshin` Artifact Registry repository with a cleanup policy (keep the 10 newest images, delete others after 30 days). |
 | `modules/storage` | The runs bucket (90-day rule on `runs/`, never destroyed by Terraform). |
 | `modules/iam` | Object read/write on that bucket for Cloud Run's service account and for the pod's Kubernetes service account (Workload Identity Federation, no keys). |
-| `modules/dns-certs` | Reserved global IP, an sslip.io hostname per site, a Google-managed certificate (load balancer authorization) and the certificate map the Gateway uses. |
-| `envs/prod` | Wires the modules together. `gke_enabled` (default `false`) switches network, gke and dns-certs on or off. `imports.tf` adopts the registry, bucket and service account made by hand for Cloud Run, so they aren't created twice. |
+| `modules/dns-certs` | Reserved global IP, an sslip.io hostname per site, a Google-managed certificate per site (load balancer authorization) and the certificate map the Gateway uses. |
+| `modules/monitoring` | Cloud Monitoring alert policies in PromQL (5xx share and p95 latency at the load balancer, container restarts) and a dashboard. Email goes to `alert_email` in `terraform.tfvars` if it's set. |
+| `envs/prod` | Wires the modules together. `gke_enabled` (default `false`) switches network, gke, dns-certs and monitoring on or off. `services.json` lists the sites (managed by `tools/sitectl`); each one gets a hostname, a certificate, a firewall port and, if it asks, bucket access. `imports.tf` adopts the registry, bucket and service account made by hand for Cloud Run, so they aren't created twice. |
 
 Values that contain the project id live in `envs/prod/terraform.tfvars` and
 `bootstrap/terraform.tfvars` (gitignored; copy `example.tfvars`).
@@ -37,7 +38,9 @@ Prices from the Cloud Billing Catalog API, us-central1:
 | Spot e2-standard-2 node (2 vCPU x $0.01309/h + 8 GB x $0.00175/h) | $0.0402/h | ~$29 per node |
 | Standard persistent disk, 30 GB per node | $0.04/GB-month | ~$1.20 per node |
 | Cluster management fee (one zonal cluster) | covered by the GKE free tier credit | $0 |
-| Gateway load balancer (forwarding rule + data processed) | not retrieved; check the pricing calculator | roughly $18+ |
+| Gateway load balancer (forwarding rule minimum, global) | $0.025/h | ~$18 |
+| Private DNS zone for googleapis.com | $0.20/zone-month | $0.20 |
+| Alert policies and dashboard (first million alert time series free) | $0 | $0 |
 
 The design doc's two nodes would cost about $60 a month before the load
 balancer, more than the $50 budget, so the owner runs one (`node_count = 1`
@@ -113,8 +116,8 @@ Then set `gke_enabled = false` in `envs/prod/terraform.tfvars` and apply:
 terraform -chdir=terraform/envs/prod apply
 ```
 
-That destroys the cluster, node, network, IP address and certificate (16
-resources) and nothing else. Check with `gcloud compute forwarding-rules
+That destroys the cluster, node, network, DNS zone, IP address,
+certificates, alerts and dashboard, and nothing else. Check with `gcloud compute forwarding-rules
 list` that no load balancer is left. Remaining cost: cents a month for the
 buckets and images, which Cloud Run uses anyway.
 
@@ -125,8 +128,9 @@ hostname, will be new).
 
 ## Not done yet
 
-- Network policies, Secret Manager and the admin hostname behind IAP
-  (design doc phase 5; the site has no admin pages yet).
+- Secret Manager and the admin hostname behind IAP (design doc phase 5; the
+  site has no admin pages yet). Network policies are in
+  `deploy/components/network-isolation`.
 - Argo CD and GitHub Actions (phase 7); `deploy/gke/apply.sh` stands in.
 - A PodDisruptionBudget: with one replica, one that keeps a pod up would
   block node upgrades. It comes with the API and worker split.

@@ -45,3 +45,9 @@ variable "authorized_networks" {
   type        = list(string)
   default     = []
 }
+
+variable "alert_email" {
+  description = "Where alerts are emailed (set in the gitignored terraform.tfvars); null: none"
+  type        = string
+  default     = null
+}

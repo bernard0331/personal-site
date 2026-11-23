@@ -79,3 +79,13 @@ module "dns_certs" {
   name   = "sites"
   sites  = [for s in local.services : s.site]
 }
+
+# Alerts and a dashboard for the Genshin site, only while the cluster exists
+# (they watch its load balancer and pods).
+module "monitoring" {
+  count              = local.gke
+  source             = "../../modules/monitoring"
+  namespace          = "genshin"
+  cluster            = module.gke[0].name
+  notification_email = var.alert_email
+}
