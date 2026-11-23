@@ -143,6 +143,10 @@ func watchMemory(p *os.Process, maxMB int, done <-chan struct{}, over chan<- int
 func (b *Binary) command(ctx context.Context, dir string, args ...string) *exec.Cmd {
 	cmd := exec.CommandContext(ctx, b.Path, args...)
 	cmd.Dir = dir
+	// Once the process is killed (time limit), stop waiting for its output
+	// after a second: a child it started could otherwise keep the output
+	// pipe open, and Wait with it, until that child exits on its own.
+	cmd.WaitDelay = time.Second
 	if b.Threads > 0 {
 		cmd.Env = append(os.Environ(), fmt.Sprintf("GOMAXPROCS=%d", b.Threads))
 	}
