@@ -10,9 +10,9 @@
 #   canary.sh rollback               send everyone to stable, remove the canary
 #   canary.sh status                 versions, pods and the current split
 #
-# How traffic is split: deploy/canary/genshin-web/httproute.yaml. Visitors
-# are sticky (a track cookie), because each version keeps its runs to
-# itself; the weights decide only where new visitors go.
+# How traffic is split: deploy/canary/genshin-web/httproute.yaml. Runs are
+# sticky (the X-Track header), because each version keeps its runs to
+# itself; the weights decide where page loads and new runs go.
 #
 # kubectl must point at the cluster, and deploy/gke/apply.sh must have
 # deployed the stable version first.
@@ -41,7 +41,7 @@ stable_route() {
     kubectl apply -n "$NS" -f -
 }
 
-# all_to_canary: every visitor, cookie or not, to the canary.
+# all_to_canary: every request, X-Track or not, to the canary.
 all_to_canary() {
   sed -e "s|GENSHIN_HOSTNAME|$(host)|" \
       -e "s|^        - name: genshin-web\$|        - name: genshin-web-canary|" \

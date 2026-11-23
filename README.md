@@ -108,8 +108,11 @@ Terraform reads the same file and gives each site:
 [deploy/gke/canary.sh](deploy/gke/canary.sh) runs a new image beside the
 stable one and splits new visitors between them with weighted
 `backendRefs` on the HTTPRoute (Gateway API). The split happens in the
-load balancer, with no mesh. A `track` cookie keeps each visitor on one
-version, because a version's runs live in its own memory and bucket folder.
+load balancer. Each run stays on the version that started it: the server
+names itself in an `X-Track` header, and the page sends it back for that
+run. The route matches the header exactly, because Google's load balancer
+allows only one regular expression per URL map, so a cookie match can't be
+used.
 
 ```bash
 deploy/gke/canary.sh start <image> 10    # 10% of new visitors

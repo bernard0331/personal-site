@@ -2,13 +2,19 @@
 # the same name. deploy/gke/canary.sh fills in the hostname and the weights.
 #
 # Rules are tried most specific first:
-#   1. a visitor with the track=canary cookie stays on the canary
-#   2. a visitor with track=stable stays on stable
-#   3. everyone else (new visitors) is split by weight, and the version that
-#      answers sets their cookie
+#   1. a request with X-Track: canary (the page asking about a run the
+#      canary started) goes to the canary
+#   2. X-Track: stable goes to stable
+#   3. everything else (page loads, new runs) is split by weight; the version
+#      that answers names itself in X-Track, and the page remembers it per run
 #
-# Rolling back is applying the base route again: every visitor goes to
-# stable, which moves canary visitors' cookies over to track=stable.
+# Exact header matches only. Matching the Cookie header needs a regular
+# expression, and Google's load balancer allows one per URL map; a rejected
+# route also blocks every other change to the shared Gateway until fixed
+# (both found on the live cluster, 2026-11-23).
+#
+# Rolling back is applying the base route again: everything goes to stable,
+# and runs the canary had started are gone.
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -24,17 +30,17 @@ spec:
   rules:
     - matches:
         - headers:
-            - name: Cookie
-              type: RegularExpression
-              value: "(^|.*; ?)track=canary(;.*|$)"
+            - name: X-Track
+              type: Exact
+              value: canary
       backendRefs:
         - name: genshin-web-canary
           port: 80
     - matches:
         - headers:
-            - name: Cookie
-              type: RegularExpression
-              value: "(^|.*; ?)track=stable(;.*|$)"
+            - name: X-Track
+              type: Exact
+              value: stable
       backendRefs:
         - name: genshin-web
           port: 80

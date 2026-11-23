@@ -337,6 +337,22 @@ function exportGood() {
 
 let runTimer = null, runData = null, view = { name: 'element', ranking: 'min' };
 
+// During a canary release two versions of the site run side by side, and a
+// run lives only on the version that started it. Every response names its
+// version in X-Track; the page remembers it per run and sends it back when
+// asking about that run, and the load balancer routes on it
+// (deploy/canary/genshin-web/httproute.yaml). Outside a canary there is no
+// X-Track and nothing is stored.
+function runTrack(id, track) {
+  let all = {};
+  try { all = JSON.parse(localStorage.getItem('runTracks') || '{}'); } catch (e) { /* storage blocked */ }
+  if (track === undefined) return all[id];
+  all[id] = track;
+  const ids = Object.keys(all);
+  if (ids.length > 50) delete all[ids[0]];
+  try { localStorage.setItem('runTracks', JSON.stringify(all)); } catch (e) { /* storage blocked */ }
+}
+
 async function optimize() {
   const o = draft.options, refined = o.run === 'refined';
   const snapshot = { characters: draft.chars, weapons: draft.weapons, unlimited: draft.unlimited3,
@@ -346,6 +362,8 @@ async function optimize() {
   const res = await fetch('/api/runs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(snapshot) });
   const body = await res.json();
   if (!res.ok) { toast(body.error || 'The run could not be started.'); return; }
+  const track = res.headers.get('X-Track');
+  if (track) runTrack(body.id, track);
   location.hash = `#/runs/${body.id}`;
 }
 
@@ -364,7 +382,8 @@ async function showRun(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('on', p.id === 'run'));
   $('steps').style.display = 'none';
   const box = $('run');
-  const res = await fetch(`/api/runs/${id}`);
+  const track = runTrack(id);
+  const res = await fetch(`/api/runs/${id}`, track ? { headers: { 'X-Track': track } } : {});
   if (!res.ok) { box.innerHTML = '<h2>Run not found</h2><p class="sub">The link may be mistyped, or the run has been removed.</p>'; shown = ''; return; }
   runData = await res.json();
   const st = runData.status, snap = runData.snapshot || {}, result = runData.result;

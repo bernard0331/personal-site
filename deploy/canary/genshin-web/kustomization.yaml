@@ -5,7 +5,7 @@
 # Differences from stable, each patched below:
 #   names          -canary suffix (genshin-web-canary)
 #   track          label and Service selector track: canary, and -track=canary
-#                  so its visitors get the track=canary cookie
+#                  so its responses say X-Track: canary
 #   bucket folder  only-dir=gke-canary: its own runs and cache, so the two
 #                  versions never resume or overwrite each other's runs
 #                  (canary.sh seeds its cache from stable's)

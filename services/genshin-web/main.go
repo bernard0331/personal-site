@@ -49,7 +49,7 @@ func main() {
 	variants := flag.Int("variants", 4, "weapon alternatives per team the solver may choose from")
 	perHour := flag.Int("runs-per-hour", 6, "runs one visitor (IP address) may start per hour; 0 for no limit")
 	trustProxy := flag.Bool("trust-proxy", false, "take visitors' addresses from X-Forwarded-For (set behind Cloud Run or a load balancer)")
-	track := flag.String("track", "", "name of this version during a canary release (stable or canary), set as the track cookie; empty: no cookie")
+	track := flag.String("track", "", "name of this version during a canary release (stable or canary), sent as the X-Track response header; empty: none")
 	proxyHops := flag.Int("proxy-hops", 0, "with -trust-proxy: the visitor is this many X-Forwarded-For entries from the end (2 behind GKE's Gateway); 0 takes the first")
 	flag.Parse()
 	if *track != "" && !trackName.MatchString(*track) {
