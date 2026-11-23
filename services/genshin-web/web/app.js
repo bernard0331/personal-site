@@ -353,6 +353,22 @@ function runTrack(id, track) {
   try { localStorage.setItem('runTracks', JSON.stringify(all)); } catch (e) { /* storage blocked */ }
 }
 
+// fetchRun asks for a run, on the version that started it. On the live
+// cluster about 3 in 100 requests carrying X-Track: canary still reached
+// stable (the load balancer's route was correct), so when the answer comes
+// from the wrong version, ask again, a few times.
+async function fetchRun(id) {
+  const track = runTrack(id);
+  let res;
+  for (let i = 0; i < 5; i++) {
+    res = await fetch(`/api/runs/${id}`, track ? { headers: { 'X-Track': track } } : {});
+    const from = res.headers.get('X-Track');
+    if (!track || !from || from === track) break;
+    await new Promise(r => setTimeout(r, 300));
+  }
+  return res;
+}
+
 async function optimize() {
   const o = draft.options, refined = o.run === 'refined';
   const snapshot = { characters: draft.chars, weapons: draft.weapons, unlimited: draft.unlimited3,
@@ -382,8 +398,7 @@ async function showRun(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.toggle('on', p.id === 'run'));
   $('steps').style.display = 'none';
   const box = $('run');
-  const track = runTrack(id);
-  const res = await fetch(`/api/runs/${id}`, track ? { headers: { 'X-Track': track } } : {});
+  const res = await fetchRun(id);
   if (!res.ok) { box.innerHTML = '<h2>Run not found</h2><p class="sub">The link may be mistyped, or the run has been removed.</p>'; shown = ''; return; }
   runData = await res.json();
   const st = runData.status, snap = runData.snapshot || {}, result = runData.result;

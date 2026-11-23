@@ -38,6 +38,12 @@ followed only on the version that started it:
 - The route's first two rules match `X-Track: canary` and `X-Track: stable`
   exactly. Everything else (page loads, new runs) is split by weight.
 
+On the live cluster, with the route programmed correctly, about 3 in 100
+requests carrying `X-Track: canary` still reached stable, even after the
+config had had well over 10 minutes to spread. So the page checks the
+`X-Track` of every answer about a run, and asks again (up to five times)
+when it came from the wrong version.
+
 A header and not a cookie: matching a cookie needs a regular expression.
 Google's load balancer allows only one per URL map, and only part of RE2.
 A rejected route also blocks every other change to the shared Gateway until
