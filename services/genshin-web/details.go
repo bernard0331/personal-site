@@ -22,6 +22,7 @@ type Details struct {
 	Iterations int                `json:"iterations"`
 	Waits      map[string]float64 `json:"waits,omitempty"`    // seconds spent waiting, by reason
 	RotCons    []int              `json:"rot_cons,omitempty"` // constellations the rotation was written for
+	Substats   map[string]string  `json:"substats,omitempty"` // refined runs: member -> the optimiser's substat rolls
 }
 
 // BuildView is one member's example build: artifact sets and main stats.
@@ -40,6 +41,8 @@ var (
 	setupLine  = regexp.MustCompile(`^\s*(\w+\s+(char|add)\b|target\b|energy\b|options\b|hurt\b)`)
 	sourceLine = regexp.MustCompile(`^#\s*Source:\s*(.*?),?\s*(https?://\S+)\s*$`)
 	teamLine   = regexp.MustCompile(`^#\s+Team "(.*)"`)
+	rollLine   = regexp.MustCompile(`=[\d.]+\*\d`)
+	rollPart   = regexp.MustCompile(`([a-z]+%?)=[\d.]+\*(\d+)`)
 )
 
 // details builds a team's Details panel from its rotation and simulation.
@@ -49,6 +52,9 @@ func (e *engine) details(r coarse.Result) *Details {
 		return nil
 	}
 	d := &Details{ElementDPS: r.ElementDPS, Duration: r.Duration, Iterations: r.Iterations, Waits: r.Waits, RotCons: r.RotCons}
+	if len(r.Stats) > 0 {
+		d.Substats = substats(r, e.cat)
+	}
 	lines := strings.Split(src.Config, "\n")
 	switch src.From {
 	case "kqm-db":

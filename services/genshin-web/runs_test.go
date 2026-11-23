@@ -32,6 +32,32 @@ func TestSnapshotValidation(t *testing.T) {
 		"energy 3":            func(s *Snapshot) { s.Energy = 3 },
 		"pin not owned":       func(s *Snapshot) { s.Pins = []string{"zibai"} },
 		"pinned and excluded": func(s *Snapshot) { s.Excluded = []string{"arlecchino"} },
+		"unknown mode":        func(s *Snapshot) { s.Mode = "overnight" },
+		"top 1% quick":        func(s *Snapshot) { s.Artifacts = "top1" },
+		"unknown artifacts":   func(s *Snapshot) { s.Mode, s.Artifacts = "light", "mine" },
+		"settings not thorough": func(s *Snapshot) {
+			s.Mode, s.Refine = "standard", &RefineOptions{Top: 10, Iterations: 1000}
+		},
+		"too many teams": func(s *Snapshot) {
+			s.Mode, s.Refine = "thorough", &RefineOptions{Top: 5000, Iterations: 1000}
+		},
+		"odd iterations": func(s *Snapshot) {
+			s.Mode, s.Refine = "thorough", &RefineOptions{Top: 10, Iterations: 999999}
+		},
+	}
+	good := map[string]func(*Snapshot){
+		"light":           func(s *Snapshot) { s.Mode = "light" },
+		"standard top 1%": func(s *Snapshot) { s.Mode, s.Artifacts = "standard", "top1" },
+		"thorough settings": func(s *Snapshot) {
+			s.Mode, s.Refine = "thorough", &RefineOptions{Top: 50, PerElement: 5, Iterations: 500, SkipWaiting: true}
+		},
+	}
+	for name, f := range good {
+		s := ok()
+		f(&s)
+		if err := s.validate(cat); err != nil {
+			t.Errorf("%s: refused: %v", name, err)
+		}
 	}
 	for name, f := range bad {
 		s := ok()

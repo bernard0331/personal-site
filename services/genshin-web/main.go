@@ -66,6 +66,7 @@ func main() {
 	}
 	eng.variants = *variants
 	eng.runs.limit = newLimiter(*perHour, *trustProxy)
+	eng.runs.resume()
 	go eng.loop()
 
 	static, _ := fs.Sub(web, "web")

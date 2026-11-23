@@ -35,7 +35,8 @@ type engine struct {
 	sources    []optimizer.Source          // every rotation: the database cache and our own files
 	byRotation map[string]optimizer.Source // "source/id" -> rotation
 	ranking    weapons.Ranking             // weapon trials' ranking; nil means stand-in weapons
-	sim        *coarse.Binary
+	sim        *coarse.Binary              // quick runs
+	refineSim  *coarse.Binary              // refined runs: the same build with the full pass's longer time limit
 	workers    int
 	iterations int
 	variants   int           // weapon alternatives per team for the solver
@@ -70,7 +71,12 @@ func newEngine(cat *catalog.Catalog, dataDir, cachePath, cacheCopy, dbPath, ownD
 	// One core per simulation, as many at once as there are cores; the same
 	// time and memory limits as the command-line passes.
 	sim.Threads, sim.Timeout, sim.MaxMemoryMB = 1, 2*time.Minute, 400
-	e := &engine{runs: newRuns(cat, dataDir, queueSize), cat: cat, sources: sources, sim: sim, workers: cpus, iterations: iterations,
+	refineSim, err := coarse.NewBinary(simPath)
+	if err != nil {
+		return nil, fmt.Errorf("simulator: %w", err)
+	}
+	refineSim.Threads, refineSim.Timeout, refineSim.MaxMemoryMB = 1, 20*time.Minute, 400
+	e := &engine{runs: newRuns(cat, dataDir, queueSize), cat: cat, sources: sources, sim: sim, refineSim: refineSim, workers: cpus, iterations: iterations,
 		byRotation: map[string]optimizer.Source{}}
 	for _, s := range sources {
 		e.byRotation[s.From+"/"+s.ID] = s
@@ -141,11 +147,29 @@ func (e *engine) remember(r coarse.Result) {
 	}
 }
 
+// cacheCopyEvery is how often a long run copies the cache to cacheCopy, so
+// that a stopped instance loses at most this much simulating.
+const cacheCopyEvery = 10 * time.Minute
+
 func (e *engine) loop() {
 	for {
 		id := e.runs.next()
 		start := time.Now()
+		stop := make(chan struct{})
+		go func() {
+			t := time.NewTicker(cacheCopyEvery)
+			defer t.Stop()
+			for {
+				select {
+				case <-t.C:
+					e.saveCacheCopy()
+				case <-stop:
+					return
+				}
+			}
+		}()
 		err := e.execute(id)
+		close(stop)
 		st, _ := e.runs.statusOf(id)
 		st.Finished = time.Now().UTC()
 		if err != nil {
@@ -294,11 +318,20 @@ func (e *engine) execute(id string) error {
 
 	st.State = "solving"
 	e.runs.setStatus(id, &st)
-	result, err := e.solveConfirmed(results, acc, rule, snap.Pins)
+	quick, err := e.solveConfirmed(results, acc, rule, snap.Pins, e.quickPass(), nil)
 	if err != nil {
 		return err
 	}
-	return e.runs.store.write(id, "result.json", result)
+	quick.Mode = "quick"
+	if !snap.refined() {
+		return e.runs.store.write(id, "result.json", quick)
+	}
+	// The page shows the quick result while the refined one is computed.
+	quick.Refining = true
+	if err := e.runs.store.write(id, "result.json", quick); err != nil {
+		return err
+	}
+	return e.refine(id, &st, snap, results, quick, acc, rule)
 }
 
 // Breakdown is one way of choosing teams, as the results page shows it.
@@ -336,7 +369,11 @@ type MemberView struct {
 
 type Result struct {
 	Breakdowns []Breakdown `json:"breakdowns"`
-	Teams      int         `json:"teams"` // distinct teams the account can field
+	Teams      int         `json:"teams"`              // distinct teams the account can field
+	Mode       string      `json:"mode"`               // "quick", or the refined run's level
+	Refining   bool        `json:"refining,omitempty"` // a quick result shown while the refined one is computed
+	Refined    int         `json:"refined,omitempty"`  // teams a refined run simulated again
+	Artifacts  string      `json:"artifacts,omitempty"`
 }
 
 // anyTeams is how many teams the breakdown without an element rule has. Ten
@@ -354,16 +391,19 @@ const confirmRounds = 2
 // solveConfirmed chooses the teams, then simulates every chosen team whose
 // weapons the solver swapped (its DPS was estimated from the weapon trials)
 // and solves again with the real results.
-func (e *engine) solveConfirmed(results []coarse.Result, acc *good.Account, rule *optimizer.Rule, pins []string) (*Result, error) {
+//
+// p is how the swapped teams are simulated: a refined run refines them too.
+// progress, when set, is told how many of them are done.
+func (e *engine) solveConfirmed(results []coarse.Result, acc *good.Account, rule *optimizer.Rule, pins []string, p pass, progress func(done, total int)) (*Result, error) {
 	confirmed := map[string]coarse.Result{}
 	confirm := func(pending map[string]coarse.Result) {
 		jobs := map[string]coarse.Job{}
 		for key, v := range pending {
-			if j, ok := e.confirmJob(v, acc, rule); ok {
+			if j, ok := e.confirmJob(v, acc, rule, p); ok {
 				jobs[key] = j
 			}
 		}
-		for key, r := range e.simulate(jobs) {
+		for key, r := range e.simulate(jobs, p, progress) {
 			confirmed[key] = r
 		}
 	}
@@ -398,8 +438,19 @@ func (e *engine) solveConfirmed(results []coarse.Result, acc *good.Account, rule
 	}
 }
 
-// confirmJob rebuilds a weapon variant's rotation with exactly its weapons.
-func (e *engine) confirmJob(v coarse.Result, acc *good.Account, rule *optimizer.Rule) (coarse.Job, bool) {
+// pass is how a run simulates: the quick pass (the simulator, few
+// iterations) or the refined one (KQM Sim's substat optimiser, then many
+// iterations).
+type pass struct {
+	sim        coarse.Simulator
+	iterations int
+	keepStats  bool // keep the "add stats" lines: the optimiser's substats
+}
+
+func (e *engine) quickPass() pass { return pass{sim: e.sim, iterations: e.iterations} }
+
+// confirmJob rebuilds a rotation with exactly v's weapons, for pass p.
+func (e *engine) confirmJob(v coarse.Result, acc *good.Account, rule *optimizer.Rule, p pass) (coarse.Job, bool) {
 	src, ok := e.byRotation[v.Source+"/"+v.ID]
 	if !ok {
 		return coarse.Job{}, false
@@ -421,18 +472,19 @@ func (e *engine) confirmJob(v coarse.Result, acc *good.Account, rule *optimizer.
 		return coarse.Job{}, false
 	}
 	return coarse.Job{ID: v.ID, Source: v.Source, Team: v.Team, Weapons: list,
-		Config: coarse.SetIterations(cfg, e.iterations), RotCons: v.RotCons, PlayerCons: v.PlayerCons}, true
+		Config: coarse.SetIterations(cfg, p.iterations), RotCons: v.RotCons, PlayerCons: v.PlayerCons, KeepStats: p.keepStats}, true
 }
 
-// simulate runs jobs through the shared cache and returns their results by
-// the same keys.
-func (e *engine) simulate(jobs map[string]coarse.Job) map[string]coarse.Result {
+// simulate runs jobs through the shared cache with pass p and returns their
+// results by the same keys. progress, when set, hears how many are done
+// (cached ones included).
+func (e *engine) simulate(jobs map[string]coarse.Job, p pass, progress func(done, total int)) map[string]coarse.Result {
 	out := map[string]coarse.Result{}
 	var todo []coarse.Job
 	owner := map[string][]string{} // cache key -> pending keys
 	e.mu.Lock()
 	for key, j := range jobs {
-		ck := coarse.Key(j.Config, e.sim.Fingerprint())
+		ck := coarse.Key(j.Config, p.sim.Fingerprint())
 		if r, ok := e.cache[ck]; ok && r.Error == "" {
 			r.ID, r.Source, r.Team, r.Weapons, r.RotCons, r.PlayerCons = j.ID, j.Source, j.Team, j.Weapons, j.RotCons, j.PlayerCons
 			out[key] = r
@@ -444,8 +496,16 @@ func (e *engine) simulate(jobs map[string]coarse.Job) map[string]coarse.Result {
 		owner[ck] = append(owner[ck], key)
 	}
 	e.mu.Unlock()
+	cached := len(jobs) - len(todo)
+	if progress != nil {
+		progress(cached, len(todo)+cached)
+	}
 	var mu sync.Mutex
-	coarse.Run(context.Background(), todo, e.sim, e.workers, nil, func(r coarse.Result) error {
+	var report func(coarse.Progress)
+	if progress != nil {
+		report = func(q coarse.Progress) { progress(cached+q.Done, len(todo)+cached) }
+	}
+	coarse.Run(context.Background(), todo, p.sim, e.workers, nil, func(r coarse.Result) error {
 		e.remember(r)
 		mu.Lock()
 		for _, key := range owner[r.Key] {
@@ -455,7 +515,7 @@ func (e *engine) simulate(jobs map[string]coarse.Job) map[string]coarse.Result {
 		}
 		mu.Unlock()
 		return nil
-	}, nil)
+	}, report)
 	return out
 }
 

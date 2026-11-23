@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -32,7 +33,26 @@ type Snapshot struct {
 	Energy     int              `json:"energy"`     // 1: KQM standard drops, 2: twice as often
 	Pins       []string         `json:"pins"`       // characters every answer must include
 	Excluded   []string         `json:"excluded"`   // characters never used
+	// Mode is "quick" (or empty) for a quick run, or a refined run's level:
+	// "light", "standard" or "thorough" (see refineLevels).
+	Mode      string         `json:"mode,omitempty"`
+	Artifacts string         `json:"artifacts,omitempty"` // refined runs: "kqm" (or empty) or "top1"
+	Refine    *RefineOptions `json:"refine,omitempty"`    // thorough runs: the advanced settings
 }
+
+// RefineOptions say which teams a refined run simulates again, and how
+// carefully. Light and standard runs use fixed settings; a thorough run
+// starts from its own and lets the visitor change them.
+type RefineOptions struct {
+	Top          int  `json:"top"`           // best teams overall
+	PerElement   int  `json:"per_element"`   // best teams of each main element
+	PerCharacter int  `json:"per_character"` // best teams each character is in
+	Iterations   int  `json:"iterations"`    // simulator iterations per refined team
+	SkipWaiting  bool `json:"skip_waiting"`  // leave out teams that wait for energy or cooldowns
+}
+
+// refined reports whether the snapshot asks for a refined run.
+func (s *Snapshot) refined() bool { return s.Mode != "" && s.Mode != "quick" }
 
 // Limits on one snapshot, far above any real account, so a hostile request
 // cannot make a run do unbounded work.
@@ -86,6 +106,31 @@ func (s *Snapshot) validate(cat *catalog.Catalog) error {
 			}
 		}
 	}
+	switch s.Mode {
+	case "", "quick", "light", "standard", "thorough":
+	default:
+		return fmt.Errorf("unknown run %q", s.Mode)
+	}
+	switch s.Artifacts {
+	case "", "kqm":
+	case "top1":
+		if !s.refined() {
+			return errors.New("top 1% artifacts need a refined run")
+		}
+	default:
+		return fmt.Errorf("unknown artifacts %q", s.Artifacts)
+	}
+	if s.Refine != nil {
+		r := s.Refine
+		switch {
+		case s.Mode != "thorough":
+			return errors.New("refine settings are for thorough runs")
+		case r.Top < 0 || r.Top > 500, r.PerElement < 0 || r.PerElement > 50, r.PerCharacter < 0 || r.PerCharacter > 5:
+			return errors.New("refine settings are out of range")
+		case r.Iterations != 250 && r.Iterations != 500 && r.Iterations != 1000 && r.Iterations != 2000:
+			return errors.New("iterations must be 250, 500, 1000 or 2000")
+		}
+	}
 	for _, p := range s.Pins {
 		for _, e := range s.Excluded {
 			if p == e {
@@ -98,7 +143,7 @@ func (s *Snapshot) validate(cat *catalog.Catalog) error {
 
 // Status is a run's progress, as GET /api/runs/{id} reports it.
 type Status struct {
-	State     string    `json:"state"` // queued, running, solving, done or failed
+	State     string    `json:"state"` // queued, running, solving, refining, done or failed
 	Done      int       `json:"done"`  // simulations finished (including cached)
 	Total     int       `json:"total"`
 	Cached    int       `json:"cached"` // of Done, how many came from the shared cache
@@ -223,11 +268,11 @@ func (rs *runs) get(w http.ResponseWriter, r *http.Request) {
 	if rs.store.read(id, "snapshot.json", &snap) == nil {
 		out["snapshot"] = snap
 	}
-	if st.State == "done" {
-		var res json.RawMessage
-		if err := rs.store.read(id, "result.json", &res); err == nil {
-			out["result"] = res
-		}
+	// A refined run saves its quick result first, so the page can show it
+	// while the refined one is computed.
+	var res json.RawMessage
+	if err := rs.store.read(id, "result.json", &res); err == nil {
+		out["result"] = res
 	}
 	w.Header().Set("Cache-Control", "no-store")
 	writeJSON(w, out)
@@ -263,10 +308,53 @@ func (rs *runs) statusOf(id string) (Status, bool) {
 		return Status{}, false
 	}
 	if disk.State != "done" && disk.State != "failed" {
-		// Left unfinished when the server restarted; it will not resume.
+		// Left unfinished when the server restarted, and not resumed (resume
+		// takes only recent runs, as many as the queue holds).
 		disk.State, disk.Error = "failed", "the server restarted during this run; start it again"
 	}
 	return disk, true
+}
+
+// resumeWindow is how old an unfinished run may be and still be resumed.
+const resumeWindow = 48 * time.Hour
+
+// resume queues again the runs a previous server left unfinished (Cloud Run
+// stops an instance some minutes after the last visit, even mid-run), oldest
+// first. Simulations done before the stop are in the shared cache, so a
+// resumed run picks up close to where it was.
+func (rs *runs) resume() {
+	dirs, err := os.ReadDir(filepath.Join(rs.store.dir, "runs"))
+	if err != nil {
+		return
+	}
+	type pending struct {
+		id string
+		st Status
+	}
+	var list []pending
+	for _, d := range dirs {
+		var st Status
+		if !d.IsDir() || !runID.MatchString(d.Name()) || rs.store.read(d.Name(), "status.json", &st) != nil {
+			continue
+		}
+		if st.State != "done" && st.State != "failed" && time.Since(st.Created) < resumeWindow {
+			list = append(list, pending{d.Name(), st})
+		}
+	}
+	sort.Slice(list, func(i, j int) bool { return list[i].st.Created.Before(list[j].st.Created) })
+	for _, p := range list {
+		st := &Status{State: "queued", Created: p.st.Created}
+		select {
+		case rs.queue <- p.id:
+			rs.setStatus(p.id, st)
+			rs.mu.Lock()
+			rs.order = append(rs.order, p.id)
+			rs.mu.Unlock()
+			log.Printf("run %s: resumed after a restart", p.id)
+		default:
+			return
+		}
+	}
 }
 
 // finished reports whether a run is over (done or failed, or unknown).
