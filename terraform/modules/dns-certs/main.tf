@@ -7,13 +7,14 @@
 # genshin.34-1-2-3.sslip.io resolves to 34.1.2.3, so each site gets a real
 # hostname pointing at the Gateway with no DNS zone to manage.
 #
-# Certificate: a Google-managed certificate from Certificate Manager with
-# load balancer authorization: Google proves control of each hostname by
-# answering for it on the load balancer itself (the hostnames already point
-# there), so no DNS records are needed. It can't cover wildcards, so each
-# hostname is listed. It's issued once the Gateway serves the hostnames,
-# usually within an hour. The Gateway uses it through a certificate map
-# (annotation networking.gke.io/certmap).
+# Certificates: one Google-managed certificate per site from Certificate
+# Manager, with load balancer authorization: Google proves control of the
+# hostname by answering for it on the load balancer itself (the hostname
+# already points there), so no DNS records are needed. One per site, not one
+# for all: adding a site then issues only its own certificate and leaves the
+# others serving. Each is issued once the Gateway serves its hostname,
+# usually within an hour. The Gateway finds them through a certificate map
+# (annotation networking.gke.io/certmap), one entry per hostname.
 #
 # Let's Encrypt would also work, but sslip.io is one shared domain for
 # everyone using it, so its rate limits are often used up.
@@ -28,10 +29,11 @@ locals {
 }
 
 resource "google_certificate_manager_certificate" "sites" {
-  name  = var.name
-  scope = "DEFAULT"
+  for_each = local.hostnames
+  name     = "${var.name}-${each.key}"
+  scope    = "DEFAULT"
   managed {
-    domains = values(local.hostnames)
+    domains = [each.value]
   }
 }
 
@@ -44,5 +46,5 @@ resource "google_certificate_manager_certificate_map_entry" "sites" {
   name         = "${var.name}-${each.key}"
   map          = google_certificate_manager_certificate_map.this.name
   hostname     = each.value
-  certificates = [google_certificate_manager_certificate.sites.id]
+  certificates = [google_certificate_manager_certificate.sites[each.key].id]
 }

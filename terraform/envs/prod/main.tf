@@ -15,16 +15,24 @@
 
 locals {
   name = "personal-site"
+
+  # The sites behind the Gateway. services.json is the one list of them; the
+  # Go tool tools/sitectl adds entries (and scaffolds their manifests), and
+  # Terraform gives each one a hostname, a certificate, a firewall port and,
+  # if it asks for the runs bucket, Workload Identity access to it.
+  services = jsondecode(file("${path.module}/services.json")).services
+
   # 1 when the GKE copy is on, 0 when off. count = 0 on a module means none
   # of its resources exist; switching to 0 and applying destroys them.
   gke = var.gke_enabled ? 1 : 0
 }
 
 module "network" {
-  count  = local.gke
-  source = "../../modules/network"
-  name   = local.name
-  region = var.region
+  count     = local.gke
+  source    = "../../modules/network"
+  name      = local.name
+  region    = var.region
+  app_ports = distinct([for s in local.services : s.port])
 }
 
 module "gke" {
@@ -61,7 +69,7 @@ module "iam" {
   # The pod's bucket access exists only while the cluster does.
   workload_pool = one(module.gke[*].workload_pool)
   kubernetes_service_accounts = var.gke_enabled ? [
-    { namespace = "genshin", name = "genshin-web" },
+    for s in local.services : { namespace = s.namespace, name = s.name } if s.bucket
   ] : []
 }
 
@@ -69,5 +77,5 @@ module "dns_certs" {
   count  = local.gke
   source = "../../modules/dns-certs"
   name   = "sites"
-  sites  = ["genshin"]
+  sites  = [for s in local.services : s.site]
 }

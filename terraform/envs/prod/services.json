@@ -1,0 +1,11 @@
+{
+  "services": [
+    {
+      "name": "genshin-web",
+      "namespace": "genshin",
+      "site": "genshin",
+      "port": 8080,
+      "bucket": true
+    }
+  ]
+}

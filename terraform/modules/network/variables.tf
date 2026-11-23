@@ -25,8 +25,8 @@ variable "services_cidr" {
   default     = "10.30.0.0/24"
 }
 
-variable "app_port" {
-  description = "Port the pods serve on, opened to the load balancer"
-  type        = number
-  default     = 8080
+variable "app_ports" {
+  description = "Ports the sites' pods serve on, opened to the load balancer"
+  type        = list(number)
+  default     = [8080]
 }

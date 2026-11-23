@@ -39,7 +39,7 @@ resource "google_compute_subnetwork" "this" {
 # The Gateway's load balancer reaches pods from Google's front ends and checks
 # their health from Google's health-check ranges; both are fixed, documented
 # ranges. GKE adds its own rule for this too, but an explicit one makes the
-# allowed path visible here. Only the port the site listens on.
+# allowed path visible here. Only the ports the sites listen on.
 resource "google_compute_firewall" "lb_to_pods" {
   name          = "${var.name}-allow-lb-to-pods"
   network       = google_compute_network.this.id
@@ -47,7 +47,7 @@ resource "google_compute_firewall" "lb_to_pods" {
   source_ranges = ["35.191.0.0/16", "130.211.0.0/22"]
   allow {
     protocol = "tcp"
-    ports    = [tostring(var.app_port)]
+    ports    = [for p in var.app_ports : tostring(p)]
   }
 }
 

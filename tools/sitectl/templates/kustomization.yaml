@@ -1,0 +1,14 @@
+# Scaffolded by tools/sitectl. The network-isolation component puts the
+# default-deny NetworkPolicies and their allow rules in this namespace.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: {{.Namespace}}
+resources:
+  - namespace.yaml
+  - serviceaccount.yaml
+  - deployment.yaml
+  - service.yaml
+  - healthcheck.yaml
+  - httproute.yaml
+components:
+  - ../../components/network-isolation

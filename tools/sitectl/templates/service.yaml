@@ -1,0 +1,16 @@
+# A stable name and port for the pods. The Gateway sends traffic straight to
+# the pods' IPs (container-native load balancing); the Service tells it which
+# pods and port.
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{.Name}}
+  namespace: {{.Namespace}}
+spec:
+  type: ClusterIP
+  selector:
+    app: {{.Name}}
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
