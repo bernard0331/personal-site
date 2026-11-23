@@ -23,9 +23,14 @@ echo "waiting for the load balancer to be deleted..."
 while [ -n "$(gcloud compute forwarding-rules list --format='value(name)' 2>/dev/null)" ]; do
   sleep 10
 done
-while [ -n "$(gcloud compute network-endpoint-groups list --format='value(name)' 2>/dev/null)" ]; do
+# The sites' endpoint groups (named k8s1-<cluster>-<namespace>-<service>-...).
+# The cluster's own system ones (kube-dns, metrics, the mesh) stay until the
+# cluster is deleted, which removes them.
+NAMESPACES=$(python3 -c 'import json; print("|".join(s["namespace"] for s in json.load(open("'"$ROOT"'/terraform/envs/prod/services.json"))["services"]))')
+while gcloud compute network-endpoint-groups list --format='value(name)' 2>/dev/null |
+  grep -Eq -- "-($NAMESPACES)-"; do
   sleep 10
 done
-echo "no forwarding rules or endpoint groups left."
+echo "no forwarding rules or site endpoint groups left."
 echo "Next: set gke_enabled = false and mesh_enabled = false in"
 echo "terraform/envs/prod/switches.auto.tfvars, then: terraform -chdir=terraform/envs/prod apply"

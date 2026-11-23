@@ -145,6 +145,14 @@ Then set `gke_enabled = false` and `mesh_enabled = false` in
 terraform -chdir=terraform/envs/prod apply
 ```
 
+If deleting the network fails because something is "already being used",
+GKE or the mesh left resources outside Terraform (empty endpoint groups, the
+mesh's firewall rule). Remove them and apply again:
+
+```bash
+deploy/gke/cleanup-orphans.sh
+```
+
 That destroys the cluster (and with it its fleet membership and the mesh),
 nodes, network, DNS zone, IP address, certificates, alerts and dashboard,
 and nothing else. Check with `gcloud compute forwarding-rules
