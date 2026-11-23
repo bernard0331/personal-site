@@ -54,17 +54,18 @@ all traffic to it; runs and the cache survive in the bucket.
 A refined run is a quick run, then its most promising teams simulated again
 with KQM Sim's substat optimiser and 1,000 iterations each (the command
 line's full pass). The quick teams show while it runs. Levels: Light (the
-quick run's picks and about 15 to 35 more teams, ~15 minutes), Standard
-(also each character's best team, ~120 teams, under an hour) and Thorough
-(the full pass's 100 / 20 per element / 3 per character, adjustable; hours).
-One refine is about 105 CPU-seconds on a laptop core. Settings live in
+quick run's picks and about 15 to 35 more teams, ~10 minutes), Standard
+(also each character's best team, ~120 teams, ~25 minutes) and Thorough
+(the full pass's 100 / 20 per element / 3 per character, adjustable; about
+an hour). A light run on a 12-character account took 3 minutes on Cloud Run
+(2026-11-22), quick pass included. Settings live in
 `refineLevels` in services/genshin-web/refine.go.
 
 ## Limits
 
 One run at a time and 6 runs an hour per visitor (IP address), and at most 20
 runs waiting. More visitors make the queue longer; they cannot add instances.
-A thorough run holds the queue for hours, so everyone else waits behind it.
+A thorough run holds the queue for about an hour; everyone else waits.
 
 ## Cost
 
@@ -73,7 +74,7 @@ Nothing while no instance is up. While one is, Cloud Run bills 8 vCPU and
 simulating), one with everything cached under a minute, and an idle
 instance stays up to about 15 minutes after the last visit. At about $0.58
 an instance-hour beyond the free tier, a light refined run costs roughly
-$0.15, a standard one $0.50 and a thorough one $1 to $2. Cloud Run's
+$0.10, a standard one $0.25 and a thorough one $0.60. Cloud Run's
 monthly free tier covers light testing. The bucket and the registry cost
 cents a month. Check the project's budget alerts and the billing report.
 
