@@ -27,9 +27,13 @@ The shared cache gains one line per simulation, thousands per run. A Cloud
 Storage mount uploads the whole file on every write, so the cache lives on
 the instance's own disk (`-cache /tmp/cache.jsonl`) and is copied to the
 bucket after every run (`-cache-copy /data/cache.jsonl`). A new instance
-restores it from that copy. A run that was going when its instance stopped
-(for example, everyone closed the page and Cloud Run scaled to zero) fails
-with "the server restarted during this run; start it again".
+restores it from that copy; during a run it is also copied every 10 minutes.
+
+Cloud Run stops an instance about 15 minutes after the last request, even
+mid-run (the run page asks for progress every few seconds, so this happens
+only when nobody has it open). The next instance queues such runs again
+(those under two days old) and they continue from the cache, so a refined
+run left alone pauses rather than fails, until someone opens the site.
 
 ## Updating the site
 
@@ -45,17 +49,31 @@ BUCKET=<the bucket> deploy/genshin-web/deploy.sh <the image build.sh printed>
 Cloud Build (about 4 minutes). `deploy.sh` creates a new revision and moves
 all traffic to it; runs and the cache survive in the bucket.
 
+## Refined runs
+
+A refined run is a quick run, then its most promising teams simulated again
+with KQM Sim's substat optimiser and 1,000 iterations each (the command
+line's full pass). The quick teams show while it runs. Levels: Light (the
+quick run's picks and about 15 to 35 more teams, ~15 minutes), Standard
+(also each character's best team, ~120 teams, under an hour) and Thorough
+(the full pass's 100 / 20 per element / 3 per character, adjustable; hours).
+One refine is about 105 CPU-seconds on a laptop core. Settings live in
+`refineLevels` in services/genshin-web/refine.go.
+
 ## Limits
 
 One run at a time and 6 runs an hour per visitor (IP address), and at most 20
 runs waiting. More visitors make the queue longer; they cannot add instances.
+A thorough run holds the queue for hours, so everyone else waits behind it.
 
 ## Cost
 
 Nothing while no instance is up. While one is, Cloud Run bills 8 vCPU and
 8 GiB per second: a run from scratch takes about 5 minutes (about 4 of
 simulating), one with everything cached under a minute, and an idle
-instance stays up to about 15 minutes after the last visit. Cloud Run's
+instance stays up to about 15 minutes after the last visit. At about $0.58
+an instance-hour beyond the free tier, a light refined run costs roughly
+$0.15, a standard one $0.50 and a thorough one $1 to $2. Cloud Run's
 monthly free tier covers light testing. The bucket and the registry cost
 cents a month. Check the project's budget alerts and the billing report.
 
