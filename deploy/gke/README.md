@@ -2,7 +2,7 @@
 
 `apply.sh` deploys `deploy/overlays/prod` to the GKE cluster that
 `terraform/envs/prod` creates. See `terraform/README.md` for bringing the
-cluster up, cost, switching from Cloud Run and taking it down.
+cluster up, cost, running it alongside Cloud Run and taking it down.
 
 | Manifest | What it is |
 | :- | :- |

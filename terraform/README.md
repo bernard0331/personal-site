@@ -4,8 +4,8 @@ Cloud resources for running the sites on Google Kubernetes Engine (design doc
 phases 3 and 4). Terraform owns the cloud resources; what runs inside the
 cluster is in `deploy/` as Kubernetes manifests.
 
-The Cloud Run service (`deploy/genshin-web/`) keeps working alongside; see
-"Switching from Cloud Run" below.
+The Cloud Run service (`deploy/genshin-web/`) keeps running alongside; see
+"Alongside Cloud Run" below.
 
 ## Layout
 
@@ -34,14 +34,12 @@ Prices from the Cloud Billing Catalog API, us-central1:
 | Cluster management fee (one zonal cluster) | covered by the GKE free tier credit | $0 |
 | Gateway load balancer (forwarding rule + data processed) | not retrieved; check the pricing calculator | roughly $18+ |
 
-So the design doc's two nodes cost about $60 a month before the load
-balancer, more than the $50 budget. Spot prices change; check before
-applying. Cheaper options, all in `terraform.tfvars`:
-
-- `node_count = 1`: about half. A spot reclaim takes the site down until GKE
-  replaces the node (minutes); unfinished runs resume.
-- `node_count = 0`: parks the cluster. No node cost; the load balancer still
-  bills while the Gateway exists.
+The design doc's two nodes would cost about $60 a month before the load
+balancer, more than the $50 budget, so the owner runs one (`node_count = 1`
+in `terraform.tfvars`, chosen 2026-11-23): about $30. A spot reclaim takes
+the GKE copy down until GKE replaces the node (minutes); unfinished runs
+resume. `node_count = 0` parks the cluster. Spot prices change; check before
+applying.
 
 ## Bringing it up
 
@@ -74,17 +72,19 @@ fails. Check it with:
 gcloud certificate-manager certificates describe sites --format='yaml(managed)'
 ```
 
-## Switching from Cloud Run
+## Alongside Cloud Run
 
-Both versions use the same bucket. **Never run both at once**: each would
-resume the other's unfinished runs and write the same files. Delete the Cloud
-Run service (`deploy/genshin-web/README.md`, "Taking it down") before the
-first `deploy/gke/apply.sh`, or scale the GKE Deployment to 0 while trying
-Cloud Run again:
+The Cloud Run service stays the main site; the GKE copy is for learning.
+They share the runs bucket but never each other's files: the GKE pod mounts
+only the bucket's `gke/` folder (the `only-dir` mount option), so its runs,
+share links and cache are separate (`gke/runs/`, `gke/cache.jsonl`). Both can
+run at once, and either can be taken down without touching the other.
+(`gke/cache.jsonl` was seeded with a copy of Cloud Run's cache on
+2026-11-23; the simulator binary is the same, so it stays valid.)
 
-```bash
-kubectl -n genshin scale deployment/genshin-web --replicas=0
-```
+To stop paying for the node while keeping the cluster, set `node_count = 0`
+and apply; set it back to 1 to bring the site back. The load balancer keeps
+billing until the Gateway is deleted (see below).
 
 Simulations on GKE run 2 at a time (one 2-vCPU node) instead of Cloud Run's
 7, so runs take roughly three times as long; `machine_type` and the

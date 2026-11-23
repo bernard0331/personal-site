@@ -116,7 +116,9 @@ spec:
             - name: tmp
               mountPath: /tmp
       volumes:
-        # The runs bucket, mounted like Cloud Run's volume. The overlay's
+        # The runs bucket, mounted like Cloud Run's volume but only its gke/
+        # folder (only-dir), so this copy of the site and the Cloud Run one
+        # never touch each other's runs or cache and can run side by side.
         # BUCKET_NAME is filled in by deploy/gke/apply.sh. uid/gid: the files
         # belong to the app's user so it can write.
         - name: data
@@ -124,7 +126,7 @@ spec:
             driver: gcsfuse.csi.storage.gke.io
             volumeAttributes:
               bucketName: BUCKET_NAME
-              mountOptions: "implicit-dirs,uid=10001,gid=10001,file-mode=0644,dir-mode=0755"
+              mountOptions: "only-dir=gke,implicit-dirs,uid=10001,gid=10001,file-mode=0644,dir-mode=0755"
         # The simulation cache and simulator scratch files, on the node's disk.
         - name: tmp
           emptyDir:

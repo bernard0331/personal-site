@@ -29,9 +29,9 @@ variable "machine_type" {
 }
 
 variable "node_count" {
-  description = "Spot nodes. Two, so the site keeps running when Google takes one back; 0 parks the cluster"
+  description = "Spot nodes. One keeps the cost down (two would keep the site up when Google takes one back); 0 parks the cluster"
   type        = number
-  default     = 2
+  default     = 1
 }
 
 variable "authorized_networks" {

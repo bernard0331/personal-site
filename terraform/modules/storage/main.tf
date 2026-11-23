@@ -11,14 +11,15 @@ resource "google_storage_bucket" "runs" {
   uniform_bucket_level_access = true
   public_access_prevention    = "enforced"
 
-  # Saved runs (and their share links) last 90 days, as the site says.
+  # Saved runs (and their share links) last 90 days, as the site says:
+  # Cloud Run's under runs/, the GKE copy's under gke/runs/.
   lifecycle_rule {
     action {
       type = "Delete"
     }
     condition {
       age            = 90
-      matches_prefix = ["runs/"]
+      matches_prefix = ["runs/", "gke/runs/"]
     }
   }
 
