@@ -1,0 +1,131 @@
+# The site: the same image as on Cloud Run (server, simulator, HiGHS).
+#
+# Exactly one replica, replaced with Recreate (old pod stops before the new
+# one starts): the run queue and the per-visitor limits are held in memory,
+# and two copies would both resume the same unfinished runs. Splitting the
+# queue from the workers (design doc: genshin-api and genshin-calc) is what
+# lifts this.
+#
+# When a spot node is taken back the pod is restarted on the other node; on
+# start-up it resumes unfinished runs from the bucket and the cache.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: genshin-web
+  namespace: genshin
+  labels:
+    app: genshin-web
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: genshin-web
+  template:
+    metadata:
+      labels:
+        app: genshin-web
+      annotations:
+        # Inject the Cloud Storage FUSE sidecar that mounts the bucket, with
+        # small requests (its defaults reserve more than this node size has
+        # to spare); 0 limits mean no cap.
+        gke-gcsfuse/volumes: "true"
+        gke-gcsfuse/cpu-request: "50m"
+        gke-gcsfuse/memory-request: "64Mi"
+        gke-gcsfuse/ephemeral-storage-request: "100Mi"
+        gke-gcsfuse/cpu-limit: "0"
+        gke-gcsfuse/memory-limit: "0"
+        gke-gcsfuse/ephemeral-storage-limit: "0"
+    spec:
+      serviceAccountName: genshin-web
+      terminationGracePeriodSeconds: 25 # spot VMs get 30 s notice
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: genshin-web
+          image: genshin-web # the overlay sets the registry path and tag
+          # The image's own command, except:
+          #   -cpus 2          simulations at once (a node has 2 vCPUs; on
+          #                    Cloud Run it was 7 of 8)
+          #   -proxy-hops 2    the visitor's address is 2 from the end of
+          #                    X-Forwarded-For behind the Gateway
+          args:
+            - -addr=:8080
+            - -img=/app/data/img
+            - -db=/app/data/kqm-db.jsonl
+            - -ranking=/app/data/ranking.json
+            - -own=/app/rotations
+            - -sim=/app/kqmsim
+            - -highs=/opt/highs/bin/python
+            - -data=/data
+            - -cache=/tmp/cache.jsonl
+            - -cache-copy=/data/cache.jsonl
+            - -cpus=2
+            - -trust-proxy
+            - -proxy-hops=2
+          ports:
+            - name: http
+              containerPort: 8080
+          # Requests are what the scheduler reserves on a node; the memory
+          # limit is the most the pod may use before it is killed. No CPU
+          # limit: idle CPU on the node may be used, and a CPU limit would
+          # only slow simulations down.
+          resources:
+            requests:
+              cpu: "1"
+              memory: 3Gi
+              ephemeral-storage: 1Gi
+            limits:
+              memory: 5Gi
+              ephemeral-storage: 4Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+          # Start-up restores the simulation cache from the bucket before the
+          # server listens, which can take a while; until this succeeds the
+          # other probes wait.
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 5
+            failureThreshold: 120
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+          # Restart the container only if the server stops answering for
+          # two minutes; simulations keep the CPU busy, so be patient.
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 6
+          volumeMounts:
+            - name: data
+              mountPath: /data
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        # The runs bucket, mounted like Cloud Run's volume. The overlay's
+        # BUCKET_NAME is filled in by deploy/gke/apply.sh. uid/gid: the files
+        # belong to the app's user so it can write.
+        - name: data
+          csi:
+            driver: gcsfuse.csi.storage.gke.io
+            volumeAttributes:
+              bucketName: BUCKET_NAME
+              mountOptions: "implicit-dirs,uid=10001,gid=10001,file-mode=0644,dir-mode=0755"
+        # The simulation cache and simulator scratch files, on the node's disk.
+        - name: tmp
+          emptyDir:
+            sizeLimit: 4Gi

@@ -1,0 +1,9 @@
+# Each site gets its own namespace (design doc). The label lets this
+# namespace's routes attach to the shared Gateway, which only accepts routes
+# from namespaces carrying it.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: genshin
+  labels:
+    personal-site/gateway: "true"

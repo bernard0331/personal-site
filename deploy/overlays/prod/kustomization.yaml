@@ -1,0 +1,13 @@
+# Production: the bases plus the image to run. Placeholders in capitals
+# (IMAGE_REPOSITORY, IMAGE_TAG, BUCKET_NAME, GENSHIN_HOSTNAME) are filled in
+# by deploy/gke/apply.sh from Terraform's outputs, because they contain the
+# project id, which stays out of the repository.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base/gateway
+  - ../../base/genshin-web
+images:
+  - name: genshin-web
+    newName: IMAGE_REPOSITORY/genshin-web
+    newTag: IMAGE_TAG

@@ -1,0 +1,16 @@
+# A stable in-cluster name and port for the pod. The Gateway sends traffic
+# straight to the pod's IP (container-native load balancing through a
+# network endpoint group); the Service tells it which pods and port.
+apiVersion: v1
+kind: Service
+metadata:
+  name: genshin-web
+  namespace: genshin
+spec:
+  type: ClusterIP
+  selector:
+    app: genshin-web
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

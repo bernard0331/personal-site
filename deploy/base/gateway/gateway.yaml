@@ -1,0 +1,36 @@
+# One Gateway for all the sites: GKE turns it into a global external
+# Application Load Balancer.
+#
+#   addresses   the reserved global IP from Terraform (modules/dns-certs)
+#   certmap     the Certificate Manager map holding each site's certificate;
+#               with it, the HTTPS listener needs no tls section
+#   https       routes from namespaces labelled personal-site/gateway=true
+#   http        only this namespace's redirect to HTTPS
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: sites
+  namespace: gateway
+  annotations:
+    networking.gke.io/certmap: sites
+spec:
+  gatewayClassName: gke-l7-global-external-managed
+  addresses:
+    - type: NamedAddress
+      value: sites
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              personal-site/gateway: "true"
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        namespaces:
+          from: Same

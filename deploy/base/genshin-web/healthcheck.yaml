@@ -1,0 +1,20 @@
+# How the load balancer checks the pod: GET /healthz on the pod's port.
+# (Cloud Run's front end reserved /healthz; a GKE load balancer doesn't.)
+apiVersion: networking.gke.io/v1
+kind: HealthCheckPolicy
+metadata:
+  name: genshin-web
+  namespace: genshin
+spec:
+  default:
+    checkIntervalSec: 15
+    timeoutSec: 5
+    config:
+      type: HTTP
+      httpHealthCheck:
+        portSpecification: USE_SERVING_PORT
+        requestPath: /healthz
+  targetRef:
+    group: ""
+    kind: Service
+    name: genshin-web
