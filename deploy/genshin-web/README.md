@@ -1,8 +1,8 @@
 # genshin-web on Cloud Run
 
-The team optimizer runs as one Cloud Run service while friends test it. This
-is the design doc's "cheaper fallback": the GKE cluster, Gateway and
-Terraform (build phases 3 and 4) come later and replace it.
+The team optimizer runs as one Cloud Run service: this is the live site. A
+GKE version (cluster, Gateway, Terraform) is also defined in this repository
+for practice, but is switched off; see [terraform/README.md](../../terraform/README.md).
 
 ## What exists
 
