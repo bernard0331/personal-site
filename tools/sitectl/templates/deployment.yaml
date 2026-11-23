@@ -19,8 +19,12 @@ spec:
     metadata:
       labels:
         app: {{.Name}}
-{{- if .Bucket}}
       annotations:
+        # Small requests for the service mesh's Envoy sidecar (its default
+        # is half a CPU); used only when the mesh is on.
+        sidecar.istio.io/proxyCPU: "50m"
+        sidecar.istio.io/proxyMemory: "64Mi"
+{{- if .Bucket}}
         # Inject the Cloud Storage FUSE sidecar that mounts the bucket.
         gke-gcsfuse/volumes: "true"
 {{- end}}

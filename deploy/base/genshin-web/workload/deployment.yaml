@@ -48,6 +48,11 @@ spec:
         # through the Envoy sidecar. They are already TLS, and the bucket
         # mount starts before the sidecar is ready.
         traffic.sidecar.istio.io/excludeOutboundIPRanges: "199.36.153.8/30,169.254.169.254/32"
+        # Small requests for the mesh's Envoy sidecar (default 100m CPU,
+        # 128Mi): it proxies a few requests a second, and with the mesh's
+        # node agents installed a 2-vCPU node has little room to spare.
+        sidecar.istio.io/proxyCPU: "50m"
+        sidecar.istio.io/proxyMemory: "64Mi"
     spec:
       serviceAccountName: genshin-web
       terminationGracePeriodSeconds: 25 # spot VMs get 30 s notice
@@ -91,7 +96,7 @@ spec:
           # only slow simulations down.
           resources:
             requests:
-              cpu: "1"
+              cpu: 750m # leaves room for the mesh's node agents
               memory: 3Gi
               ephemeral-storage: 1Gi
             limits:

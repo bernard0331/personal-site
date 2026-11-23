@@ -6,7 +6,9 @@
 #   IMAGE is any image with python3 that the nodes can pull (genshin-web's).
 #
 # Each check runs in an ephemeral debug container added to a site's pod; it
-# shares the pod's network, so the pod's policies apply to it. A pod in a
+# shares the pod's network, so the pod's policies apply to it (and, with the
+# service mesh on, its sidecar). A check counts as open only if the far end
+# answers (TLS handshake or HTTP response), not just if a connection opens. A pod in a
 # throwaway namespace with no policies plays an outsider. Prints PASS/FAIL
 # per check and exits non-zero if any check fails.
 set -eu
@@ -15,14 +17,39 @@ IMAGE=${1:?usage: verify-policies.sh IMAGE}
 # probe: python3 that tries each "host port expect" line (expect: open or
 # blocked) with a 4-second timeout and prints PASS/FAIL lines.
 PROBE='
-import socket, sys
+import socket, ssl, sys
+
+def reached(host, port):
+    # A plain TCP connect is not enough: with the service mesh on, the pod
+    # Envoy sidecar accepts every outgoing connection itself and only then
+    # dials the destination. So require an answer from the far end: a
+    # completed TLS handshake on 443, otherwise an HTTP response that is not
+    # Envoy reporting it could not connect.
+    s = socket.create_connection((host, port), timeout=4)
+    s.settimeout(4)
+    try:
+        if port == 443:
+            ctx = ssl.create_default_context()
+            ctx.check_hostname, ctx.verify_mode = False, ssl.CERT_NONE
+            ctx.wrap_socket(s, server_hostname=host).close()
+            return True
+        s.sendall(("GET / HTTP/1.1\r\nHost: %s\r\nConnection: close\r\n\r\n" % host).encode())
+        data = b""
+        while len(data) < 4096:
+            chunk = s.recv(4096)
+            if not chunk:
+                break
+            data += chunk
+        return data.startswith(b"HTTP/") and b"upstream connect error" not in data
+    finally:
+        s.close()
+
 fails = 0
 for line in sys.argv[1].strip().splitlines():
     host, port, expect, why = line.split(None, 3)
     try:
-        socket.create_connection((host, int(port)), timeout=4).close()
-        got = "open"
-    except OSError as e:
+        got = "open" if reached(host, int(port)) else "blocked"
+    except OSError:
         got = "blocked"
     ok = got == expect
     fails += not ok

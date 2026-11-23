@@ -1,7 +1,7 @@
 # personal-site
 
-A Genshin Impact team optimizer, written in Go, with the infrastructure to
-run it on Google Kubernetes Engine (GKE). Everything in Google Cloud is
+A Genshin Impact team optimizer and a small landing page, written in Go,
+with the infrastructure to run them on Google Kubernetes Engine (GKE). Everything in Google Cloud is
 created by Terraform, and what runs in the cluster is described by Kustomize
 manifests.
 
@@ -13,9 +13,11 @@ solves the team selection exactly. See
 [services/genshin-web](services/genshin-web) for the site.
 
 > The GKE environment is brought up from Terraform when I work on it and
-> torn down to zero cost between sessions (one `gke_enabled` switch). Between
-> sessions, friends use the same container image on Cloud Run, which scales
-> to zero.
+> torn down to zero cost between sessions (switches in
+> `terraform/envs/prod/switches.auto.tfvars`). Between sessions, friends use
+> the same optimizer image on Cloud Run, which scales to zero. Everything
+> below was run and checked on the live cluster on 2026-11-23; the scripts
+> that check it are in `deploy/gke/`.
 
 ## Architecture
 
@@ -27,9 +29,13 @@ visitor ──HTTPS──▶ global external Application Load Balancer
    VPC "personal-site" ─ subnet: nodes / pods / services ranges
    ┌──────────────────────────────────────────────────────────┐
    │ GKE Standard, zonal, private nodes, Dataplane V2         │
-   │   namespace genshin                                      │
-   │     genshin-web pod ── GCS FUSE ──▶ runs bucket (gke/)   │
-   │       identity: Workload Identity Federation (no keys)   │
+   │ default-deny NetworkPolicies in every site namespace     │
+   │                                                          │
+   │   namespace home          namespace genshin              │
+   │     home pod ──mTLS──────▶ genshin-web pod               │
+   │     (Envoy)  (Cloud Service (Envoy) ── GCS FUSE ──▶ runs │
+   │               Mesh, by identity)        bucket (gke/)    │
+   │   identity: Workload Identity Federation (no keys)       │
    └──────────────────────────────────────────────────────────┘
         │ Private Google Access (no Cloud NAT, no internet egress)
         ▼
@@ -49,9 +55,14 @@ visitor ──HTTPS──▶ global external Application Load Balancer
   enforces Kubernetes NetworkPolicies.
 - **Default-deny NetworkPolicies** in every site's namespace
   ([deploy/components/network-isolation](deploy/components/network-isolation)):
-  ingress is allowed only from the load balancer's ranges, on the serving
-  port. Egress is allowed only to kube-dns, the GKE metadata server
-  (Workload Identity tokens) and private.googleapis.com.
+  ingress is allowed only from the load balancer's ranges on the serving
+  port, plus named service-to-service paths (home → genshin-web). Egress is
+  allowed only to cluster DNS (kube-dns and GKE's NodeLocal DNSCache), the
+  GKE metadata server (Workload Identity tokens) and private.googleapis.com.
+  [deploy/gke/verify-policies.sh](deploy/gke/verify-policies.sh) checks this
+  from inside the pods in 12 checks: allowed paths answer, while another
+  site's pod, the Kubernetes API, other Google API addresses and unlisted
+  namespaces don't.
 - **Google APIs on private addresses**: a private Cloud DNS zone answers
   `*.googleapis.com` with private.googleapis.com (199.36.153.8/30). Pods'
   calls to Google APIs therefore go to four fixed addresses, reached
@@ -79,6 +90,32 @@ visitor ──HTTPS──▶ global external Application Load Balancer
 - **Cloud Storage FUSE**: the runs bucket is mounted into the pod with the
   GKE CSI driver, limited to its own folder so the GKE and Cloud Run copies
   never share data.
+
+### Service mesh
+
+Cloud Service Mesh (Google's managed Istio, `terraform/modules/mesh`, behind
+its own `mesh_enabled` switch) adds an Envoy sidecar to every site's pods.
+The landing page checks the optimizer's health in-cluster. That call travels
+over mutual TLS, with each side identified by its Kubernetes service account
+(SPIFFE identity).
+
+Calls into genshin-web are allowed at two independent layers:
+
+| Layer | Enforced by | Allows |
+| :- | :- | :- |
+| NetworkPolicy | Dataplane V2 (eBPF), by namespace, pod and port | pods labelled `app=home` in namespace `home`, on 8080 |
+| AuthorizationPolicy ([deploy/mesh](deploy/mesh)) | the Envoy sidecar, by mTLS identity | `home/home`, plus the load balancer's ranges (its HTTPS ends at the load balancer, so it has no mesh identity) |
+
+[deploy/gke/verify-mesh.sh](deploy/gke/verify-mesh.sh) proves both on the
+live cluster:
+
+- The sidecar's metrics show home's requests arriving over `mutual_tls`.
+- A pod that passes the NetworkPolicy (namespace `home`, label `app=home`)
+  but runs as the wrong service account is refused with `403 RBAC: access
+  denied`.
+
+Pods keep their direct path to Google APIs: the bucket mount starts before
+the sidecar does, and those calls are already TLS.
 
 ### Self-serve sites
 
@@ -152,6 +189,7 @@ of it is created and removed with the cluster.
 | :- | :- |
 | `services/genshin-calc` | The optimizer: simulation, weapon choice, exact team selection (AGPL-3.0) |
 | `services/genshin-web` | The site and its JSON API, Go standard library only (AGPL-3.0) |
+| `services/home` | The landing page; checks each site's health in-cluster |
 | `terraform/bootstrap` | Enables APIs, creates the versioned Terraform state bucket |
 | `terraform/modules/network` | VPC, subnet with pod and Service ranges, load balancer firewall rule |
 | `terraform/modules/gke` | Cluster, spot node pool, node service account |
@@ -160,17 +198,22 @@ of it is created and removed with the cluster.
 | `terraform/modules/storage` | Runs bucket with lifecycle rules |
 | `terraform/modules/dns-certs` | Reserved IP, hostnames, a certificate per site and the certificate map |
 | `terraform/modules/monitoring` | Alert policies (PromQL) and a dashboard |
+| `terraform/modules/mesh` | Cloud Service Mesh (managed Istio) for the cluster |
+| `terraform/modules/github-ci` | Workload Identity Federation for GitHub Actions (read-only, no keys) |
 | `terraform/envs/prod` | The environment that wires the modules together (GCS backend) |
 | `deploy/base`, `deploy/overlays/prod` | Kustomize manifests: Gateway, namespace, Deployment, Service, HTTPRoute, health check |
-| `deploy/components/network-isolation` | Default-deny NetworkPolicies, included by every site |
+| `deploy/components/network-isolation`, `mesh` | Default-deny NetworkPolicies and mesh enrolment, included by every site |
+| `deploy/mesh` | Istio AuthorizationPolicies (who may call whom) |
 | `deploy/canary/genshin-web` | The canary copy of the workload and the weighted route |
-| `deploy/gke/apply.sh`, `canary.sh` | Render with Terraform's outputs and apply; canary releases |
+| `deploy/gke/apply.sh`, `canary.sh`, `down.sh` | Render with Terraform's outputs and apply; canary releases; teardown |
+| `deploy/gke/verify-*.sh` | Live checks of the NetworkPolicies and the mesh |
 | `tools/sitectl` | The self-serve CLI for adding a site |
 | `deploy/genshin-web` | Image build (Cloud Build) and the Cloud Run deployment |
 
 ## Bringing it up and down
 
-Set `gke_enabled = true` in the gitignored `terraform/envs/prod/terraform.tfvars`, then:
+Set `gke_enabled = true` (and `mesh_enabled = true` for the mesh) in
+`terraform/envs/prod/switches.auto.tfvars`, then:
 
 ```bash
 terraform -chdir=terraform/envs/prod apply
@@ -180,21 +223,25 @@ terraform -chdir=terraform/envs/prod apply
 deploy/gke/apply.sh <image>
 ```
 
-Taking it down deletes the Kubernetes resources first (so the load balancer
-goes), then applies with `gke_enabled=false`. The full steps and the cost
+Taking it down runs `deploy/gke/down.sh` first: it deletes the Kubernetes
+resources and waits until the load balancer is gone. Then it applies with
+both switches off. The full steps and the cost
 are in [terraform/README.md](terraform/README.md) and
 [deploy/gke/README.md](deploy/gke/README.md).
 
+## CI
+
+- [ci.yml](.github/workflows/ci.yml) runs Go tests, `sitectl check`,
+  kubeconform on every rendered manifest, and `terraform fmt` and
+  `validate`, with no cloud access.
+- [plan.yml](.github/workflows/plan.yml) runs `terraform plan` against the
+  real project. It authenticates through GitHub OIDC and Workload Identity
+  Federation, so there are no keys. The pool accepts only this repository
+  (by its numeric id) and grants read-only roles.
+
 ## Roadmap (planned, not built yet)
 
-- A landing page and a Terraforming Mars site, as further routes on the same
-  Gateway.
-- `terraform plan` in CI through GitHub OIDC and Workload Identity
-  Federation (no keys). CI today ([.github/workflows/ci.yml](.github/workflows/ci.yml))
-  runs Go tests, `sitectl check`, kubeconform on every rendered manifest, and
-  `terraform fmt` and `validate`, with no cloud access.
-- A service mesh (Istio ambient or Cloud Service Mesh) with mTLS, once a
-  second service talks to the optimizer.
+- A Terraforming Mars site, as a further route on the same Gateway.
 - GitOps deploys with Argo CD in place of `apply.sh`.
 - Identity-Aware Proxy for admin pages.
 

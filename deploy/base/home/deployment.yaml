@@ -19,6 +19,11 @@ spec:
     metadata:
       labels:
         app: home
+      annotations:
+        # Small requests for the service mesh's Envoy sidecar (its default
+        # is half a CPU); used only when the mesh is on.
+        sidecar.istio.io/proxyCPU: "50m"
+        sidecar.istio.io/proxyMemory: "64Mi"
     spec:
       serviceAccountName: home
       securityContext:
