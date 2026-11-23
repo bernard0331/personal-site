@@ -1,83 +1,132 @@
 # personal-site
 
-Three websites, planned to share one Google Kubernetes Engine (GKE) cluster:
+A Genshin Impact team optimizer, written in Go, with the infrastructure to
+run it on Google Kubernetes Engine (GKE). Everything in Google Cloud is
+created by Terraform, and what runs in the cluster is described by Kustomize
+manifests.
 
-- **A landing page** about me, linking to the other two. Not started.
-- **A Genshin Impact team optimizer**: give it your account and it finds your
-  strongest teams with no character or weapon used twice. Live for friends to
-  test. See [services/genshin-calc](services/genshin-calc) (simulation and
-  team selection) and [services/genshin-web](services/genshin-web) (the site).
-- **A Terraforming Mars site** for games played through
-  [tfm-cli](https://github.com/bernard0331/tfm-cli). Not started.
+The optimizer takes a player's account and finds their strongest teams with
+no character or weapon used twice. It simulates each candidate team with a
+patched build of [KQM Sim](https://github.com/KQM-git/kqmsim) and then
+solves the team selection exactly. See
+[services/genshin-calc](services/genshin-calc) for the optimizer and
+[services/genshin-web](services/genshin-web) for the site.
 
-> For a single small site, Cloud Run is simpler and cheaper than GKE, and
-> that is what serves the optimizer today. The GKE version exists to practise
-> Kubernetes, Kubernetes networking, Terraform, Go and GitHub Actions.
+> The GKE environment is brought up from Terraform when I work on it and
+> torn down to zero cost between sessions (one `gke_enabled` switch). Between
+> sessions, friends use the same container image on Cloud Run, which scales
+> to zero.
 
-## Status
+## Architecture
 
-| Part | State |
+```
+visitor ──HTTPS──▶ global external Application Load Balancer
+                   (Gateway API, Certificate Manager TLS, reserved IP)
+                        │ container-native load balancing (NEG)
+                        ▼
+   VPC "personal-site" ─ subnet: nodes / pods / services ranges
+   ┌──────────────────────────────────────────────────────────┐
+   │ GKE Standard, zonal, private nodes, Dataplane V2         │
+   │   namespace genshin                                      │
+   │     genshin-web pod ── GCS FUSE ──▶ runs bucket (gke/)   │
+   │       identity: Workload Identity Federation (no keys)   │
+   └──────────────────────────────────────────────────────────┘
+        │ Private Google Access (no Cloud NAT, no internet egress)
+        ▼
+   Artifact Registry · Cloud Storage · Logging · Monitoring
+```
+
+### Networking
+
+- **VPC-native cluster** on a custom-mode VPC: one subnet with secondary
+  ranges for pods and Services, so every pod gets a routable VPC address.
+- **Private nodes**: nodes have internal addresses only. There is no Cloud
+  NAT, so pods cannot reach the internet. Private Google Access lets the nodes
+  reach Google APIs (pulling images, the bucket, logs and metrics).
+- **Firewall**: an explicit rule admits only Google's load balancer and
+  health-check ranges (35.191.0.0/16, 130.211.0.0/22) on the app's port.
+- **Dataplane V2**: GKE's eBPF dataplane, based on Cilium, which also
+  enforces Kubernetes NetworkPolicies.
+- **Gateway API**: one shared `Gateway` (class
+  `gke-l7-global-external-managed`) on a reserved global IP. Each site's
+  `HTTPRoute` attaches to its HTTPS listener from its own namespace, allowed
+  by a namespace label (`personal-site/gateway=true`). Plain HTTP only
+  redirects to HTTPS.
+- **TLS**: a Google-managed Certificate Manager certificate with load
+  balancer authorization, served through a certificate map. Hostnames use
+  sslip.io until a domain is bought.
+- **Client IP**: behind the load balancer the visitor's address is read from
+  a fixed position in `X-Forwarded-For` (`-proxy-hops`), so a forged header
+  cannot bypass the per-visitor rate limits.
+
+### Identity and storage
+
+- **Workload Identity Federation for GKE**: the pod's Kubernetes service
+  account is granted object access on the one bucket directly, as a
+  `principal://` member. No Google service account keys exist anywhere.
+- **Least-privilege nodes**: the nodes run as their own service account,
+  which may only write logs and metrics and pull images (not the default
+  Compute Engine account with Editor).
+- **Cloud Storage FUSE**: the runs bucket is mounted into the pod with the
+  GKE CSI driver, limited to its own folder so the GKE and Cloud Run copies
+  never share data.
+
+### Compute
+
+- One zonal GKE Standard cluster (the free tier covers its management fee)
+  with a spot node pool, shielded nodes with secure boot, and a weekend
+  maintenance window.
+- The pod runs as a non-root user with all capabilities dropped and the
+  default seccomp profile, with startup, readiness and liveness probes.
+
+## Repository layout
+
+| Path | What it holds |
 | :- | :- |
-| Optimizer core (simulator, rotations, team selection) | Done; runs locally and in the site |
-| Optimizer site | Live on Cloud Run, one instance at most, none while idle. See [deploy/genshin-web](deploy/genshin-web/README.md) |
-| Terraform | Written and applied. Manages the registry, bucket and service accounts, and the GKE version behind a switch |
-| GKE version | Defined in code and tested (2026-11-23), then switched off so it costs nothing. See [terraform](terraform/README.md) and [deploy/gke](deploy/gke/README.md) |
-| Argo CD, GitHub Actions, network policies, IAP | Not done |
-| Landing page, Terraforming Mars site | Not started |
+| `services/genshin-calc` | The optimizer: simulation, weapon choice, exact team selection (AGPL-3.0) |
+| `services/genshin-web` | The site and its JSON API, Go standard library only (AGPL-3.0) |
+| `terraform/bootstrap` | Enables APIs, creates the versioned Terraform state bucket |
+| `terraform/modules/network` | VPC, subnet with pod and Service ranges, load balancer firewall rule |
+| `terraform/modules/gke` | Cluster, spot node pool, node service account |
+| `terraform/modules/iam` | Bucket access for the Cloud Run and Kubernetes identities |
+| `terraform/modules/registry` | Artifact Registry repository with cleanup policies |
+| `terraform/modules/storage` | Runs bucket with lifecycle rules |
+| `terraform/modules/dns-certs` | Reserved IP, hostnames, certificate and certificate map |
+| `terraform/envs/prod` | The environment that wires the modules together (GCS backend) |
+| `deploy/base`, `deploy/overlays/prod` | Kustomize manifests: Gateway, namespace, Deployment, Service, HTTPRoute, health check |
+| `deploy/gke/apply.sh` | Renders the overlay with Terraform's outputs and applies it |
+| `deploy/genshin-web` | Image build (Cloud Build) and the Cloud Run deployment |
 
-## Layout
+## Bringing it up and down
 
-| Folder | What it holds |
-| :- | :- |
-| `services/genshin-calc` | The optimizer: runs KQM Sim (a patched build), picks weapons, solves team selection exactly. AGPL-3.0 |
-| `services/genshin-web` | The optimizer's website and JSON API (Go standard library). AGPL-3.0 |
-| `deploy/genshin-web` | Building the image and deploying it to Cloud Run |
-| `deploy/base`, `deploy/overlays`, `deploy/gke` | Kubernetes manifests (Kustomize) for the GKE version, and the script that applies them |
-| `terraform/bootstrap` | APIs and the bucket that holds Terraform state (local state, run once) |
-| `terraform/modules`, `terraform/envs/prod` | Network, GKE cluster, registry, storage, IAM, IP address and certificates |
-| `local/` | Gitignored: accounts, caches, game images, notes |
-
-## Running the site
-
-Locally: see [services/genshin-web](services/genshin-web/README.md).
-
-On Cloud Run (the live site):
+Set `gke_enabled = true` in the gitignored `terraform/envs/prod/terraform.tfvars`, then:
 
 ```bash
-deploy/genshin-web/build.sh
+terraform -chdir=terraform/envs/prod apply
 ```
 
 ```bash
-BUCKET=<the bucket> deploy/genshin-web/deploy.sh <the image build.sh printed>
+deploy/gke/apply.sh <image>
 ```
 
-On GKE: set `gke_enabled = true` in `terraform/envs/prod/terraform.tfvars`,
-run `terraform apply` there, then `deploy/gke/apply.sh`. One spot node costs
-about $30 a month and the load balancer about $18, so switch it off again
-afterwards (steps in [terraform/README.md](terraform/README.md)). It keeps its
-data in its own folder of the bucket, so it can run alongside Cloud Run.
+Taking it down deletes the Kubernetes resources first (so the load balancer
+goes), then applies with `gke_enabled=false`. The full steps and the cost
+are in [terraform/README.md](terraform/README.md) and
+[deploy/gke/README.md](deploy/gke/README.md).
 
-## Local tools
+## Roadmap (planned, not built yet)
 
-| Tool | Used for |
-| :- | :- |
-| Go | All services |
-| Python with HiGHS | Team selection (exact solver) |
-| Docker and kind | Local Kubernetes cluster |
-| kubectl | Talking to the local and GKE clusters |
-| Terraform | Cloud resources |
-| gcloud | Google Cloud CLI, credentials and Cloud Build |
-
-Create and delete the local cluster:
-
-```bash
-kind create cluster --name personal-site
-kind delete cluster --name personal-site
-```
+- A landing page and a Terraforming Mars site, as further routes on the same
+  Gateway.
+- CI: `terraform plan` and manifest validation in GitHub Actions, using
+  GitHub OIDC (no keys).
+- GitOps deploys with Argo CD in place of `apply.sh`.
+- Identity-Aware Proxy for admin pages.
 
 ## Rules for this repository
 
-- No project IDs, emails or secrets. Use variables and a gitignored tfvars file.
+- No project IDs, emails or secrets. Use variables and a gitignored tfvars
+  file.
 - No service account keys. Use Workload Identity, GitHub OIDC and application
   default credentials.
 - HoYoverse's images and the KQM Sim Database cache are never committed.

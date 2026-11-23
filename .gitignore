@@ -28,3 +28,4 @@ crash.log
 
 # Local-only data: account scans, cached rotations and simulator results
 local/
+NEXT_TASKS_job_gaps.md
