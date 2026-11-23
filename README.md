@@ -186,8 +186,10 @@ are in [terraform/README.md](terraform/README.md) and
 
 - A landing page and a Terraforming Mars site, as further routes on the same
   Gateway.
-- CI: `terraform plan`, `sitectl check` and manifest validation in GitHub
-  Actions, using GitHub OIDC (no keys).
+- `terraform plan` in CI through GitHub OIDC and Workload Identity
+  Federation (no keys). CI today ([.github/workflows/ci.yml](.github/workflows/ci.yml))
+  runs Go tests, `sitectl check`, kubeconform on every rendered manifest, and
+  `terraform fmt` and `validate`, with no cloud access.
 - A service mesh (Istio ambient or Cloud Service Mesh) with mTLS, once a
   second service talks to the optimizer.
 - GitOps deploys with Argo CD in place of `apply.sh`.

@@ -1,0 +1,70 @@
+# Checks on every push and pull request. No cloud access: nothing here holds
+# credentials, so it can't change anything in Google Cloud.
+#
+#   go          vet and tests for the services and tools
+#   sites       sitectl check: every site in services.json has manifests,
+#               network policies, the Gateway label and an up-to-date overlay
+#   manifests   render every Kustomize build and validate it against the
+#               Kubernetes and Gateway API schemas (kubeconform)
+#   terraform   formatting and validation of every root, without a backend
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go vet ./...
+      - run: go test ./...
+      - run: go run ./tools/sitectl check
+
+  manifests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go install github.com/yannh/kubeconform/cmd/kubeconform@v0.7.0
+      - name: Render and validate
+        run: |
+          # Placeholders that apply.sh and canary.sh fill in from Terraform.
+          fill='s|IMAGE_REPOSITORY|registry.example/repo|g; s|IMAGE_TAG|ci|g; s|CANARY_TAG|ci|g;
+                s|BUCKET_NAME|bucket|g; s|\([A-Z_]*\)_HOSTNAME|site.example.com|g;
+                s|STABLE_WEIGHT|90|g; s|CANARY_WEIGHT|10|g'
+          {
+            kubectl kustomize deploy/overlays/prod
+            echo ---
+            kubectl kustomize deploy/canary/genshin-web
+            echo ---
+            cat deploy/canary/genshin-web/httproute.yaml
+          } | sed -e "$fill" |
+            kubeconform -strict -summary \
+              -schema-location default \
+              -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' -
+
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.17.2
+      - run: terraform fmt -check -recursive terraform
+      - name: Validate
+        run: |
+          for root in terraform/bootstrap terraform/envs/prod; do
+            terraform -chdir=$root init -backend=false -input=false
+            terraform -chdir=$root validate
+          done
