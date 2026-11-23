@@ -28,9 +28,9 @@ const freshAdv = () => ({ top: 100, per_element: 20, per_character: 3, iteration
 const freshOptions = () => ({ energy: 1, pins: [], excluded: [], run: 'quick', level: 'light', artifacts: 'kqm', adv: freshAdv() });
 const LEVELS = ['light', 'standard', 'thorough'];
 const LEVEL_NOTES = {
-  light: 'The quick run\'s picks and the best few teams of each element: about 30–40 teams, roughly 15 minutes.',
-  standard: 'Also each character\'s best team: about 120 teams, roughly 45 minutes.',
-  thorough: 'With the settings below, up to about 370 teams on a large account: 2–3 hours. Change them to trade time for coverage.',
+  light: 'The quick run\'s picks and the best few teams of each element: about 30–40 teams, roughly 10 minutes on a large account.',
+  standard: 'Also each character\'s best team: about 120 teams, roughly 25 minutes.',
+  thorough: 'With the settings below, up to about 370 teams on a large account: about an hour. Change them to trade time for coverage.',
 };
 // all4: weapons "Every 4-star" added, so switching it off removes only those.
 let draft = { chars: {}, weapons: {}, unlimited3: true, all4: [], artifacts: [], options: freshOptions() };
