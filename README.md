@@ -17,7 +17,8 @@ solves the team selection exactly. See
 > `terraform/envs/prod/switches.auto.tfvars`). Between sessions, friends use
 > the same optimizer image on Cloud Run, which scales to zero. Everything
 > below was run and checked on the live cluster on 2026-11-23; the scripts
-> that check it are in `deploy/gke/`.
+> that check it are in `deploy/gke/`, and the results are in
+> [docs/verification.md](docs/verification.md).
 
 ## Architecture
 

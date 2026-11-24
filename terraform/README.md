@@ -199,4 +199,5 @@ gh secret set RUNS_BUCKET --body "$(terraform -chdir=terraform/envs/prod output 
 gh secret set WIF_PROVIDER --body "$(terraform -chdir=terraform/envs/prod output -raw github_workload_identity_provider)"
 ```
 
-Until they're set, the workflow skips with a notice.
+They are set (2026-11-23), so the workflow plans for real. If they were
+removed, it would skip with a notice instead of failing.
