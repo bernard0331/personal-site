@@ -81,7 +81,7 @@ module "dns_certs" {
   sites  = [for s in local.services : s.site]
 }
 
-# Alerts and a dashboard for the Genshin site, only while the cluster exists
+# Alerts, SLOs with burn-rate alerts, and a dashboard, only while the cluster exists
 # (they watch its load balancer and pods).
 module "monitoring" {
   count              = local.gke
@@ -89,6 +89,7 @@ module "monitoring" {
   namespace          = "genshin"
   cluster            = module.gke[0].name
   notification_email = var.alert_email
+  sites              = [for s in local.services : { name = s.name, namespace = s.namespace }]
 }
 
 # Cloud Service Mesh (managed Istio), only with the cluster and mesh_enabled.

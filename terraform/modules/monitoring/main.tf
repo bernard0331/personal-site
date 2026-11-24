@@ -108,14 +108,23 @@ resource "google_monitoring_dashboard" "site" {
     mosaicLayout = {
       columns = 12
       tiles = [
-        for i, t in [
-          { title = "Requests per second by response class", queries = ["sum by (response_code_class) (rate(${local.lb_requests}[5m]))"] },
-          { title = "5xx share of requests", queries = ["sum(rate(${local.lb_5xx}[5m])) / sum(rate(${local.lb_requests}[5m]))"] },
-          { title = "Latency p50 and p95 (ms)", queries = [for q in [0.5, 0.95] : "histogram_quantile(${q}, sum by (le) (rate(${local.lb_latency}[5m])))"] },
-          { title = "Pod CPU (cores)", queries = ["sum by (pod_name, container_name) (rate(kubernetes_io:container_cpu_core_usage_time{${local.pod_filter}}[5m]))"] },
-          { title = "Pod memory (bytes)", queries = ["sum by (pod_name, container_name) (kubernetes_io:container_memory_used_bytes{${local.pod_filter},memory_type=\"non-evictable\"})"] },
-          { title = "Container restarts (30 min)", queries = ["sum by (pod_name, container_name) (increase(kubernetes_io:container_restart_count{${local.pod_filter}}[30m]))"] },
-          ] : {
+        for i, t in concat(
+          [for t in [
+            { title = "Requests per second by response class", queries = ["sum by (response_code_class) (rate(${local.lb_requests}[5m]))"] },
+            { title = "5xx share of requests", queries = ["sum(rate(${local.lb_5xx}[5m])) / sum(rate(${local.lb_requests}[5m]))"] },
+            { title = "Latency p50 and p95 (ms)", queries = [for q in [0.5, 0.95] : "histogram_quantile(${q}, sum by (le) (rate(${local.lb_latency}[5m])))"] },
+            { title = "Pod CPU (cores)", queries = ["sum by (pod_name, container_name) (rate(kubernetes_io:container_cpu_core_usage_time{${local.pod_filter}}[5m]))"] },
+            { title = "Pod memory (bytes)", queries = ["sum by (pod_name, container_name) (kubernetes_io:container_memory_used_bytes{${local.pod_filter},memory_type=\"non-evictable\"})"] },
+            { title = "Container restarts (30 min)", queries = ["sum by (pod_name, container_name) (increase(kubernetes_io:container_restart_count{${local.pod_filter}}[30m]))"] },
+            ] : { title = t.title, sets = [for q in t.queries : { prometheusQuery = q }] }
+          ],
+          # Per site: SLO compliance over the 28-day window, and the share of
+          # the error budget still left (1 = untouched, 0 or below = spent).
+          flatten([for s in var.sites : [
+            { title = "${s.name}: SLO compliance (28 days)", sets = [for k in ["availability", "latency"] : { timeSeriesFilter = { filter = "select_slo_compliance(\"${local.slo_by_kind[k][s.name].name}\")" } }] },
+            { title = "${s.name}: error budget remaining", sets = [for k in ["availability", "latency"] : { timeSeriesFilter = { filter = "select_slo_budget_fraction(\"${local.slo_by_kind[k][s.name].name}\")" } }] },
+          ]]),
+          ) : {
           xPos   = (i % 2) * 6
           yPos   = floor(i / 2) * 4
           width  = 6
@@ -123,9 +132,9 @@ resource "google_monitoring_dashboard" "site" {
           widget = {
             title = t.title
             xyChart = {
-              dataSets = [for q in t.queries : {
+              dataSets = [for q in t.sets : {
                 plotType        = "LINE"
-                timeSeriesQuery = { prometheusQuery = q }
+                timeSeriesQuery = q
               }]
             }
           }
