@@ -62,4 +62,28 @@ since the header was added). Otherwise runs started on stable carry no
 header, and their polls may be split onto the canary.
 
 The canary reserves a quarter of a CPU and 1 GiB, and runs one simulation at
-a time, so it fits on the single spot node beside stable.
+a time. It fits on one spot node beside stable alone, but not once the
+landing page (home) is also on that node; use `node_count = 2` for canary
+sessions.
+
+## Testing the SLO alerts
+
+A canary with no ready pods does not test anything: the load balancer sends
+its share to stable instead (checked live). `fault.yaml` runs
+`tools/faultserver` with genshin-web's canary labels instead. It passes the
+health check and answers 503 to every other request, so the route's weight
+becomes the error rate:
+
+```bash
+IMG=REGION-docker.pkg.dev/PROJECT/genshin/faultserver:test   # built with Cloud Build from tools/faultserver
+deploy/gke/canary.sh start <stable image> 50   # canary Service, health check, 50/50 route (waits for the canary pod: node_count = 2)
+kubectl -n genshin scale deploy/genshin-web-canary --replicas=0
+sed "s|IMAGE|$IMG|" deploy/gke/fault.yaml | kubectl apply -f -
+# keep some traffic going; the fast-burn alert opens in about 6 minutes
+kubectl -n genshin delete deploy genshin-web-fault
+deploy/gke/canary.sh rollback
+```
+
+Alert openings and closings are logged in Cloud Logging
+(`monitoring.googleapis.com/ViolationOpenEventv1` and `ViolationAutoResolveEventv1`),
+so the test needs no notification channel.

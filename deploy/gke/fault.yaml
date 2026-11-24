@@ -1,0 +1,37 @@
+# A broken "canary" for testing the SLO burn-rate alerts (deploy/gke/README.md).
+# Its pods carry genshin-web's canary labels, so the canary Service and health
+# check from deploy/canary/genshin-web pick them up; canary.sh weight then
+# decides what share of new visitors get its 503s.
+#   kubectl apply -f   (after replacing IMAGE)   then   canary.sh weight PERCENT
+#   kubectl -n genshin delete deploy genshin-web-fault   then   canary.sh rollback
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: genshin-web-fault
+  namespace: genshin
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: genshin-web, track: canary}
+  template:
+    metadata:
+      labels: {app: genshin-web, track: canary}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: faultserver
+          image: IMAGE
+          ports:
+            - {name: http, containerPort: 8080}
+          readinessProbe:
+            httpGet: {path: /healthz, port: http}
+          resources:
+            requests: {cpu: 10m, memory: 16Mi}
+            limits: {memory: 32Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
