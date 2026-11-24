@@ -176,6 +176,47 @@ runbook note. The module also defines a dashboard for request rate by
 response class, error share, latency, and pod CPU, memory and restarts. All
 of it is created and removed with the cluster.
 
+### SLOs and error budgets
+
+Each site has two SLOs, defined as native Cloud Monitoring objects
+(`google_monitoring_custom_service` and `google_monitoring_slo`, in
+[terraform/modules/monitoring/slo.tf](terraform/modules/monitoring/slo.tf))
+and measured at the load balancer over a rolling 28 days:
+
+| SLO | Target | Error budget (28 days) |
+| :- | :- | :- |
+| Availability: requests that are not 5xx | 99.5% | 0.5% of requests, about 3.4 hours of full outage |
+| Latency: requests answered within 500 ms | 95% | 5% of requests |
+
+Why these targets: the site runs on one spot node, which Google can take
+back at any time, so 99.9% would be spent by a single node replacement.
+99.5% still notices a bad release within the hour. The live p95 latency was
+69 ms (genshin) and 51 ms (home), and every request is short (simulations
+run in the background and the page polls), so 500 ms leaves room for a busy
+node without hiding a real slowdown.
+
+Burn-rate alerts follow the multi-window pattern from Google's SRE workbook.
+A burn rate of 1 spends exactly the whole budget in 28 days. Each alert
+needs a long window (is it real?) and a short one (is it still happening?):
+
+| Alert | Burn rate | Windows | Budget spent at that rate | Severity |
+| :- | :- | :- | :- | :- |
+| Fast | 14.4x | 1 hour and 5 minutes | 2% per hour, all of it in 2 days | page |
+| Slow | 6x | 6 hours and 30 minutes | 5% per 6 hours, all of it in under 5 days | ticket |
+
+Each alert policy also needs at least 50 requests in its long window, so a
+quiet personal site doesn't page on two failed requests. That's why the
+alerts use Cloud Monitoring's `select_slo_burn_rate` conditions and not
+PromQL: threshold conditions can be combined with AND in one policy, with
+the traffic guard as a third condition. The dashboard shows each SLO's
+compliance and its remaining error budget.
+
+To test them, [deploy/gke/fault.yaml](deploy/gke/fault.yaml) runs
+[tools/faultserver](tools/faultserver) as a broken canary that passes its
+health check and answers 503 to everything else. In the live test, the
+fast-burn alert opened about 6 minutes after errors began, and cleared after
+the rollback ([docs/verification.md](docs/verification.md)).
+
 ### Compute
 
 - One zonal GKE Standard cluster (the free tier covers its management fee)
@@ -198,7 +239,7 @@ of it is created and removed with the cluster.
 | `terraform/modules/registry` | Artifact Registry repository with cleanup policies |
 | `terraform/modules/storage` | Runs bucket with lifecycle rules |
 | `terraform/modules/dns-certs` | Reserved IP, hostnames, a certificate per site and the certificate map |
-| `terraform/modules/monitoring` | Alert policies (PromQL) and a dashboard |
+| `terraform/modules/monitoring` | Alert policies (PromQL), SLOs with burn-rate alerts, and a dashboard |
 | `terraform/modules/mesh` | Cloud Service Mesh (managed Istio) for the cluster |
 | `terraform/modules/github-ci` | Workload Identity Federation for GitHub Actions (read-only, no keys) |
 | `terraform/envs/prod` | The environment that wires the modules together (GCS backend) |
@@ -209,6 +250,7 @@ of it is created and removed with the cluster.
 | `deploy/gke/apply.sh`, `canary.sh`, `down.sh` | Render with Terraform's outputs and apply; canary releases; teardown |
 | `deploy/gke/verify-*.sh` | Live checks of the NetworkPolicies and the mesh |
 | `tools/sitectl` | The self-serve CLI for adding a site |
+| `tools/faultserver`, `deploy/gke/fault.yaml` | A backend that only fails, for testing the alerts as a broken canary |
 | `deploy/genshin-web` | Image build (Cloud Build) and the Cloud Run deployment |
 
 ## Bringing it up and down

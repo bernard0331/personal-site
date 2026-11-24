@@ -5,6 +5,56 @@ environment is brought up only for these sessions and switched off after, so
 each entry records the date it was last run. The scripts named here re-run the
 checks on a fresh bring-up.
 
+## 2026-11-24: SLOs and error-budget burn-rate alerts
+
+Setup: GKE with 1 spot node, mesh off, both sites deployed (image 7a3a9b8),
+steady test traffic of about 2 requests a second to genshin and 0.4 to www.
+
+### Plan
+
+| | |
+| :- | :- |
+| GKE off | `terraform plan`: no changes (nothing SLO-related is created) |
+| GKE on | 18 monitoring resources: 2 custom services, 4 SLOs, 8 burn-rate policies, the 3 earlier alerts and the dashboard; applied cleanly |
+
+### SLO data
+
+| | |
+| :- | :- |
+| Site filter | the backend service names were `gkegw1-kna0-genshin-genshin-web-80-…` and `gkegw1-kna0-home-home-80-…`; the regex picks out each site |
+| Compliance | all four SLOs returned data within minutes. genshin-web availability started at 93–95%: the first requests after bring-up got 5xx while the backend warmed up |
+| Live p95 latency | 69 ms (genshin), 51 ms (home), so the 500 ms threshold has room |
+
+The startup errors were a real check of the multi-window design: the
+1-hour burn rate was above 14.4, but the 5-minute one was 0 by then, so
+nothing fired.
+
+### Forced errors
+
+| Time (UTC) | Event |
+| :- | :- |
+| 05:19 | canary route at 50/50, canary scaled to zero pods: **0 errors**, the load balancer sent the canary's share to stable |
+| 05:24 | `tools/faultserver` deployed as the canary (healthy, answers 503): about 45–55% of requests now 5xx |
+| 05:30:13 | **slow-burn** alert opened (all three conditions: 6h and 30m burn above 6, at least 50 requests) |
+| 05:31:22 | **fast-burn** alert opened; at about that time the burn rate was 28x over 1 hour and 100x over 5 minutes |
+| 05:34:44 | the older PromQL "5xx error rate" alert opened |
+| 05:38:28 | fault removed, `canary.sh rollback` |
+| 05:51:04 | fast-burn alert resolved (the 5-minute window was clean; the 1-hour burn rate was still about 30) |
+| 05:59:45 | PromQL 5xx alert resolved |
+| 06:15:09 | slow-burn alert resolved |
+
+Source: Cloud Logging, `monitoring.googleapis.com/ViolationOpenEventv1` and
+`ViolationAutoResolveEventv1`. The latency SLO and home's alerts didn't
+fire, as expected.
+
+Found while testing:
+
+- A canary with no ready pods doesn't produce errors at Google's load
+  balancer: weighted traffic goes only to backends with healthy endpoints.
+  Hence the fault server.
+- The canary didn't fit on one node beside stable and home (insufficient
+  CPU and memory); the fault server needs only 10m of CPU.
+
 ## 2026-11-23: NetworkPolicies, canary, alerts, service mesh, CI plan
 
 Setup: GKE Standard, zonal, 2 spot nodes (2 for the mesh session; the default
