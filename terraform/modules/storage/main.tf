@@ -23,6 +23,18 @@ resource "google_storage_bucket" "runs" {
     }
   }
 
+  # Fan-out batches (services/genshin-calc/fanout): the jobs, results and
+  # done markers of a batch are only read while it runs.
+  lifecycle_rule {
+    action {
+      type = "Delete"
+    }
+    condition {
+      age            = 1
+      matches_prefix = ["fanout/", "gke/fanout/"]
+    }
+  }
+
   # Keep the bucket (and every saved run) if the rest is destroyed: deleting
   # it is a separate, deliberate step.
   lifecycle {

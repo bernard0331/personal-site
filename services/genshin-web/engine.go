@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -18,6 +17,7 @@ import (
 
 	"github.com/bernard0331/personal-site/services/genshin-calc/catalog"
 	"github.com/bernard0331/personal-site/services/genshin-calc/coarse"
+	"github.com/bernard0331/personal-site/services/genshin-calc/fanout"
 	"github.com/bernard0331/personal-site/services/genshin-calc/good"
 	"github.com/bernard0331/personal-site/services/genshin-calc/optimizer"
 	"github.com/bernard0331/personal-site/services/genshin-calc/rotation"
@@ -39,8 +39,9 @@ type engine struct {
 	refineSim  *coarse.Binary              // refined runs: the same build with the full pass's longer time limit
 	workers    int
 	iterations int
-	variants   int           // weapon alternatives per team for the solver
-	highs      *solver.HiGHS // nil: the slower branch and bound
+	variants   int                 // weapon alternatives per team for the solver
+	highs      *solver.HiGHS       // nil: the slower branch and bound
+	fanout     *fanout.Coordinator // nil: every simulation runs here
 
 	// The shared cache: every simulation any run has done, by key (the
 	// config and the simulator build). The same team with the same
@@ -306,13 +307,15 @@ func (e *engine) execute(id string) error {
 		resMu.Unlock()
 		return nil
 	}
-	progress := func(p coarse.Progress) {
-		if p.Done%20 == 0 || p.Done == p.Total {
-			st.Done = st.Cached + p.Done
+	last := 0
+	progress := func(done, total int) {
+		if done-last >= 20 || done == total {
+			last = done
+			st.Done = st.Cached + done
 			e.runs.setStatus(id, &st)
 		}
 	}
-	if _, err := coarse.Run(context.Background(), todo, e.sim, e.workers, nil, save, progress); err != nil {
+	if err := e.runJobs(todo, e.quickPass(), save, progress); err != nil {
 		return err
 	}
 
@@ -501,11 +504,11 @@ func (e *engine) simulate(jobs map[string]coarse.Job, p pass, progress func(done
 		progress(cached, len(todo)+cached)
 	}
 	var mu sync.Mutex
-	var report func(coarse.Progress)
+	var report func(done, total int)
 	if progress != nil {
-		report = func(q coarse.Progress) { progress(cached+q.Done, len(todo)+cached) }
+		report = func(done, total int) { progress(cached+done, total+cached) }
 	}
-	coarse.Run(context.Background(), todo, p.sim, e.workers, nil, func(r coarse.Result) error {
+	e.runJobs(todo, p, func(r coarse.Result) error {
 		e.remember(r)
 		mu.Lock()
 		for _, key := range owner[r.Key] {

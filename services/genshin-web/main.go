@@ -20,7 +20,9 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"os"
 	"runtime"
+	"strconv"
 	"time"
 
 	"github.com/bernard0331/personal-site/services/genshin-calc/catalog"
@@ -51,7 +53,21 @@ func main() {
 	trustProxy := flag.Bool("trust-proxy", false, "take visitors' addresses from X-Forwarded-For (set behind Cloud Run or a load balancer)")
 	track := flag.String("track", "", "name of this version during a canary release (stable or canary), sent as the X-Track response header; empty: none")
 	proxyHops := flag.Int("proxy-hops", 0, "with -trust-proxy: the visitor is this many X-Forwarded-For entries from the end (2 behind GKE's Gateway); 0 takes the first")
+	worker := flag.String("worker", "", "worker mode: simulate one shard of the fan-out batch at this location (gs://bucket/prefix/batch), then exit")
+	var fo fanoutConfig
+	flag.StringVar(&fo.store, "fanout", os.Getenv("FANOUT_STORE"), "fan big batches of simulations out to workers, through this store (gs://bucket/prefix, or a directory); empty: simulate everything here")
+	flag.StringVar(&fo.launch, "fanout-launch", envOr("FANOUT_LAUNCH", "local"), "how workers start: cloudrun:projects/P/locations/R/jobs/J (a Cloud Run Job), or local (child processes, for trying it out)")
+	flag.IntVar(&fo.shards, "fanout-shards", envInt("FANOUT_SHARDS", 8), "most workers one batch may use")
+	flag.IntVar(&fo.minPerShard, "fanout-min-per-shard", 100, "quick batches: at least this many simulations per worker (smaller batches stay here)")
+	flag.IntVar(&fo.workerCPUs, "fanout-worker-cpus", envInt("FANOUT_WORKER_CPUS", 8), "cores each worker has")
+	flag.IntVar(&fo.threads, "fanout-threads", 8, "refined batches: cores each team's substat optimiser gets on a worker")
 	flag.Parse()
+	if *worker != "" {
+		if err := runWorker(*worker, *simPath, *cpus); err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
 	if *track != "" && !trackName.MatchString(*track) {
 		log.Fatalf("-track %q: use lower case letters, digits and dashes", *track)
 	}
@@ -70,6 +86,9 @@ func main() {
 		log.Fatal(err)
 	}
 	eng.variants = *variants
+	if eng.fanout, err = newCoordinator(fo, *simPath); err != nil {
+		log.Fatal(err)
+	}
 	eng.runs.limit = newLimiter(*perHour, *trustProxy)
 	eng.runs.limit.proxyHops = *proxyHops
 	eng.runs.resume()
@@ -95,6 +114,23 @@ func main() {
 	}
 	log.Printf("listening on http://%s", *addr)
 	log.Fatal(srv.ListenAndServe())
+}
+
+// envOr and envInt give a flag its default from the environment, so a
+// deployment can set it without repeating the image's arguments (the fan-out
+// settings name the project, which stays out of the repository).
+func envOr(name, def string) string {
+	if v := os.Getenv(name); v != "" {
+		return v
+	}
+	return def
+}
+
+func envInt(name string, def int) int {
+	if n, err := strconv.Atoi(os.Getenv(name)); err == nil {
+		return n
+	}
+	return def
 }
 
 // imageServer serves PNG icons from dir. http.Dir refuses paths that climb
