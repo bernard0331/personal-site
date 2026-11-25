@@ -10,7 +10,8 @@ no character or weapon used twice. It simulates each candidate team with a
 patched build of [KQM Sim](https://github.com/KQM-git/kqmsim) and then
 solves the team selection exactly. See
 [services/genshin-calc](services/genshin-calc) for the optimizer and
-[services/genshin-web](services/genshin-web) for the site.
+[services/genshin-web](services/genshin-web) for the site. Where a run's time goes, and what
+was tried to speed it up: [docs/performance.md](docs/performance.md).
 
 > The GKE environment is brought up from Terraform when I work on it and
 > torn down to zero cost between sessions (switches in
