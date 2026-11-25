@@ -27,11 +27,19 @@ import (
 // iterations) and other accounts differ.
 
 // refineLevels are the light and standard runs' settings, and a thorough
-// run's starting point (the full pass's defaults).
+// run's starting point.
+//
+// Iterations: the substat optimiser takes about 85% of a refined team's
+// time and the final simulation the rest. Over the full pass's 366 refined
+// teams (2026-11-25), DPS varies by a median 2.4% from one iteration to the
+// next, so 250 iterations give a standard error of about 0.15% (500: 0.11%;
+// 1,000: 0.08%). That is below the optimiser's own run-to-run variation
+// (0.1-0.9% on the same team), so more iterations mostly buy precision the
+// substats don't have.
 var refineLevels = map[string]RefineOptions{
-	"light":    {Top: 15, PerElement: 3, Iterations: 1000},
-	"standard": {Top: 30, PerElement: 5, PerCharacter: 1, Iterations: 1000},
-	"thorough": {Top: 100, PerElement: 20, PerCharacter: 3, Iterations: 1000},
+	"light":    {Top: 15, PerElement: 3, Iterations: 250},
+	"standard": {Top: 30, PerElement: 5, PerCharacter: 1, Iterations: 250},
+	"thorough": {Top: 100, PerElement: 20, PerCharacter: 3, Iterations: 500},
 }
 
 // waitLimit is how many seconds of waiting for energy or cooldowns make a

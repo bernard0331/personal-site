@@ -24,7 +24,7 @@ const byKey = { char: {}, weapon: {}, set: {} };
 const STORE = 'team-optimizer-draft';
 // energy 1: KQM standard. run: quick or refined; level: light, standard or
 // thorough; adv: a thorough run's settings (the server's defaults).
-const freshAdv = () => ({ top: 100, per_element: 20, per_character: 3, iterations: 1000, skip_waiting: false });
+const freshAdv = () => ({ top: 100, per_element: 20, per_character: 3, iterations: 500, skip_waiting: false });
 const freshOptions = () => ({ energy: 1, pins: [], excluded: [], run: 'quick', level: 'light', artifacts: 'kqm', adv: freshAdv() });
 const LEVELS = ['light', 'standard', 'thorough'];
 const LEVEL_NOTES = {

@@ -51,9 +51,10 @@ all traffic to it; runs and the cache survive in the bucket.
 
 ## Refined runs
 
-A refined run is a quick run, then its most promising teams simulated again
-with KQM Sim's substat optimiser and 1,000 iterations each (the command
-line's full pass). The quick teams show while it runs. Levels: Light (the
+A refined run is a quick run, then its most promising teams again: KQM Sim's
+substat optimiser chooses their substats, and the result is simulated with
+250 iterations (500 for thorough; the command line's full pass uses 1,000).
+The quick teams show while it runs. Levels: Light (the
 quick run's picks and about 15 to 35 more teams, ~10 minutes), Standard
 (also each character's best team, ~120 teams, ~25 minutes) and Thorough
 (the full pass's 100 / 20 per element / 3 per character, adjustable; about
