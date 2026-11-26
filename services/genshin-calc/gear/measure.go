@@ -173,9 +173,15 @@ type Measured struct {
 	// MinWait is the least the character waits anywhere in its ER sweep:
 	// waiting no ER removes.
 	MinWait float64
+	// ERValue is team DPS per ER point just below the floor (energy on):
+	// what a point missed costs, when no allocation can meet every floor.
+	ERValue float64
 	// CritRateOther is the character's CRIT Rate from everything but
 	// artifacts (GOOD %); artifacts may add up to 100 minus this.
 	CritRateOther float64
+	CritDMGOther  float64 // the same for CRIT DMG
+	// BaseArtifacts are the artifact stats the measurements were made at.
+	BaseArtifacts Stats
 }
 
 // Analyze turns the measurements' results (by job ID) into each character's
@@ -192,7 +198,11 @@ func (p *Plan) Analyze(res map[string]coarse.Result) ([]Measured, error) {
 			if c == ch.Key && i < len(base.CritRateOther) {
 				m.CritRateOther = base.CritRateOther[i]
 			}
+			if c == ch.Key && i < len(base.CritDMGOther) {
+				m.CritDMGOther = base.CritDMGOther[i]
+			}
 		}
+		m.BaseArtifacts = ArtifactStats(p.Config, ch.Key)
 		for id, r := range res {
 			key, ok := strings.CutPrefix(id, "w/"+ch.Key+"/")
 			if !ok || r.Error != "" {
@@ -212,7 +222,7 @@ func (p *Plan) Analyze(res map[string]coarse.Result) ([]Measured, error) {
 			m.Layouts = append(m.Layouts, LayoutValue{Layout: l, Value: r.DPS - base.DPS})
 		}
 		sort.Slice(m.Layouts, func(i, j int) bool { return m.Layouts[i].Value > m.Layouts[j].Value })
-		m.ERNeed, m.MinWait = p.erNeed(ch.Key, res)
+		m.ERNeed, m.MinWait, m.ERValue = p.erNeed(ch.Key, res)
 		out = append(out, m)
 	}
 	return out, nil
@@ -220,14 +230,14 @@ func (p *Plan) Analyze(res map[string]coarse.Result) ([]Measured, error) {
 
 // erNeed is the least ER above which the character waits no more than
 // waitOK longer than with the most ER in the sweep, and that least waiting.
-func (p *Plan) erNeed(char string, res map[string]coarse.Result) (float64, float64) {
+func (p *Plan) erNeed(char string, res map[string]coarse.Result) (need, least, value float64) {
 	idx := -1
 	for i, c := range p.order {
 		if c == char {
 			idx = i
 		}
 	}
-	type point struct{ er, wait float64 }
+	type point struct{ er, wait, dps float64 }
 	var pts []point
 	for id, r := range res {
 		v, ok := strings.CutPrefix(id, "er/"+char+"/")
@@ -236,21 +246,33 @@ func (p *Plan) erNeed(char string, res map[string]coarse.Result) (float64, float
 		}
 		var o float64
 		fmt.Sscanf(v, "%g", &o)
-		pts = append(pts, point{p.er0[char] + o, r.EnergyWaits[idx]})
+		pts = append(pts, point{p.er0[char] + o, r.EnergyWaits[idx], r.DPS})
 	}
 	if len(pts) == 0 {
-		return math.Inf(1), 0
+		return math.Inf(1), 0, 0
 	}
 	sort.Slice(pts, func(i, j int) bool { return pts[i].er < pts[j].er })
-	least := math.Inf(1)
+	least = math.Inf(1)
 	for _, pt := range pts {
 		least = math.Min(least, pt.wait)
 	}
-	need := math.Inf(1)
+	need = math.Inf(1)
+	at := -1
 	for i := len(pts) - 1; i >= 0 && pts[i].wait <= least+waitOK; i-- {
-		need = pts[i].er
+		need, at = pts[i].er, i
 	}
-	return math.Max(0, need), least
+	// What ER is worth just below the floor: the slope over the 20 points
+	// under it (or as far as the sweep goes).
+	if at > 0 {
+		lo := at
+		for lo > 0 && pts[at].er-pts[lo-1].er <= 20 {
+			lo--
+		}
+		if lo < at {
+			value = math.Max(0, (pts[at].dps-pts[lo].dps)/(pts[at].er-pts[lo].er))
+		}
+	}
+	return math.Max(0, need), least, value
 }
 
 // erCheckOffsets are the layout checks' points, relative to the character's

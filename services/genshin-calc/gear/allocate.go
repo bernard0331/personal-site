@@ -117,7 +117,8 @@ func (a *Allocator) Allocate(wearers []Wearer, pieces []Piece, objective string,
 		Team    int      `json:"team"`
 		Cands   []cand   `json:"cands"`
 		Layouts []layout `json:"layouts"`
-		CRCap   *float64 `json:"cr_cap"` // most CRIT Rate its artifacts may add; null: none
+		CRCap   *float64 `json:"cr_cap"`   // most CRIT Rate its artifacts may add; null: none
+		ERValue float64  `json:"er_value"` // soft solve: what a point below its floor costs
 	}
 	in := struct {
 		Chars     []char    `json:"chars"`
@@ -125,6 +126,9 @@ func (a *Allocator) Allocate(wearers []Wearer, pieces []Piece, objective string,
 		Objective string    `json:"objective"`
 		TimeLimit float64   `json:"time_limit"`
 	}{Objective: objective, TeamBase: teamBase, TimeLimit: 60}
+	// The helper solves with hard ER floors first, and only if no
+	// allocation meets them all, again with each point missed costing its
+	// er_value.
 	if a.TimeLimit > 0 {
 		in.TimeLimit = a.TimeLimit.Seconds()
 	}
@@ -170,7 +174,7 @@ func (a *Allocator) Allocate(wearers []Wearer, pieces []Piece, objective string,
 				}
 			}
 		}
-		c := char{Team: w.Team}
+		c := char{Team: w.Team, ERValue: m.ERValue}
 		if m.CritRateOther > 0 {
 			v := math.Max(0, 100-m.CritRateOther)
 			c.CRCap = &v
@@ -275,4 +279,102 @@ func slotIndex(s string) int {
 		}
 	}
 	return len(Slots)
+}
+
+// Choose picks one build per wearer (builds[i] for wearers[i]) so that no
+// piece is in two chosen builds, with the highest estimated value (objective
+// as in Allocate).
+func (a *Allocator) Choose(wearers []Wearer, builds [][]Build, objective string, teamBase []float64) (*Allocation, error) {
+	type build struct {
+		Pieces []int   `json:"pieces"`
+		Value  float64 `json:"value"`
+	}
+	type char struct {
+		Team   int     `json:"team"`
+		Builds []build `json:"builds"`
+	}
+	in := struct {
+		Mode      string    `json:"mode"`
+		Chars     []char    `json:"chars"`
+		TeamBase  []float64 `json:"team_base"`
+		Objective string    `json:"objective"`
+		TimeLimit float64   `json:"time_limit"`
+	}{Mode: "builds", Objective: objective, TeamBase: teamBase, TimeLimit: 60}
+	if a.TimeLimit > 0 {
+		in.TimeLimit = a.TimeLimit.Seconds()
+	}
+	for wi, w := range wearers {
+		c := char{Team: w.Team}
+		for _, b := range builds[wi] {
+			ids := make([]int, len(b.Pieces))
+			for i, p := range b.Pieces {
+				ids[i] = p.ID
+			}
+			c.Builds = append(c.Builds, build{ids, b.Value})
+		}
+		in.Chars = append(in.Chars, c)
+	}
+	var res struct {
+		Chosen     []int  `json:"chosen"`
+		Optimal    bool   `json:"optimal"`
+		Infeasible bool   `json:"infeasible"`
+		Status     string `json:"status"`
+	}
+	if err := a.run(in, &res); err != nil {
+		return nil, err
+	}
+	if res.Infeasible || len(res.Chosen) != len(wearers) {
+		return nil, fmt.Errorf("no set of builds shares no piece (%s)", res.Status)
+	}
+	out := &Allocation{Optimal: res.Optimal}
+	for wi, w := range wearers {
+		bi := res.Chosen[wi]
+		if bi < 0 || bi >= len(builds[wi]) {
+			return nil, fmt.Errorf("gear solver chose no build for %s", w.Char)
+		}
+		b := builds[wi][bi]
+		out.Assignments = append(out.Assignments, Assignment{Char: w.Char, Team: w.Team, Pieces: b.Pieces,
+			Layout: b.Layout.Layout, Sets: b.Sets, Stats: b.Stats, Value: b.Value, ER: b.ER, ERShort: b.ERShort})
+	}
+	return out, nil
+}
+
+// AsBuild turns an assignment back into a build (for Choose's candidates).
+func (as Assignment) AsBuild(m *Measured) Build {
+	return Build{Pieces: as.Pieces, Layout: LayoutValue{Layout: as.Layout}, Stats: as.Stats, Sets: as.Sets,
+		ER: as.ER, ERShort: as.ERShort, Value: m.Value(as.Stats) - as.ERShort*m.ERValue}
+}
+
+// run sends in to the HiGHS helper and reads its answer into out.
+func (a *Allocator) run(in any, out any) error {
+	body, err := json.Marshal(in)
+	if err != nil {
+		return err
+	}
+	dir, err := os.MkdirTemp("", "gear-")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(dir)
+	script := filepath.Join(dir, "gear_solve.py")
+	if err := os.WriteFile(script, solveScript, 0o600); err != nil {
+		return err
+	}
+	limit := a.TimeLimit
+	if limit <= 0 {
+		limit = time.Minute
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 2*limit+time.Minute)
+	defer cancel()
+	cmd := exec.CommandContext(ctx, a.Python, script)
+	cmd.Stdin = bytes.NewReader(body)
+	var stdout, stderr bytes.Buffer
+	cmd.Stdout, cmd.Stderr = &stdout, &stderr
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("gear solver: %v: %s", err, stderr.String())
+	}
+	if err := json.Unmarshal(stdout.Bytes(), out); err != nil {
+		return fmt.Errorf("gear solver: %v", err)
+	}
+	return nil
 }

@@ -135,3 +135,55 @@ func TestAllocate(t *testing.T) {
 		t.Fatalf("a should get every best crit piece, got %v", a0.Stats)
 	}
 }
+
+func TestValueCapsCritRate(t *testing.T) {
+	m := Measured{Weights: Stats{"critRate_": 100, "critDMG_": 50, "atk_": 10}, CritRateOther: 50, CritDMGOther: 50,
+		BaseArtifacts: Stats{"critRate_": 20, "critDMG_": 80}}
+	at := func(cr, cd float64) float64 { return m.Value(Stats{"critRate_": cr, "critDMG_": cd}) }
+	if at(60, 100) != at(50, 100) {
+		t.Fatalf("CRIT Rate past 100%% total still counts: %.1f vs %.1f", at(60, 100), at(50, 100))
+	}
+	if !(at(40, 100) > at(30, 100) && at(30, 120) > at(30, 100)) {
+		t.Fatal("crit below the cap should count")
+	}
+}
+
+func TestBuildsAndChoose(t *testing.T) {
+	py, _ := filepath.Abs("../../../local/highs-venv/bin/python")
+	if _, err := os.Stat(py); err != nil {
+		t.Skip("no local HiGHS Python")
+	}
+	var ps []Piece
+	for i, slot := range Slots {
+		ps = append(ps,
+			Piece{ID: 3 * i, Set: "goldentroupe", Slot: slot, Stats: Stats{"critRate_": 12}},
+			Piece{ID: 3*i + 1, Set: "goldentroupe", Slot: slot, Stats: Stats{"critDMG_": 24}},
+			Piece{ID: 3*i + 2, Set: "goldentroupe", Slot: slot, Stats: Stats{"atk_": 10}})
+	}
+	m := Measured{Char: "a", Weights: Stats{"critRate_": 100, "critDMG_": 50, "atk_": 5}, CritRateOther: 50, CritDMGOther: 50,
+		BaseArtifacts: Stats{"critRate_": 24, "critDMG_": 48}}
+	bs := m.Builds(ps, 0, 300)
+	if len(bs) == 0 || len(bs[0].Pieces) != 5 {
+		t.Fatalf("builds %v", bs)
+	}
+	cr := bs[0].Stats["critRate_"]
+	if cr > 50+1e-9 { // 50% from elsewhere: more than 50 from artifacts is wasted
+		t.Fatalf("best build has %.0f CRIT Rate from artifacts: past the cap", cr)
+	}
+	n := m
+	n.Char = "b"
+	a := &Allocator{Python: py}
+	al, err := a.Choose([]Wearer{{Measured: m}, {Measured: n}}, [][]Build{bs, n.Builds(ps, 0, 300)}, "sum", []float64{0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	seen := map[int]bool{}
+	for _, as := range al.Assignments {
+		for _, p := range as.Pieces {
+			if seen[p.ID] {
+				t.Fatalf("piece %d chosen twice", p.ID)
+			}
+			seen[p.ID] = true
+		}
+	}
+}

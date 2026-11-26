@@ -61,12 +61,13 @@ type Result struct {
 	// its artifacts (base, weapon, ascension, static bonuses), in config
 	// order: real-artifact runs keep artifacts from pushing it past 100%.
 	CritRateOther []float64 `json:"crit_rate_other,omitempty"`
-	Flags         []string  `json:"flags,omitempty"`       // reasons to distrust the number
-	Stats         []string  `json:"stats,omitempty"`       // the config's "add stats" lines, when the job asks for them
-	Error         string    `json:"error,omitempty"`       // set when the simulation failed
-	Final         bool      `json:"final,omitempty"`       // the failure would repeat (a limit was exceeded): do not retry
-	RotCons       []int     `json:"rot_cons,omitempty"`    // constellations the rotation was written for
-	PlayerCons    []int     `json:"player_cons,omitempty"` // the player's constellations
+	CritDMGOther  []float64 `json:"crit_dmg_other,omitempty"` // the same for CRIT DMG
+	Flags         []string  `json:"flags,omitempty"`          // reasons to distrust the number
+	Stats         []string  `json:"stats,omitempty"`          // the config's "add stats" lines, when the job asks for them
+	Error         string    `json:"error,omitempty"`          // set when the simulation failed
+	Final         bool      `json:"final,omitempty"`          // the failure would repeat (a limit was exceeded): do not retry
+	RotCons       []int     `json:"rot_cons,omitempty"`       // constellations the rotation was written for
+	PlayerCons    []int     `json:"player_cons,omitempty"`    // the player's constellations
 }
 
 // Simulator runs one config and returns the simulator's JSON result.
@@ -138,16 +139,22 @@ func Summarise(job Job, raw []byte) (Result, error) {
 	for _, member := range s.Failed {
 		r.EnergyWaits = append(r.EnergyWaits, member["insufficient_energy"].Mean)
 	}
-	const critRate = 9 // attributes.CR's index in the output's stat arrays (index 0 is NoStat)
-	for _, c := range out.Chars {
-		other := 0.0
-		if len(c.Snapshot) > critRate {
-			other = c.Snapshot[critRate]
-			if len(c.Stats) > critRate {
-				other -= c.Stats[critRate]
-			}
+	// attributes.CR and CD's indexes in the output's stat arrays (index 0
+	// is NoStat).
+	const critRate, critDMG = 9, 10
+	other := func(c []float64, s []float64, i int) float64 {
+		if len(c) <= i {
+			return 0
 		}
-		r.CritRateOther = append(r.CritRateOther, 100*other)
+		v := c[i]
+		if len(s) > i {
+			v -= s[i]
+		}
+		return 100 * v
+	}
+	for _, c := range out.Chars {
+		r.CritRateOther = append(r.CritRateOther, other(c.Snapshot, c.Stats, critRate))
+		r.CritDMGOther = append(r.CritDMGOther, other(c.Snapshot, c.Stats, critDMG))
 	}
 	for _, member := range s.Failed {
 		for reason, v := range member {

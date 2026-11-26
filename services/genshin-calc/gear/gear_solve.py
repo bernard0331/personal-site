@@ -36,7 +36,6 @@ import highspy
 import numpy as np
 
 INF = highspy.kHighsInf
-SHORT_PENALTY = 1e7  # per ER point missed: far above any piece's measured value
 
 
 def main():
@@ -45,6 +44,22 @@ def main():
     answer = os.fdopen(os.dup(1), "w")
     os.dup2(2, 1)
     p = json.load(sys.stdin)
+    if p.get("mode") == "builds":
+        json.dump(solve_builds(p), answer)
+        answer.flush()
+        return
+    # Hard ER floors first (the owner's rule); only if no allocation meets
+    # them all, each point missed costs what the character's ER sweep says
+    # it is worth in team DPS.
+    out = solve(p, soft=False)
+    if out["infeasible"]:
+        out = solve(p, soft=True)
+        out["soft"] = True
+    json.dump(out, answer)
+    answer.flush()
+
+
+def solve(p, soft):
     h = highspy.Highs()
     h.setOptionValue("output_flag", False)
     h.setOptionValue("threads", 1)
@@ -66,8 +81,8 @@ def main():
     n = len(cols)
     h.addCols(n, np.zeros(n), np.zeros(n), np.ones(n), 0, np.array([], np.int32), np.array([], np.int32), np.array([]))
     ints = np.arange(n, dtype=np.int32)
-    for s in short:  # continuous, 0 or more
-        h.changeColBounds(s, 0, INF)
+    for s in short:  # continuous, 0 or more; 0 when the floors are hard
+        h.changeColBounds(s, 0, INF if soft else 0)
     ints = np.array([i for i in ints if i not in set(short)], dtype=np.int32)
     if z is not None:
         h.changeColBounds(z, -INF, INF)
@@ -95,10 +110,8 @@ def main():
                 terms = [(c, 1.0) for c, cand in x[ci] if cand["piece"] in want]
                 row(0, INF, terms + [(y[ci][li], -float(need["count"]))])
         # ER floor of the chosen layout: sum er_p x + sum (er_l - need_l) y >= 0
-        # short[c] is ER the floor is missed by. Each point of it costs far
-        # more than any piece is worth, so the floor holds whenever the
-        # inventory can meet it, and is missed by as little as possible when
-        # it can't.
+        # short[c] is ER the floor is missed by: 0 in the hard solve; in the
+        # soft one each point costs the character's er_value.
         if any(lay.get("er_need") is not None for lay in ch["layouts"]):
             terms = [(c, float(cand["er"])) for c, cand in x[ci] if cand["er"]]
             terms += [(y[ci][li], float(lay["er"]) - float(lay.get("er_need") or 0))
@@ -115,8 +128,8 @@ def main():
             row(-INF, 1, [(c, 1.0) for c in cs])
 
     cost = np.zeros(n)
-    for s in short:
-        cost[s] = -SHORT_PENALTY
+    for ci, s in enumerate(short):
+        cost[s] = -float(p["chars"][ci].get("er_value") or 0)
     if z is None:
         for ci, ch in enumerate(p["chars"]):
             for c, cand in x[ci]:
@@ -153,8 +166,71 @@ def main():
             pieces = [cand["piece"] for c, cand in x[ci] if v[c] > 0.5]
             layout = next((li for li, c in enumerate(y[ci]) if v[c] > 0.5), -1)
             out["chars"].append({"pieces": pieces, "layout": layout, "er_short": max(0.0, v[short[ci]])})
-    json.dump(out, answer)
-    answer.flush()
+    return out
+
+
+def solve_builds(p):
+    """Pick one build per character, no piece in two builds.
+
+    Input: {"mode": "builds", "chars": [{"team": 0, "builds": [{"pieces": [ids], "value": v}, ...]}, ...],
+            "team_base": [...], "objective": "sum" | "min", "time_limit": 60}
+    Output: {"chosen": [build index per character], "optimal": ..., "infeasible": ...}
+    """
+    h = highspy.Highs()
+    h.setOptionValue("output_flag", False)
+    h.setOptionValue("threads", 1)
+    h.setOptionValue("time_limit", float(p.get("time_limit", 60)))
+    cols = []
+    for ci, ch in enumerate(p["chars"]):
+        for bi, b in enumerate(ch["builds"]):
+            cols.append((ci, bi, b))
+    z = len(cols) if p["objective"] == "min" else None
+    n = len(cols) + (1 if z is not None else 0)
+    h.addCols(n, np.zeros(n), np.zeros(n), np.ones(n), 0, np.array([], np.int32), np.array([], np.int32), np.array([]))
+    ints = np.arange(len(cols), dtype=np.int32)
+    h.changeColsIntegrality(len(ints), ints, np.full(len(ints), highspy.HighsVarType.kInteger))
+    if z is not None:
+        h.changeColBounds(z, -INF, INF)
+    lo, hi, starts, idx, vals = [], [], [], [], []
+    def row(l, u, terms):
+        lo.append(l); hi.append(u); starts.append(len(idx))
+        for c, v in terms:
+            idx.append(c); vals.append(v)
+    per_char, users = {}, {}
+    for c, (ci, bi, b) in enumerate(cols):
+        per_char.setdefault(ci, []).append(c)
+        for pid in b["pieces"]:
+            users.setdefault(pid, []).append(c)
+    for cs in per_char.values():
+        row(1, 1, [(c, 1.0) for c in cs])
+    for cs in users.values():
+        if len(cs) > 1:
+            row(-INF, 1, [(c, 1.0) for c in cs])
+    cost = np.zeros(n)
+    if z is None:
+        for c, (ci, bi, b) in enumerate(cols):
+            cost[c] = b["value"]
+    else:
+        cost[z] = 1.0
+        for t in sorted({ch["team"] for ch in p["chars"]}):
+            terms = [(z, 1.0)] + [(c, -b["value"]) for c, (ci, bi, b) in enumerate(cols) if p["chars"][ci]["team"] == t]
+            row(-INF, float(p["team_base"][t]), terms)
+    h.addRows(len(lo), np.array(lo, float), np.array(hi, float), len(idx),
+              np.array(starts, np.int32), np.array(idx, np.int32), np.array(vals, float))
+    h.changeColsCost(n, np.arange(n, dtype=np.int32), cost)
+    h.changeObjectiveSense(highspy.ObjSense.kMaximize)
+    h.run()
+    st = h.getModelStatus()
+    out = {"status": h.modelStatusToString(st), "optimal": st == highspy.HighsModelStatus.kOptimal,
+           "infeasible": st == highspy.HighsModelStatus.kInfeasible, "chosen": []}
+    if h.getInfo().primal_solution_status == 2:
+        v = h.getSolution().col_value
+        chosen = [-1] * len(p["chars"])
+        for c, (ci, bi, b) in enumerate(cols):
+            if v[c] > 0.5:
+                chosen[ci] = bi
+        out["chosen"] = chosen
+    return out
 
 
 if __name__ == "__main__":

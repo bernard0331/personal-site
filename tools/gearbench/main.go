@@ -48,6 +48,7 @@ func main() {
 	python := flag.String("python", "local/highs-venv/bin/python", "a Python with highspy")
 	rounds := flag.Int("rounds", 3, "measure-allocate rounds, each measured at the previous round's build")
 	verbose := flag.Bool("v", false, "print each round's measurements")
+	keepBuilds := flag.Int("builds", 60, "best whole builds per character the final choice picks from")
 	flag.Parse()
 
 	raw, err := os.ReadFile(*cfgPath)
@@ -174,6 +175,18 @@ func main() {
 				}
 				log.Printf("round %d: no allocation with higher floors (%v); keeping the last one", r, err)
 				break
+			}
+			// Crit-aware builds: each character's best whole builds by the
+			// estimate, plus the linear answer (so some choice always fits),
+			// then one per character with no piece shared.
+			builds := make([][]gear.Build, len(ws))
+			for i := range ws {
+				builds[i] = append(ws[i].Measured.Builds(pool, ws[i].ExtraER, *keepBuilds), next.Assignments[i].AsBuild(&ws[i].Measured))
+			}
+			if chosen, err := alloc.Choose(ws, builds, "sum", []float64{ms[0].BaseDPS}); err != nil {
+				log.Printf("round %d: build choice failed (%v); using the linear answer", r, err)
+			} else {
+				next = chosen
 			}
 			al = next
 			geared = cfg
