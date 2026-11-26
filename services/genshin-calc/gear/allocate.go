@@ -22,6 +22,9 @@ var solveScript []byte
 type Wearer struct {
 	Measured
 	Team int
+	// ExtraER raises every one of its floors, e.g. after the character
+	// still waited for energy in a check.
+	ExtraER float64
 }
 
 // Assignment is what a character was given.
@@ -34,6 +37,9 @@ type Assignment struct {
 	Stats  Stats          // the pieces' stats in total
 	Value  float64        // the measured value of pieces and layout over standard artifacts
 	ER     float64        // artifact plus set-bonus ER
+	// ERShort is how far below its floor the character's ER is, when no
+	// allocation from the inventory reaches it (0 when it does).
+	ERShort float64
 }
 
 // Allocation is the answer for a set of teams.
@@ -70,7 +76,15 @@ func (m *Measured) layouts() []LayoutValue {
 			own.Need = append(own.Need, SetNeed{set, min(n, 4)})
 		}
 	}
-	out := append([]LayoutValue{{own, 0}}, m.Layouts...)
+	out := []LayoutValue{{own, 0, m.ERNeed}}
+	for _, l := range m.Layouts {
+		if l.ERNeed == 0 {
+			l.ERNeed = m.ERNeed // not checked: the character's own floor
+		}
+		if !math.IsInf(l.ERNeed, 1) {
+			out = append(out, l)
+		}
+	}
 	return out
 }
 
@@ -87,21 +101,23 @@ func (a *Allocator) Allocate(wearers []Wearer, pieces []Piece, objective string,
 		Slot  string  `json:"slot"`
 		Score float64 `json:"score"`
 		ER    float64 `json:"er"`
+		CR    float64 `json:"cr"`
 	}
 	type need struct {
 		Pieces []int `json:"pieces"`
 		Count  int   `json:"count"`
 	}
 	type layout struct {
-		Value float64 `json:"value"`
-		ER    float64 `json:"er"`
-		Need  []need  `json:"need"`
+		Value  float64  `json:"value"`
+		ER     float64  `json:"er"`
+		Need   []need   `json:"need"`
+		ERNeed *float64 `json:"er_need"` // null: no floor
 	}
 	type char struct {
 		Team    int      `json:"team"`
 		Cands   []cand   `json:"cands"`
 		Layouts []layout `json:"layouts"`
-		ERNeed  *float64 `json:"er_need"`
+		CRCap   *float64 `json:"cr_cap"` // most CRIT Rate its artifacts may add; null: none
 	}
 	in := struct {
 		Chars     []char    `json:"chars"`
@@ -155,6 +171,10 @@ func (a *Allocator) Allocate(wearers []Wearer, pieces []Piece, objective string,
 			}
 		}
 		c := char{Team: w.Team}
+		if m.CritRateOther > 0 {
+			v := math.Max(0, 100-m.CritRateOther)
+			c.CRCap = &v
+		}
 		ids := make([]int, 0, len(chosen))
 		for id := range chosen {
 			ids = append(ids, id)
@@ -162,10 +182,14 @@ func (a *Allocator) Allocate(wearers []Wearer, pieces []Piece, objective string,
 		sort.Ints(ids)
 		for _, id := range ids {
 			p := byID[id]
-			c.Cands = append(c.Cands, cand{id, p.Slot, m.Score(p), p.Stats["enerRech_"]})
+			c.Cands = append(c.Cands, cand{id, p.Slot, m.Score(p), p.Stats["enerRech_"], p.Stats["critRate_"]})
 		}
 		for _, l := range lays[wi] {
 			out := layout{Value: l.Value, ER: SetER(l.sample())}
+			if !math.IsInf(l.ERNeed, 1) {
+				v := l.ERNeed + w.ExtraER
+				out.ERNeed = &v
+			}
 			for _, n := range l.Need {
 				nd := need{Count: n.Count}
 				for _, id := range ids {
@@ -176,10 +200,6 @@ func (a *Allocator) Allocate(wearers []Wearer, pieces []Piece, objective string,
 				out.Need = append(out.Need, nd)
 			}
 			c.Layouts = append(c.Layouts, out)
-		}
-		if !math.IsInf(m.ERNeed, 1) {
-			v := m.ERNeed
-			c.ERNeed = &v
 		}
 		in.Chars = append(in.Chars, c)
 	}
@@ -208,8 +228,9 @@ func (a *Allocator) Allocate(wearers []Wearer, pieces []Piece, objective string,
 	}
 	var res struct {
 		Chars []struct {
-			Pieces []int `json:"pieces"`
-			Layout int   `json:"layout"`
+			Pieces  []int   `json:"pieces"`
+			Layout  int     `json:"layout"`
+			ERShort float64 `json:"er_short"`
 		} `json:"chars"`
 		Optimal    bool   `json:"optimal"`
 		Infeasible bool   `json:"infeasible"`
@@ -241,6 +262,7 @@ func (a *Allocator) Allocate(wearers []Wearer, pieces []Piece, objective string,
 			as.Value += lays[wi][r.Layout].Value
 		}
 		as.ER = as.Stats["enerRech_"] + SetER(as.Sets)
+		as.ERShort = r.ERShort
 		out.Assignments = append(out.Assignments, as)
 	}
 	return out, nil

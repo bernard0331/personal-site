@@ -157,10 +157,17 @@ func (c *Coordinator) Run(ctx context.Context, jobs []coarse.Job, sim coarse.Sim
 
 	// Round-robin, so slow jobs (which tend to sit together) are spread out.
 	parts := make([][]coarse.Job, shards)
-	want := map[string]coarse.Job{}
-	for i, j := range jobs {
-		parts[i%shards] = append(parts[i%shards], j)
-		want[coarse.Key(j.Config, fp)] = j
+	// Jobs with the same config are simulated once; each of them gets the
+	// result under its own ID.
+	want := map[string][]coarse.Job{}
+	i := 0
+	for _, j := range jobs {
+		k := coarse.Key(j.Config, fp)
+		if len(want[k]) == 0 {
+			parts[i%shards] = append(parts[i%shards], j)
+			i++
+		}
+		want[k] = append(want[k], j)
 	}
 	// All shards at once: one after another took 7 s for 16 from a laptop.
 	errs := make([]error, shards)
@@ -212,13 +219,15 @@ func (c *Coordinator) Run(ctx context.Context, jobs []coarse.Job, sim coarse.Sim
 			if json.Unmarshal(sc.Bytes(), &r) != nil || got[r.Key] {
 				continue
 			}
-			j, ok := want[r.Key]
+			js, ok := want[r.Key]
 			if !ok {
 				continue
 			}
 			got[r.Key] = true
-			r.ID, r.Source, r.Team, r.Weapons, r.RotCons, r.PlayerCons = j.ID, j.Source, j.Team, j.Weapons, j.RotCons, j.PlayerCons
-			save(r)
+			for _, j := range js {
+				r.ID, r.Source, r.Team, r.Weapons, r.RotCons, r.PlayerCons = j.ID, j.Source, j.Team, j.Weapons, j.RotCons, j.PlayerCons
+				save(r)
+			}
 		}
 		if progress != nil {
 			progress(len(got))
@@ -257,9 +266,9 @@ func (c *Coordinator) Run(ctx context.Context, jobs []coarse.Job, sim coarse.Sim
 	log.Printf("fanout %s: %d of %d results in %s", m.Batch, len(got), len(jobs), time.Since(start).Round(time.Second))
 
 	var missing []coarse.Job
-	for k, j := range want {
+	for k, js := range want {
 		if !got[k] {
-			missing = append(missing, j)
+			missing = append(missing, js...)
 		}
 	}
 	return missing, err

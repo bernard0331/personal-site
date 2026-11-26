@@ -244,3 +244,16 @@ func TestMeasureUsesTheCallersLabel(t *testing.T) {
 		t.Fatalf("manifest %+v: want kind measure, seed 7", got)
 	}
 }
+
+func TestSameConfigUnderTwoIDs(t *testing.T) {
+	st := Dir(t.TempDir())
+	sim := fakeSim{"fp1"}
+	c := &Coordinator{Store: st, Launcher: inProcess(t, sim, nil), Shards: 2, MinPerShard: 1, Poll: 10 * time.Millisecond, Timeout: 10 * time.Second}
+	js := jobs(3)
+	js = append(js, coarse.Job{ID: "copy", Source: "test", Team: js[0].Team, Config: js[0].Config})
+	got := map[string]bool{}
+	missing, err := c.Run(context.Background(), js, sim, Quick, "", func(r coarse.Result) { got[r.ID] = true }, nil)
+	if err != nil || len(missing) != 0 || !got["copy"] || !got[js[0].ID] || len(got) != 4 {
+		t.Fatalf("got %v, missing %d, err %v: both IDs of the shared config want a result", got, len(missing), err)
+	}
+}

@@ -7,8 +7,9 @@ installs).
 Input:
   {"chars": [{"team": 0,
               "cands": [{"piece": 12, "slot": "flower", "score": 410.5, "er": 0}, ...],
-              "layouts": [{"value": 1200.0, "er": 20, "need": [{"pieces": [12, 40], "count": 4}]}, ...],
-              "er_need": 160.0}, ...],          (er_need null: no floor)
+              "layouts": [{"value": 1200.0, "er": 20, "er_need": 160.0,
+                           "need": [{"pieces": [12, 40], "count": 4}]}, ...]}, ...],
+                                                (a layout's er_need null: no floor)
    "team_base": [250000.0, ...],
    "objective": "sum" | "min", "time_limit": 60}
 
@@ -18,11 +19,12 @@ Model, for character c, candidate piece p and layout l:
   each piece p:              sum of x[c,p] over characters <= 1
   each character c:          sum of y[c,l] = 1
   each need of layout l:     sum of x[c,p] over the need's pieces >= count * y[c,l]
-  each character's ER floor: sum er_p x[c,p] + sum er_l y[c,l] >= er_need
+  each character's ER floor (its chosen layout's):
+                             sum er_p x[c,p] + sum (er_l - er_need_l) y[c,l] >= 0
   team t's value: base_t + sum of score x + sum of value y over its characters
   "sum": maximise the teams' total;  "min": maximise the weakest team.
 
-Output: {"chars": [{"pieces": [ids], "layout": index}, ...], "optimal": true|false,
+Output: {"chars": [{"pieces": [ids], "layout": index, "er_short": 0.0}, ...], "optimal": true|false,
          "status": "...", "infeasible": true|false}
 """
 
@@ -34,6 +36,7 @@ import highspy
 import numpy as np
 
 INF = highspy.kHighsInf
+SHORT_PENALTY = 1e7  # per ER point missed: far above any piece's measured value
 
 
 def main():
@@ -52,16 +55,20 @@ def main():
         cols.append(0.0)
         return len(cols) - 1
 
-    x, y = [], []  # x[c] = [(col, cand)], y[c] = [col per layout]
+    x, y, short = [], [], []  # x[c] = [(col, cand)], y[c] = [col per layout], short[c]: ER missed
     for ch in p["chars"]:
         x.append([(col(), cand) for cand in ch["cands"]])
         y.append([col() for _ in ch["layouts"]])
+        short.append(col())
     teams = sorted({ch["team"] for ch in p["chars"]})
     z = col() if p["objective"] == "min" else None
 
     n = len(cols)
     h.addCols(n, np.zeros(n), np.zeros(n), np.ones(n), 0, np.array([], np.int32), np.array([], np.int32), np.array([]))
     ints = np.arange(n, dtype=np.int32)
+    for s in short:  # continuous, 0 or more
+        h.changeColBounds(s, 0, INF)
+    ints = np.array([i for i in ints if i not in set(short)], dtype=np.int32)
     if z is not None:
         h.changeColBounds(z, -INF, INF)
         ints = ints[ints != z]
@@ -87,15 +94,29 @@ def main():
                 want = set(need.get("pieces") or [])
                 terms = [(c, 1.0) for c, cand in x[ci] if cand["piece"] in want]
                 row(0, INF, terms + [(y[ci][li], -float(need["count"]))])
-        if ch.get("er_need") is not None:
+        # ER floor of the chosen layout: sum er_p x + sum (er_l - need_l) y >= 0
+        # short[c] is ER the floor is missed by. Each point of it costs far
+        # more than any piece is worth, so the floor holds whenever the
+        # inventory can meet it, and is missed by as little as possible when
+        # it can't.
+        if any(lay.get("er_need") is not None for lay in ch["layouts"]):
             terms = [(c, float(cand["er"])) for c, cand in x[ci] if cand["er"]]
-            terms += [(y[ci][li], float(lay["er"])) for li, lay in enumerate(ch["layouts"]) if lay["er"]]
-            row(float(ch["er_need"]), INF, terms)
+            terms += [(y[ci][li], float(lay["er"]) - float(lay.get("er_need") or 0))
+                      for li, lay in enumerate(ch["layouts"])]
+            row(0, INF, terms + [(short[ci], 1.0)])
+        # CRIT Rate past 100% does nothing, but the measured values can't see
+        # the cap: keep the artifacts' CRIT Rate within what's left of it.
+        if ch.get("cr_cap") is not None:
+            terms = [(c, float(cand["cr"])) for c, cand in x[ci] if cand.get("cr")]
+            if terms:
+                row(-INF, float(ch["cr_cap"]), terms)
     for cs in users.values():
         if len(cs) > 1:
             row(-INF, 1, [(c, 1.0) for c in cs])
 
     cost = np.zeros(n)
+    for s in short:
+        cost[s] = -SHORT_PENALTY
     if z is None:
         for ci, ch in enumerate(p["chars"]):
             for c, cand in x[ci]:
@@ -131,7 +152,7 @@ def main():
         for ci, ch in enumerate(p["chars"]):
             pieces = [cand["piece"] for c, cand in x[ci] if v[c] > 0.5]
             layout = next((li for li, c in enumerate(y[ci]) if v[c] > 0.5), -1)
-            out["chars"].append({"pieces": pieces, "layout": layout})
+            out["chars"].append({"pieces": pieces, "layout": layout, "er_short": max(0.0, v[short[ci]])})
     json.dump(out, answer)
     answer.flush()
 

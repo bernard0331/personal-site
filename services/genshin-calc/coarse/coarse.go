@@ -57,12 +57,16 @@ type Result struct {
 	// config order like CharDPS: real-artifact runs set each character's
 	// Energy Recharge floor from it.
 	EnergyWaits []float64 `json:"energy_waits,omitempty"`
-	Flags       []string  `json:"flags,omitempty"`       // reasons to distrust the number
-	Stats       []string  `json:"stats,omitempty"`       // the config's "add stats" lines, when the job asks for them
-	Error       string    `json:"error,omitempty"`       // set when the simulation failed
-	Final       bool      `json:"final,omitempty"`       // the failure would repeat (a limit was exceeded): do not retry
-	RotCons     []int     `json:"rot_cons,omitempty"`    // constellations the rotation was written for
-	PlayerCons  []int     `json:"player_cons,omitempty"` // the player's constellations
+	// CritRateOther is each member's CRIT Rate (GOOD %) from everything but
+	// its artifacts (base, weapon, ascension, static bonuses), in config
+	// order: real-artifact runs keep artifacts from pushing it past 100%.
+	CritRateOther []float64 `json:"crit_rate_other,omitempty"`
+	Flags         []string  `json:"flags,omitempty"`       // reasons to distrust the number
+	Stats         []string  `json:"stats,omitempty"`       // the config's "add stats" lines, when the job asks for them
+	Error         string    `json:"error,omitempty"`       // set when the simulation failed
+	Final         bool      `json:"final,omitempty"`       // the failure would repeat (a limit was exceeded): do not retry
+	RotCons       []int     `json:"rot_cons,omitempty"`    // constellations the rotation was written for
+	PlayerCons    []int     `json:"player_cons,omitempty"` // the player's constellations
 }
 
 // Simulator runs one config and returns the simulator's JSON result.
@@ -99,6 +103,10 @@ const waitThreshold = 1.0
 func Summarise(job Job, raw []byte) (Result, error) {
 	var out struct {
 		SimVersion string `json:"sim_version"`
+		Chars      []struct {
+			Stats    []float64 `json:"stats"`
+			Snapshot []float64 `json:"snapshot_stats"`
+		} `json:"character_details"`
 		Statistics struct {
 			Iterations int               `json:"iterations"`
 			DPS        stat              `json:"dps"`
@@ -129,6 +137,17 @@ func Summarise(job Job, raw []byte) (Result, error) {
 	waited := 0.0
 	for _, member := range s.Failed {
 		r.EnergyWaits = append(r.EnergyWaits, member["insufficient_energy"].Mean)
+	}
+	const critRate = 8 // the simulator's stat index (attributes.CR)
+	for _, c := range out.Chars {
+		other := 0.0
+		if len(c.Snapshot) > critRate {
+			other = c.Snapshot[critRate]
+			if len(c.Stats) > critRate {
+				other -= c.Stats[critRate]
+			}
+		}
+		r.CritRateOther = append(r.CritRateOther, 100*other)
 	}
 	for _, member := range s.Failed {
 		for reason, v := range member {
