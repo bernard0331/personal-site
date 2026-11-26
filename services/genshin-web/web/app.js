@@ -22,16 +22,9 @@ const imgURL = icon => `/img/${icon}.png`;
 let catalog;               // from /api/catalog
 const byKey = { char: {}, weapon: {}, set: {} };
 const STORE = 'team-optimizer-draft';
-// energy 1: KQM standard. run: quick or refined; level: light, standard or
-// thorough; adv: a thorough run's settings (the server's defaults).
-const freshAdv = () => ({ top: 100, per_element: 20, per_character: 3, iterations: 500, skip_waiting: false });
-const freshOptions = () => ({ energy: 1, pins: [], excluded: [], run: 'quick', level: 'light', artifacts: 'kqm', adv: freshAdv() });
-const LEVELS = ['light', 'standard', 'thorough'];
-const LEVEL_NOTES = {
-  light: 'The quick run\'s picks and the best few teams of each element: about 30–40 teams, roughly 10 minutes on a large account.',
-  standard: 'Also each character\'s best team: about 120 teams, roughly 25 minutes.',
-  thorough: 'With the settings below, up to about 370 teams on a large account: about an hour. Change them to trade time for coverage.',
-};
+// energy 1: KQM standard. run: quick or refined (refined runs are the
+// server's one "standard" level since 2026-11-26).
+const freshOptions = () => ({ energy: 1, pins: [], excluded: [], run: 'quick', artifacts: 'kqm' });
 // all4: weapons "Every 4-star" added, so switching it off removes only those.
 let draft = { chars: {}, weapons: {}, unlimited3: true, all4: [], artifacts: [], options: freshOptions() };
 
@@ -257,18 +250,12 @@ function drawPins() {
   drawRunChoice();
 }
 
-// The run choice: quick or refined, how much to refine, a thorough run's
-// settings, and the artifact mode (top 1% only for refined runs).
+// The run choice: quick or refined, and the artifact mode (top 1% only for
+// refined runs).
 function drawRunChoice() {
   const o = draft.options, refined = o.run === 'refined';
   if (!refined && o.artifacts === 'top1') o.artifacts = 'kqm';
   document.querySelectorAll('#runkind .runcard').forEach(c => c.classList.toggle('on', c.dataset.kind === o.run));
-  $('refined-opts').style.display = refined ? '' : 'none';
-  document.querySelectorAll('#level button').forEach((b, i) => b.classList.toggle('on', LEVELS[i] === o.level));
-  $('level-note').textContent = LEVEL_NOTES[o.level];
-  $('advanced').style.display = refined && o.level === 'thorough' ? '' : 'none';
-  $('adv-top').value = o.adv.top; $('adv-el').value = o.adv.per_element; $('adv-char').value = o.adv.per_character;
-  $('adv-it').value = String(o.adv.iterations); $('adv-wait').checked = o.adv.skip_waiting;
   const art = document.querySelectorAll('#artmode button');
   art[0].classList.toggle('on', o.artifacts !== 'top1'); art[1].classList.toggle('on', o.artifacts === 'top1');
   art[1].disabled = !refined;
@@ -279,24 +266,18 @@ function drawRunChoice() {
 function wireRunChoice() {
   const o = () => draft.options;
   document.querySelectorAll('#runkind .runcard').forEach(c => c.onclick = () => { o().run = c.dataset.kind; save(); drawRunChoice(); });
-  document.querySelectorAll('#level button').forEach((b, i) => b.onclick = () => { o().level = LEVELS[i]; save(); drawRunChoice(); });
   document.querySelectorAll('#artmode button').forEach((b, i) => b.onclick = () => {
     if (b.disabled || i > 1) return;
     o().artifacts = i === 1 ? 'top1' : 'kqm'; save(); drawRunChoice();
   });
-  const num = (id, key, lo, hi) => $(id).onchange = () => {
-    const v = Math.max(lo, Math.min(hi, Math.round(+$(id).value || 0)));
-    o().adv[key] = v; save(); drawRunChoice();
-  };
-  num('adv-top', 'top', 0, 500); num('adv-el', 'per_element', 0, 50); num('adv-char', 'per_character', 0, 5);
-  $('adv-it').onchange = () => { o().adv.iterations = +$('adv-it').value; save(); };
-  $('adv-wait').onchange = () => { o().adv.skip_waiting = $('adv-wait').checked; save(); };
 }
 
-// runLabel names a snapshot's run: "Quick run" or e.g. "Light refined run (top 1%)".
+// runLabel names a snapshot's run: "Quick run" or "Refined run (top 1%
+// artifacts)". Older runs also say their level ("Thorough refined run").
 function runLabel(snap) {
   if (!snap.mode || snap.mode === 'quick') return 'Quick run';
-  return `${cap(snap.mode)} refined run${snap.artifacts === 'top1' ? ' (top 1% artifacts)' : ''}`;
+  const level = snap.mode === 'standard' ? 'Refined run' : `${cap(snap.mode)} refined run`;
+  return `${level}${snap.artifacts === 'top1' ? ' (top 1% artifacts)' : ''}`;
 }
 
 // ---------- GOOD import and export ----------
@@ -373,8 +354,7 @@ async function optimize() {
   const o = draft.options, refined = o.run === 'refined';
   const snapshot = { characters: draft.chars, weapons: draft.weapons, unlimited: draft.unlimited3,
     energy: o.energy, pins: o.pins, excluded: o.excluded,
-    mode: refined ? o.level : 'quick', artifacts: refined ? o.artifacts : 'kqm' };
-  if (refined && o.level === 'thorough') snapshot.refine = o.adv;
+    mode: refined ? 'standard' : 'quick', artifacts: refined ? o.artifacts : 'kqm' };
   const res = await fetch('/api/runs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(snapshot) });
   const body = await res.json();
   if (!res.ok) { toast(body.error || 'The run could not be started.'); return; }
@@ -424,8 +404,7 @@ async function showRun(id) {
       draft.unlimited3 = !!snap.unlimited;
       const refined = snap.mode && snap.mode !== 'quick';
       draft.options = { ...freshOptions(), energy: snap.energy || 1, pins: [...(snap.pins || [])], excluded: [...(snap.excluded || [])],
-        run: refined ? 'refined' : 'quick', level: refined ? snap.mode : 'light', artifacts: snap.artifacts || 'kqm',
-        adv: snap.refine ? { ...snap.refine } : freshAdv() };
+        run: refined ? 'refined' : 'quick', artifacts: snap.artifacts || 'kqm' };
       save(); history.pushState(null, '', '/'); clearTimeout(runTimer); shown = '';
       drawGrid(); drawWFilters(); drawWeapons(); drawPins(); go(0);
     };

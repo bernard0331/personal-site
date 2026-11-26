@@ -98,14 +98,15 @@ beyond the free tier.
       (usually 2-3 rounds; each round re-gears only the teams that changed).
 
    Contenders are the best few teams per element, plus any team within about
-   10% of the weakest chosen team on standard artifacts (adjustable in thorough
-   runs). Estimates with 16 Cloud Run workers:
+   10% of the weakest chosen team on standard artifacts. Refined runs have one
+   level since 2026-11-26 (standard, about 120 teams). Estimates with 16 Cloud
+   Run workers:
 
-   | Teams geared | Light | Standard | Thorough |
-   | :- | :- | :- | :- |
-   | Only the chosen teams | 5-10 min, about $1 | same | same |
-   | Every refined candidate | about 37: 12 min, about $2 | about 120: 40 min, about $7 | about 300: 1.5 h, about $17 |
-   | Contenders (chosen) | about 30-40: 10-15 min, about $2 | about 40-60: 15-20 min, about $3-4 | about 60-80: 20-30 min, about $4-5 |
+   | Teams geared | Time on top of a refined run | Compute |
+   | :- | :- | :- |
+   | Only the chosen teams | 5-10 min | about $1 |
+   | Every refined candidate (about 120) | about 40 min | about $7 |
+   | Contenders (chosen: about 40-60) | 15-20 min | about $3-4 |
 
    Gearing one team (four characters measured in it) is about 2,400
    vCPU-seconds. Costs are before Cloud Run's free tier.

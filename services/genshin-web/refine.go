@@ -19,15 +19,16 @@ import (
 // The solver then chooses the teams again from the refined numbers only.
 //
 // Which teams: every team the quick run chose (in any breakdown, with the
-// weapons it chose), plus the best quick-pass teams by refineLevels. On the
+// weapons it chose), plus the best quick-pass teams by standardRefine. On the
 // owner's account (2026-11-22, 366 teams refined by the full pass), the quick
 // run's own choices alone gave the same five-team breakdown and the same
 // weakest team per element as all 366, and an element average within 2%; the
 // extra teams are there because a quick run's numbers are rough (15
 // iterations) and other accounts differ.
 
-// refineLevels are the light and standard runs' settings, and a thorough
-// run's starting point.
+// standardRefine is what every refined run refines. Refined runs had three
+// levels until 2026-11-26 (light, standard, thorough; the owner kept only
+// standard): about 120 teams on a large account.
 //
 // Iterations: the substat optimiser takes about 85% of a refined team's
 // time and the final simulation the rest. Over the full pass's 366 refined
@@ -36,28 +37,15 @@ import (
 // 1,000: 0.08%). That is below the optimiser's own run-to-run variation
 // (0.1-0.9% on the same team), so more iterations mostly buy precision the
 // substats don't have.
-var refineLevels = map[string]RefineOptions{
-	"light":    {Top: 15, PerElement: 3, Iterations: 250},
-	"standard": {Top: 30, PerElement: 5, PerCharacter: 1, Iterations: 250},
-	"thorough": {Top: 100, PerElement: 20, PerCharacter: 3, Iterations: 500},
-}
-
-// waitLimit is how many seconds of waiting for energy or cooldowns make a
-// thorough run's "skip waiting teams" leave a team out.
-const waitLimit = 5.0
+var standardRefine = RefineOptions{Top: 30, PerElement: 5, PerCharacter: 1, Iterations: 250}
 
 // pinTeams is how many of each pinned character's best teams are refined, so
 // the refined solve can still give every pinned character a team.
 const pinTeams = 3
 
-// options returns the settings a snapshot's refined run uses.
-func refineOptions(s Snapshot) RefineOptions {
-	o := refineLevels[s.Mode]
-	if s.Mode == "thorough" && s.Refine != nil {
-		o = *s.Refine
-	}
-	return o
-}
+// refineOptions returns the settings a snapshot's refined run uses: the
+// standard ones, also for an old light or thorough run resumed after a restart.
+func refineOptions(Snapshot) RefineOptions { return standardRefine }
 
 // refine is a refined run's second half: results and quick are the quick
 // run's, already saved.
@@ -134,14 +122,6 @@ func (e *engine) candidates(results []coarse.Result, quick *Result, o RefineOpti
 			out = append(out, r)
 		}
 	}
-	waits := func(r coarse.Result) bool {
-		total := 0.0
-		for _, s := range r.Waits {
-			total += s
-		}
-		return o.SkipWaiting && total > waitLimit
-	}
-
 	// The quick run's choices, with the weapons it chose for them.
 	for _, bd := range quick.Breakdowns {
 		for _, t := range bd.Teams {
@@ -157,9 +137,7 @@ func (e *engine) candidates(results []coarse.Result, quick *Result, o RefineOpti
 		}
 	}
 	for _, r := range coarse.Select(results, coarse.Picks{Top: o.Top, PerElement: o.PerElement, PerCharacter: o.PerCharacter}) {
-		if !waits(r) {
-			add(r)
-		}
+		add(r)
 	}
 	if len(pins) > 0 {
 		best := coarse.Select(results, coarse.Picks{Top: len(results)})

@@ -36,7 +36,7 @@
     <div class="faq">
       <details><summary>Why are the numbers different from my damage in game?</summary><p>The simulator plays each team the same way every time, against one standard target, with the assumptions above. It is built to compare teams fairly, not to match a single run.</p></details>
       <details><summary>Where do the rotations come from?</summary><p>The KQM Sim Database and KQM guides, credited on every team. Teams the database lacks get rotations from trusted guides.</p></details>
-      <details><summary>Quick or refined?</summary><p>Quick simulates every team you can field in minutes. Refined starts with a quick run, then simulates the most promising teams again: KQM Sim's substat optimiser picks substats for your weapons and constellations, and each team runs 250 times (500 for Thorough). Light takes about 10 minutes, Standard about 25, Thorough about an hour. The quick teams show while you wait.</p></details>
+      <details><summary>Quick or refined?</summary><p>Quick simulates every team you can field in minutes. Refined starts with a quick run, then simulates the most promising teams again: KQM Sim's substat optimiser picks substats for your weapons and constellations, and each team runs 250 times. About 120 teams are refined: the quick run's picks, the best of each element and each character's best team. The quick teams show while you wait.</p></details>
     </div>
   </section>
 
@@ -87,21 +87,7 @@
     <h3 style="margin:22px 0 10px">Run</h3>
     <div style="display:flex;gap:12px;flex-wrap:wrap" id="runkind">
       <div class="runcard" data-kind="quick"><div class="t">Quick</div><div class="sub">Every team you can field, rough numbers · a few minutes</div></div>
-      <div class="runcard" data-kind="refined"><div class="t">Refined</div><div class="sub">A quick run, then the most promising teams again with optimised substats and 250 to 500 iterations each</div></div>
-    </div>
-    <div id="refined-opts" style="display:none;margin-top:12px">
-      <div class="opt"><div><div class="t">How much to refine</div><div class="sub">More teams can find better ones, and take longer</div></div>
-        <div><div class="seg" id="level"><button>Light</button><button>Standard</button><button>Thorough</button></div>
-        <div class="sub" style="margin-top:6px" id="level-note"></div></div></div>
-      <div class="opt" id="advanced" style="display:none"><div><div class="t">Thorough settings</div><div class="sub">Which teams are refined, and how carefully</div></div>
-        <div class="adv" style="margin-top:0">
-          <label>Best teams overall <input type="number" id="adv-top" min="0" max="500"></label>
-          <label>Best of each element <input type="number" id="adv-el" min="0" max="50"></label>
-          <label>Best for each character <input type="number" id="adv-char" min="0" max="5"></label>
-          <label>Iterations per team <select id="adv-it"><option>250</option><option>500</option><option>1000</option><option>2000</option></select></label>
-          <label class="inline wide"><input type="checkbox" id="adv-wait"> Skip teams that wait over 5 s for energy or cooldowns</label>
-          <div class="hint wide">The teams the quick run chose are always refined. A team counts once however many rules pick it.</div>
-        </div></div>
+      <div class="runcard" data-kind="refined"><div class="t">Refined</div><div class="sub">A quick run, then about 120 of the most promising teams again with optimised substats and 250 iterations each</div></div>
     </div>
     <div class="nav-foot"><button data-go="2">Back</button><button class="primary" id="optimize">Optimize</button></div>
   </section>

@@ -33,22 +33,21 @@ type Snapshot struct {
 	Energy     int              `json:"energy"`     // 1: KQM standard drops, 2: twice as often
 	Pins       []string         `json:"pins"`       // characters every answer must include
 	Excluded   []string         `json:"excluded"`   // characters never used
-	// Mode is "quick" (or empty) for a quick run, or a refined run's level:
-	// "light", "standard" or "thorough" (see refineLevels).
+	// Mode is "quick" (or empty) for a quick run, or "standard" for a refined
+	// run. Runs saved before 2026-11-26 may say "light" or "thorough" (levels
+	// the site no longer offers) and carry Refine; they still display.
 	Mode      string         `json:"mode,omitempty"`
 	Artifacts string         `json:"artifacts,omitempty"` // refined runs: "kqm" (or empty) or "top1"
-	Refine    *RefineOptions `json:"refine,omitempty"`    // thorough runs: the advanced settings
+	Refine    *RefineOptions `json:"refine,omitempty"`    // old thorough runs only; refused for new ones
 }
 
 // RefineOptions say which teams a refined run simulates again, and how
-// carefully. Light and standard runs use fixed settings; a thorough run
-// starts from its own and lets the visitor change them.
+// carefully (see standardRefine).
 type RefineOptions struct {
-	Top          int  `json:"top"`           // best teams overall
-	PerElement   int  `json:"per_element"`   // best teams of each main element
-	PerCharacter int  `json:"per_character"` // best teams each character is in
-	Iterations   int  `json:"iterations"`    // simulator iterations per refined team
-	SkipWaiting  bool `json:"skip_waiting"`  // leave out teams that wait for energy or cooldowns
+	Top          int `json:"top"`           // best teams overall
+	PerElement   int `json:"per_element"`   // best teams of each main element
+	PerCharacter int `json:"per_character"` // best teams each character is in
+	Iterations   int `json:"iterations"`    // simulator iterations per refined team
 }
 
 // refined reports whether the snapshot asks for a refined run.
@@ -107,7 +106,9 @@ func (s *Snapshot) validate(cat *catalog.Catalog) error {
 		}
 	}
 	switch s.Mode {
-	case "", "quick", "light", "standard", "thorough":
+	case "", "quick", "standard":
+	case "light", "thorough":
+		return fmt.Errorf("%s runs are no longer offered: use a standard refined run", s.Mode)
 	default:
 		return fmt.Errorf("unknown run %q", s.Mode)
 	}
@@ -121,15 +122,7 @@ func (s *Snapshot) validate(cat *catalog.Catalog) error {
 		return fmt.Errorf("unknown artifacts %q", s.Artifacts)
 	}
 	if s.Refine != nil {
-		r := s.Refine
-		switch {
-		case s.Mode != "thorough":
-			return errors.New("refine settings are for thorough runs")
-		case r.Top < 0 || r.Top > 500, r.PerElement < 0 || r.PerElement > 50, r.PerCharacter < 0 || r.PerCharacter > 5:
-			return errors.New("refine settings are out of range")
-		case r.Iterations != 250 && r.Iterations != 500 && r.Iterations != 1000 && r.Iterations != 2000:
-			return errors.New("iterations must be 250, 500, 1000 or 2000")
-		}
+		return errors.New("refine settings are no longer offered")
 	}
 	for _, p := range s.Pins {
 		for _, e := range s.Excluded {

@@ -34,23 +34,16 @@ func TestSnapshotValidation(t *testing.T) {
 		"pinned and excluded": func(s *Snapshot) { s.Excluded = []string{"arlecchino"} },
 		"unknown mode":        func(s *Snapshot) { s.Mode = "overnight" },
 		"top 1% quick":        func(s *Snapshot) { s.Artifacts = "top1" },
-		"unknown artifacts":   func(s *Snapshot) { s.Mode, s.Artifacts = "light", "mine" },
-		"settings not thorough": func(s *Snapshot) {
+		"unknown artifacts":   func(s *Snapshot) { s.Mode, s.Artifacts = "standard", "mine" },
+		"light (removed)":     func(s *Snapshot) { s.Mode = "light" },
+		"thorough (removed)":  func(s *Snapshot) { s.Mode = "thorough" },
+		"refine settings": func(s *Snapshot) {
 			s.Mode, s.Refine = "standard", &RefineOptions{Top: 10, Iterations: 1000}
-		},
-		"too many teams": func(s *Snapshot) {
-			s.Mode, s.Refine = "thorough", &RefineOptions{Top: 5000, Iterations: 1000}
-		},
-		"odd iterations": func(s *Snapshot) {
-			s.Mode, s.Refine = "thorough", &RefineOptions{Top: 10, Iterations: 999999}
 		},
 	}
 	good := map[string]func(*Snapshot){
-		"light":           func(s *Snapshot) { s.Mode = "light" },
+		"standard":        func(s *Snapshot) { s.Mode = "standard" },
 		"standard top 1%": func(s *Snapshot) { s.Mode, s.Artifacts = "standard", "top1" },
-		"thorough settings": func(s *Snapshot) {
-			s.Mode, s.Refine = "thorough", &RefineOptions{Top: 50, PerElement: 5, Iterations: 500, SkipWaiting: true}
-		},
 	}
 	for name, f := range good {
 		s := ok()
