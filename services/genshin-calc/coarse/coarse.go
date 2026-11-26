@@ -49,16 +49,20 @@ type Result struct {
 	Iterations int                `json:"iterations"`
 	DPS        float64            `json:"dps"`
 	DPSSD      float64            `json:"dps_sd"`
-	CharDPS    []float64          `json:"char_dps"`              // per member, in Team order
-	ElementDPS map[string]float64 `json:"element_dps"`           // decides the team's element
-	Duration   float64            `json:"duration"`              // simulated fight length in seconds
-	Waits      map[string]float64 `json:"waits,omitempty"`       // seconds the team spent waiting, by reason
-	Flags      []string           `json:"flags,omitempty"`       // reasons to distrust the number
-	Stats      []string           `json:"stats,omitempty"`       // the config's "add stats" lines, when the job asks for them
-	Error      string             `json:"error,omitempty"`       // set when the simulation failed
-	Final      bool               `json:"final,omitempty"`       // the failure would repeat (a limit was exceeded): do not retry
-	RotCons    []int              `json:"rot_cons,omitempty"`    // constellations the rotation was written for
-	PlayerCons []int              `json:"player_cons,omitempty"` // the player's constellations
+	CharDPS    []float64          `json:"char_dps"`        // per member, in Team order
+	ElementDPS map[string]float64 `json:"element_dps"`     // decides the team's element
+	Duration   float64            `json:"duration"`        // simulated fight length in seconds
+	Waits      map[string]float64 `json:"waits,omitempty"` // seconds the team spent waiting, by reason
+	// EnergyWaits is each member's waiting for energy (seconds per fight), in
+	// config order like CharDPS: real-artifact runs set each character's
+	// Energy Recharge floor from it.
+	EnergyWaits []float64 `json:"energy_waits,omitempty"`
+	Flags       []string  `json:"flags,omitempty"`       // reasons to distrust the number
+	Stats       []string  `json:"stats,omitempty"`       // the config's "add stats" lines, when the job asks for them
+	Error       string    `json:"error,omitempty"`       // set when the simulation failed
+	Final       bool      `json:"final,omitempty"`       // the failure would repeat (a limit was exceeded): do not retry
+	RotCons     []int     `json:"rot_cons,omitempty"`    // constellations the rotation was written for
+	PlayerCons  []int     `json:"player_cons,omitempty"` // the player's constellations
 }
 
 // Simulator runs one config and returns the simulator's JSON result.
@@ -123,6 +127,9 @@ func Summarise(job Job, raw []byte) (Result, error) {
 		}
 	}
 	waited := 0.0
+	for _, member := range s.Failed {
+		r.EnergyWaits = append(r.EnergyWaits, member["insufficient_energy"].Mean)
+	}
 	for _, member := range s.Failed {
 		for reason, v := range member {
 			if v.Mean > 0 {

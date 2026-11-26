@@ -59,6 +59,7 @@ type Artifact struct {
 	Level    int
 	MainStat string
 	Substats []Substat
+	Location string // the character wearing it now (simulator key), or ""
 }
 
 // Account is everything read from one file.
@@ -161,6 +162,7 @@ type file struct {
 		Rarity      int       `json:"rarity"`
 		MainStatKey string    `json:"mainStatKey"`
 		Substats    []Substat `json:"substats"`
+		Location    string    `json:"location"`
 	} `json:"artifacts"`
 }
 
@@ -242,7 +244,7 @@ func Parse(r io.Reader, cat *catalog.Catalog) (*Account, *Report, error) {
 			rep.drop("an artifact of %q has substats that are not valid", clean(a.SetKey))
 		default:
 			acc.Artifacts = append(acc.Artifacts, Artifact{Set: key, Slot: a.SlotKey, Rarity: a.Rarity, Level: a.Level,
-				MainStat: a.MainStatKey, Substats: a.Substats})
+				MainStat: a.MainStatKey, Substats: a.Substats, Location: wearer(a.Location)})
 		}
 	}
 	return acc, rep, nil
@@ -290,4 +292,18 @@ func clean(s string) string {
 		}
 		return '?'
 	}, s)
+}
+
+// wearer is an artifact's GOOD location as a simulator key, or "" when it is
+// unequipped or names something unexpected (the file is untrusted).
+func wearer(loc string) string {
+	if loc == "" || len(loc) > 40 {
+		return ""
+	}
+	for _, r := range loc {
+		if !(r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9') {
+			return ""
+		}
+	}
+	return catalog.SimKey(loc)
 }

@@ -42,7 +42,7 @@ func main() {
 	n := flag.Int("n", 4230, "simulations in the batch")
 	iterations := flag.Int("iterations", 15, "iterations per simulation")
 	kind := flag.String("kind", fanout.Quick, "quick, refine or measure (the seeded simulator)")
-	seedFlag := flag.Int64("seed", 1, "measure: iteration i runs with seed SEED+i")
+	seedFlag := flag.Int64("measure-seed", 1, "measure: iteration i runs with seed MEASURE_SEED+i")
 	dump := flag.String("dump", "", "write each result's id and DPS here (JSON lines)")
 	options := flag.String("options", "", "refine: the optimiser's -options")
 	seed := flag.Int64("seed", 1, "which rotations (the same seed gives the same batch)")
@@ -71,14 +71,14 @@ func main() {
 	var s coarse.Simulator
 	switch {
 	case strings.HasPrefix(*launch, "cloudrun:"):
-		if *fp == "" {
+		if *fp == "" && *kind != fanout.Measure {
 			log.Fatal("-fingerprint is required with cloudrun")
 		}
 		args[1] = "/app/kqmsim"
 		l = &fanout.CloudRunJob{Name: strings.TrimPrefix(*launch, "cloudrun:"), Args: args, Token: &fanout.Token{}}
 		s = claim(*fp)
 	case strings.HasPrefix(*launch, "service:"):
-		if *fp == "" {
+		if *fp == "" && *kind != fanout.Measure {
 			log.Fatal("-fingerprint is required with service")
 		}
 		l = &fanout.Service{URL: strings.TrimPrefix(*launch, "service:"), Token: &fanout.IDToken{}, Log: log.Printf, Parallel: *shards}
