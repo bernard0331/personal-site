@@ -42,7 +42,9 @@ jobs:
           # Placeholders that apply.sh and canary.sh fill in from Terraform.
           fill='s|IMAGE_REPOSITORY|registry.example/repo|g; s|IMAGE_TAG|ci|g; s|CANARY_TAG|ci|g;
                 s|BUCKET_NAME|bucket|g; s|\([A-Z_]*\)_HOSTNAME|site.example.com|g;
-                s|STABLE_WEIGHT|90|g; s|CANARY_WEIGHT|10|g'
+                s|STABLE_WEIGHT|90|g; s|CANARY_WEIGHT|10|g;
+                s|FANOUT_STORE_VALUE|"gs://bucket/gke/fanout"|g; s|FANOUT_SHARDS_VALUE|"3"|g;
+                s|KUBE_API_ENDPOINT|10.0.0.2|g'
           {
             kubectl kustomize deploy/overlays/prod
             echo ---

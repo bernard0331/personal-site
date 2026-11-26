@@ -37,3 +37,8 @@ output "github_workload_identity_provider" {
   description = "Repository secret WIF_PROVIDER for the plan workflow"
   value       = module.github_ci.workload_identity_provider
 }
+
+output "fanout_nodes" {
+  description = "Most GKE fan-out workers (0: none); deploy/gke/apply.sh reads it"
+  value       = var.gke_enabled ? var.fanout_nodes : 0
+}

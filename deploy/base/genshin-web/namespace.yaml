@@ -1,9 +1,17 @@
 # Each site gets its own namespace (design doc). The label lets this
 # namespace's routes attach to the shared Gateway, which only accepts routes
 # from namespaces carrying it.
+#
+# Pod Security Admission: the site may create Jobs (fanout.yaml), which is the
+# same as creating pods, so the namespace refuses privileged pods, host
+# namespaces and host paths (baseline), and warns about anything short of
+# the restricted profile that every pod here is written to.
 apiVersion: v1
 kind: Namespace
 metadata:
   name: genshin
   labels:
     personal-site/gateway: "true"
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/warn: restricted
+    pod-security.kubernetes.io/audit: restricted

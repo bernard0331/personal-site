@@ -57,7 +57,7 @@ func main() {
 	workerServe := flag.Bool("worker-serve", false, "worker service mode: serve POST /shard (one fan-out shard per request) on -addr")
 	var fo fanoutConfig
 	flag.StringVar(&fo.store, "fanout", os.Getenv("FANOUT_STORE"), "fan big batches of simulations out to workers, through this store (gs://bucket/prefix, or a directory); empty: simulate everything here")
-	flag.StringVar(&fo.launch, "fanout-launch", envOr("FANOUT_LAUNCH", "local"), "how workers start: service:https://URL (a Cloud Run service of workers), cloudrun:projects/P/locations/R/jobs/J (a Cloud Run Job), or local (child processes, for trying it out)")
+	flag.StringVar(&fo.launch, "fanout-launch", envOr("FANOUT_LAUNCH", "local"), "how workers start: service:https://URL (a Cloud Run service of workers), cloudrun:projects/P/locations/R/jobs/J (a Cloud Run Job), k8s:NAMESPACE (a Kubernetes Indexed Job), or local (child processes, for trying it out)")
 	flag.IntVar(&fo.shards, "fanout-shards", envInt("FANOUT_SHARDS", 8), "most workers one batch may use")
 	flag.IntVar(&fo.minPerShard, "fanout-min-per-shard", 100, "quick batches: at least this many simulations per worker (smaller batches stay here)")
 	flag.IntVar(&fo.workerCPUs, "fanout-worker-cpus", envInt("FANOUT_WORKER_CPUS", 8), "cores each worker has")

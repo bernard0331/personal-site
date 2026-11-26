@@ -78,7 +78,7 @@ storage.googleapis.com 443 open Google APIs through private.googleapis.com
 199.36.153.4 443 blocked restricted.googleapis.com, not on the allow list
 169.254.169.254 80 open metadata server (Workload Identity tokens)
 $HOME_POD_IP 8080 blocked another site's pod
-$KUBE_API 443 blocked the Kubernetes API
+$KUBE_API 443 open the Kubernetes API (fan-out starts worker Jobs; RBAC checked below)
 " || status=1
 
 echo "== from home (namespace home)"
@@ -103,5 +103,23 @@ kubectl -n policy-test wait pod/probe --for=jsonpath='{.status.phase}'=Succeeded
 kubectl -n policy-test logs probe
 [ "$(kubectl -n policy-test get pod probe -o jsonpath='{.status.phase}')" = Succeeded ] || status=1
 kubectl delete namespace policy-test --wait=false >/dev/null
+
+# What the site's service account may do with the API it can now reach
+# (deploy/base/genshin-web/fanout.yaml): Jobs in its own namespace, nothing else.
+echo "== the site's Kubernetes permissions (RBAC)"
+SA=system:serviceaccount:genshin:genshin-web
+while read -r want verb what ns why; do
+  [ -z "$verb" ] && continue
+  got=$(kubectl auth can-i "$verb" "$what" -n "$ns" --as "$SA" 2>/dev/null || true)
+  if [ "$got" = "$want" ]; then mark=ok; else mark=FAIL; status=1; fi
+  printf '%-4s %-3s %s %s in %s (%s)\n' "$mark" "$got" "$verb" "$what" "$ns" "$why"
+done <<EOF2
+yes create jobs.batch genshin starting worker Jobs
+yes get pods genshin reading its own pod's image
+no create pods genshin pods only through Jobs
+no get secrets genshin no Secrets
+no create jobs.batch home only its own namespace
+no delete deployments.apps genshin nothing else
+EOF2
 
 exit $status

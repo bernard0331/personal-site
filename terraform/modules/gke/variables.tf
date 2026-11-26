@@ -60,3 +60,15 @@ variable "mesh" {
   type        = bool
   default     = false
 }
+
+variable "worker_nodes" {
+  description = "Most fan-out worker nodes (spot, autoscaled from zero); 0: no worker pool"
+  type        = number
+  default     = 0
+}
+
+variable "worker_machine_type" {
+  description = "Fan-out worker machine: 8 vCPU, like a Cloud Run worker"
+  type        = string
+  default     = "c2d-highcpu-8"
+}

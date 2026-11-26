@@ -32,8 +32,17 @@ import json, sys
 for site, host in json.load(sys.stdin).items():
     print("s|%s_HOSTNAME|%s|g" % (site.upper().replace("-", "_"), host))')
 
+# Fan-out: on when Terraform made a worker node pool; one worker per node.
+FANOUT_NODES=$($TF output -raw fanout_nodes 2>/dev/null || echo 0)
+FANOUT_STORE=""
+[ "$FANOUT_NODES" -gt 0 ] && FANOUT_STORE="gs://$BUCKET/gke/fanout"
+KUBE_API_ENDPOINT=$(kubectl get endpoints kubernetes -o jsonpath='{.subsets[0].addresses[0].ip}')
+
 kubectl kustomize "$ROOT/deploy/overlays/prod" |
   sed -e "s|IMAGE_REPOSITORY|$REPO|g" \
+      -e "s|FANOUT_STORE_VALUE|\"$FANOUT_STORE\"|g" \
+      -e "s|FANOUT_SHARDS_VALUE|\"$FANOUT_NODES\"|g" \
+      -e "s|KUBE_API_ENDPOINT|$KUBE_API_ENDPOINT|g" \
       -e "s|IMAGE_TAG|$TAG|g" \
       -e "s|BUCKET_NAME|$BUCKET|g" \
       -e "$HOSTS" |

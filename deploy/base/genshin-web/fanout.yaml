@@ -1,0 +1,61 @@
+# Fan-out on GKE (services/genshin-calc/fanout): the site starts Kubernetes
+# Indexed Jobs of worker pods on the worker node pool. What that needs, and
+# no more:
+#
+#   Role / RoleBinding   the site's service account may manage Jobs in this
+#                        namespace and read pods (its own, for its image).
+#                        Not pods' create, not Secrets, not other namespaces.
+#   NetworkPolicy        the site's pods (and only they) may reach the
+#                        Kubernetes API server, on 443. apply.sh fills in the
+#                        control plane's address (the kubernetes Service's
+#                        endpoint), which Dataplane V2 matches after it
+#                        translates the Service address.
+#
+# The workers themselves need nothing new: they run as the same service
+# account (bucket access through Workload Identity), get no API token, and the
+# namespace's DNS and Google API rules already cover them.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: fanout
+  namespace: genshin
+rules:
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["create", "get", "list", "delete"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: fanout
+  namespace: genshin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: fanout
+subjects:
+  - kind: ServiceAccount
+    name: genshin-web
+    namespace: genshin
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-kube-api
+  namespace: genshin
+spec:
+  podSelector:
+    matchLabels:
+      app: genshin-web
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - ipBlock:
+            cidr: KUBE_API_ENDPOINT/32
+      ports:
+        - protocol: TCP
+          port: 443

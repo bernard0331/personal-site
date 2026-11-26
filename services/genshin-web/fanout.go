@@ -44,6 +44,11 @@ func newCoordinator(c fanoutConfig, simPath string) (*fanout.Coordinator, error)
 		l = &fanout.CloudRunJob{Name: strings.TrimPrefix(c.launch, "cloudrun:"), Args: args, Token: &fanout.Token{}}
 	case strings.HasPrefix(c.launch, "service:"):
 		l = &fanout.Service{URL: strings.TrimPrefix(c.launch, "service:"), Token: &fanout.IDToken{}, Log: log.Printf}
+	case strings.HasPrefix(c.launch, "k8s:"):
+		// k8s:NAMESPACE: an Indexed Job on the worker node pool (GKE).
+		l = &fanout.IndexedJob{Namespace: strings.TrimPrefix(c.launch, "k8s:"), ServiceAccount: "genshin-web", Args: args,
+			NodeSelector: map[string]string{"personal-site/pool": "workers"}, Toleration: "personal-site/workers",
+			CPU: fmt.Sprintf("%dm", c.workerCPUs*1000-500), Memory: "3Gi", Container: "genshin-web"}
 	case c.launch == "local":
 		self, err := os.Executable()
 		if err != nil {
@@ -51,7 +56,7 @@ func newCoordinator(c fanoutConfig, simPath string) (*fanout.Coordinator, error)
 		}
 		l = &fanout.Processes{Binary: self, Args: args}
 	default:
-		return nil, fmt.Errorf("-fanout-launch %q: want service:https://URL, cloudrun:projects/P/locations/R/jobs/J or local", c.launch)
+		return nil, fmt.Errorf("-fanout-launch %q: want service:https://URL, cloudrun:projects/P/locations/R/jobs/J, k8s:NAMESPACE or local", c.launch)
 	}
 	log.Printf("fan-out: up to %d workers of %d cores (%s), batches in %s", c.shards, c.workerCPUs, c.launch, c.store)
 	return &fanout.Coordinator{Store: st, Launcher: l, Shards: c.shards, MinPerShard: c.minPerShard, Threads: c.threads,

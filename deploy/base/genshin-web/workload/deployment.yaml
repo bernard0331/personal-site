@@ -87,6 +87,20 @@ spec:
             - -trust-proxy
             - -proxy-hops=2
             - -track=stable
+          # Fan-out (fanout.yaml): big batches go to an Indexed Job on the
+          # worker node pool. apply.sh sets the store (empty when Terraform
+          # has no worker pool: everything is simulated here) and how many
+          # workers a batch may use (the pool's size), as quoted strings
+          # (Kustomize drops the quotes around a placeholder).
+          env:
+            - name: FANOUT_STORE
+              value: FANOUT_STORE_VALUE
+            - name: FANOUT_LAUNCH
+              value: k8s:genshin
+            - name: FANOUT_SHARDS
+              value: FANOUT_SHARDS_VALUE
+            - name: FANOUT_WORKER_CPUS
+              value: "8"
           ports:
             - name: http
               containerPort: 8080

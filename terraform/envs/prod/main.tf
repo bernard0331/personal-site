@@ -49,6 +49,7 @@ module "gke" {
   node_count          = var.node_count
   authorized_networks = var.authorized_networks
   mesh                = var.mesh_enabled
+  worker_nodes        = var.fanout_nodes
 }
 
 module "registry" {

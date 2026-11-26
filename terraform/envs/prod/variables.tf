@@ -57,3 +57,9 @@ variable "mesh_enabled" {
   type        = bool
   default     = false
 }
+
+variable "fanout_nodes" {
+  description = "Most fan-out worker nodes on GKE (8 vCPU spot, autoscaled from zero; about $0.07 an hour each while one runs). The project's 32-vCPU quota leaves room for 3 beside a 2-vCPU site node; 0: no worker pool"
+  type        = number
+  default     = 0
+}

@@ -120,6 +120,11 @@ resource "google_container_cluster" "this" {
     }
   }
 
+  # Remove idle nodes quickly (the workers pool sits empty between batches).
+  cluster_autoscaling {
+    autoscaling_profile = "OPTIMIZE_UTILIZATION"
+  }
+
   deletion_protection = var.deletion_protection
 }
 
@@ -156,6 +161,55 @@ resource "google_container_node_pool" "spot" {
       mode = "GKE_METADATA"
     }
 
+    shielded_instance_config {
+      enable_secure_boot          = true
+      enable_integrity_monitoring = true
+    }
+  }
+}
+
+# Fan-out workers (services/genshin-calc/fanout): a second spot pool of
+# larger machines that the cluster autoscaler grows from zero while worker
+# pods wait and shrinks back when they're done. The taint keeps everything
+# but worker pods (which tolerate it) off these nodes; the label is what
+# worker pods ask for. worker_nodes = 0: no pool, and the site simulates
+# everything on its own node.
+resource "google_container_node_pool" "workers" {
+  count    = var.worker_nodes > 0 ? 1 : 0
+  name     = "workers"
+  cluster  = google_container_cluster.this.id
+  location = var.zone
+
+  initial_node_count = 0
+  autoscaling {
+    min_node_count = 0
+    max_node_count = var.worker_nodes
+  }
+
+  management {
+    auto_repair  = true
+    auto_upgrade = true
+  }
+
+  node_config {
+    spot         = true
+    machine_type = var.worker_machine_type
+    disk_size_gb = var.disk_size_gb
+    disk_type    = "pd-standard"
+    labels = {
+      "personal-site/pool" = "workers"
+    }
+    taint {
+      key    = "personal-site/workers"
+      value  = "true"
+      effect = "NO_SCHEDULE"
+    }
+
+    service_account = google_service_account.nodes.email
+    oauth_scopes    = ["https://www.googleapis.com/auth/cloud-platform"]
+    workload_metadata_config {
+      mode = "GKE_METADATA"
+    }
     shielded_instance_config {
       enable_secure_boot          = true
       enable_integrity_monitoring = true
