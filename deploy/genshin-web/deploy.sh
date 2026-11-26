@@ -12,7 +12,7 @@
 #   REGION   (default: us-central1)
 #   BUCKET   Cloud Storage bucket for runs and the cache's copy (required)
 #   SA       service account the service and the job run as (default: genshin-web@PROJECT.iam.gserviceaccount.com)
-#   FANOUT_SHARDS  most workers one batch may use (default 8; 0 turns fan-out off)
+#   FANOUT_SHARDS  most workers one batch may use (default 16; 0 turns fan-out off)
 #   FANOUT_VIA     service (default) or job: which workers the site uses
 #   WORKER_MAX     most worker instances at once (default 16; 16 x 8 vCPU plus
 #                  the site fits Cloud Run's default 200 vCPU regional quota)
@@ -61,7 +61,7 @@ REGION=${REGION:-us-central1}
 BUCKET=${BUCKET:?set BUCKET to the Cloud Storage bucket for runs}
 SA=${SA:-genshin-web@$PROJECT.iam.gserviceaccount.com}
 
-FANOUT_SHARDS=${FANOUT_SHARDS:-8}
+FANOUT_SHARDS=${FANOUT_SHARDS:-16}
 FANOUT_VIA=${FANOUT_VIA:-service}
 WORKER_MAX=${WORKER_MAX:-16}
 

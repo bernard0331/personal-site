@@ -134,8 +134,19 @@ func (c *Coordinator) Run(ctx context.Context, jobs []coarse.Job, sim coarse.Sim
 		parts[i%shards] = append(parts[i%shards], j)
 		want[coarse.Key(j.Config, fp)] = j
 	}
+	// All shards at once: one after another took 7 s for 16 from a laptop.
+	errs := make([]error, shards)
+	var wg sync.WaitGroup
 	for i, p := range parts {
-		if err := c.Store.Put(ctx, shardName(m.Batch, "shard", i, "jsonl"), jsonLines(p)); err != nil {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			errs[i] = c.Store.Put(ctx, shardName(m.Batch, "shard", i, "jsonl"), jsonLines(p))
+		}()
+	}
+	wg.Wait()
+	for i, err := range errs {
+		if err != nil {
 			return jobs, fmt.Errorf("writing shard %d: %w", i, err)
 		}
 	}

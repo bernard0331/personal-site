@@ -131,18 +131,19 @@ func (s *Service) Launch(ctx context.Context, location string, shards int) error
 		go func() {
 			// Not ctx: the request must outlive Launch, and the coordinator
 			// stops waiting on its own timeout.
-			req, err := http.NewRequest(http.MethodPost, s.URL+"/shard", bytes.NewReader(body))
-			if err != nil {
-				return
-			}
-			req.Header.Set("Authorization", "Bearer "+tok)
-			req.Header.Set("Content-Type", "application/json")
-			resp, err := c.Do(req)
-			if err == nil {
-				defer resp.Body.Close()
-				if resp.StatusCode/100 != 2 {
-					err = apiError(fmt.Sprintf("shard %d", i), resp)
+			var err error
+			for attempt, wait := 0, time.Second; ; attempt++ {
+				var retry bool
+				retry, err = s.post(c, tok, body, i)
+				if err == nil || !retry || attempt == 60 || shardDone(location, i) {
+					break
 				}
+				// Cloud Run turns a request away when it waited too long
+				// for an instance (a burst of shards outruns start-up):
+				// those instances are starting and take seconds, so ask
+				// again soon (for up to about two minutes).
+				time.Sleep(wait)
+				wait = 2 * time.Second
 			}
 			if err == nil {
 				return
@@ -154,6 +155,49 @@ func (s *Service) Launch(ctx context.Context, location string, shards int) error
 		}()
 	}
 	return nil
+}
+
+// post sends one shard request. retry says whether Cloud Run turned it away
+// before a worker took it (no instance was free in time).
+func (s *Service) post(c *http.Client, tok string, body []byte, i int) (retry bool, err error) {
+	req, err := http.NewRequest(http.MethodPost, s.URL+"/shard", bytes.NewReader(body))
+	if err != nil {
+		return false, err
+	}
+	req.Header.Set("Authorization", "Bearer "+tok)
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := c.Do(req)
+	if err != nil {
+		return false, err // no answer at all: not the start-up case, which always answers
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode/100 == 2 {
+		return false, nil
+	}
+	err = apiError(fmt.Sprintf("shard %d", i), resp)
+	switch resp.StatusCode {
+	case http.StatusTooManyRequests, http.StatusServiceUnavailable:
+		return true, err
+	case http.StatusInternalServerError: // Cloud Run's own "no available instance" comes as a 500 too
+		return strings.Contains(err.Error(), "available instance"), err
+	}
+	return false, err
+}
+
+// shardDone reports whether shard i of the batch at location has a done marker.
+func shardDone(location string, i int) bool {
+	storeLoc, batch, err := SplitLocation(location)
+	if err != nil {
+		return false
+	}
+	st, err := Open(storeLoc)
+	if err != nil {
+		return false
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	_, err = st.Get(ctx, shardName(batch, "done", i, "json"))
+	return err == nil
 }
 
 // IDToken is an OpenID Connect identity token for calling a private Cloud
@@ -201,11 +245,11 @@ func markFailed(location string, i int, err error) {
 	if serr != nil {
 		return
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-	defer cancel()
-	if _, gerr := st.Get(ctx, shardName(batch, "done", i, "json")); gerr == nil {
+	if shardDone(location, i) {
 		return // the worker finished after all
 	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
 	b, _ := json.Marshal(Done{Shard: i, Error: err.Error()})
 	st.Put(ctx, shardName(batch, "done", i, "json"), b)
 }
