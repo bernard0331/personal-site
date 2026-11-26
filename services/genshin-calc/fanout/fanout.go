@@ -43,6 +43,11 @@ import (
 const (
 	Quick  = "quick"  // the simulator alone
 	Refine = "refine" // KQM Sim's substat optimiser, then the simulator
+	// Measure: the seeded simulator (kqmsim-seeded) with Manifest.Seed, for
+	// comparing configs on the same random rolls (what a stat or an artifact
+	// set is worth). Results are for the caller only, never the shared cache;
+	// the batch's fingerprint is a label the worker adopts, not a check.
+	Measure = "measure"
 )
 
 // Manifest describes a batch to its workers.
@@ -52,7 +57,8 @@ type Manifest struct {
 	Options     string    `json:"options,omitempty"` // the optimiser's -options, for Refine
 	Fingerprint string    `json:"fingerprint"`       // the coordinator's simulator, which workers must match
 	Shards      int       `json:"shards"`
-	Threads     int       `json:"threads"` // cores per simulation
+	Threads     int       `json:"threads"`        // cores per simulation
+	Seed        int64     `json:"seed,omitempty"` // Measure: iteration i runs with seed Seed+i
 	Created     time.Time `json:"created"`
 }
 
@@ -93,6 +99,7 @@ type Coordinator struct {
 	MinPerShard     int           // quick batches: at least this many jobs per worker (default 100)
 	MaxRefineShards int           // refined batches: most shards, one team each (default 256)
 	Threads         int           // refine batches: cores per optimiser (default 1)
+	Seed            int64         // measure batches: the seed (default 1)
 	Poll            time.Duration // how often to look for results (default 3 s)
 	Timeout         time.Duration // how long to wait for the whole batch (default 15 min)
 }
@@ -112,9 +119,11 @@ func (c *Coordinator) Plan(kind string, n int) int {
 			s = 256
 		}
 	}
-	if kind == Quick {
+	if kind == Quick || kind == Measure {
 		per := c.MinPerShard
-		if per <= 0 {
+		if kind == Measure {
+			per = 8 // one simulation per core: measurements are long (thousands of iterations)
+		} else if per <= 0 {
 			per = 100
 		}
 		s = min(s, (n+per-1)/per)
@@ -139,6 +148,12 @@ func (c *Coordinator) Run(ctx context.Context, jobs []coarse.Job, sim coarse.Sim
 		threads = c.Threads
 	}
 	m := Manifest{Batch: newID(), Kind: kind, Options: options, Fingerprint: fp, Shards: shards, Threads: threads, Created: time.Now().UTC()}
+	if kind == Measure {
+		m.Seed = c.Seed
+		if m.Seed == 0 {
+			m.Seed = 1
+		}
+	}
 
 	// Round-robin, so slow jobs (which tend to sit together) are spread out.
 	parts := make([][]coarse.Job, shards)
@@ -283,7 +298,9 @@ func Work(ctx context.Context, store Store, batch string, index, cpus int, simFo
 	if err != nil {
 		return done(0, err)
 	}
-	if fp := sim.Fingerprint(); fp != m.Fingerprint {
+	if m.Kind == Measure {
+		sim = labelled{sim, m.Fingerprint} // results keyed as the caller expects; never cached
+	} else if fp := sim.Fingerprint(); fp != m.Fingerprint {
 		return done(0, fmt.Errorf("simulator %s, but the batch was made with %s", fp, m.Fingerprint))
 	}
 	sb, err := store.Get(ctx, shardName(batch, "shard", index, "jsonl"))
@@ -382,4 +399,22 @@ func newID() string {
 	b := make([]byte, 6)
 	rand.Read(b)
 	return time.Now().UTC().Format("20060102-150405") + "-" + hex.EncodeToString(b)
+}
+
+// labelled runs a simulator under another fingerprint: a measure batch's
+// results are keyed with the caller's label, not the worker's build.
+type labelled struct {
+	coarse.Simulator
+	fp string
+}
+
+func (l labelled) Fingerprint() string { return l.fp }
+
+// Label is a coarse.Simulator that is never run here, only names a measure
+// batch's results (their cache keys) on the coordinator's side.
+type Label string
+
+func (l Label) Fingerprint() string { return string(l) }
+func (l Label) Run(context.Context, string) ([]byte, error) {
+	return nil, fmt.Errorf("a Label is not a simulator")
 }

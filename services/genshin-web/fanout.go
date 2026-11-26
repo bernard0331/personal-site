@@ -174,6 +174,15 @@ func workShard(ctx context.Context, loc string, i int, simPath string, cpus int)
 		case fanout.Refine:
 			bin.Timeout, bin.MaxMemoryMB = 20*time.Minute, 400+100*bin.Threads
 			return &coarse.Optimiser{Bin: bin, Options: m.Options}, nil
+		case fanout.Measure:
+			// The seeded variant next to the simulator (Dockerfile).
+			seeded, err := coarse.NewBinary(simPath + "-seeded")
+			if err != nil {
+				return nil, err
+			}
+			seeded.Threads, seeded.Timeout, seeded.MaxMemoryMB = max(1, m.Threads), 10*time.Minute, 400
+			seeded.Args = []string{"-seed", fmt.Sprint(m.Seed)}
+			return seeded, nil
 		}
 		return nil, fmt.Errorf("unknown kind %q", m.Kind)
 	})

@@ -14,6 +14,10 @@ COPY src/ .
 RUN go build -trimpath -o /out/genshin-web ./services/genshin-web
 # build.sh clones KQM Sim at the pinned release and applies the patches.
 RUN sh services/genshin-calc/simulator/build.sh /out/kqmsim
+# The same simulator plus a -seed flag, for measuring what a stat or an
+# artifact set is worth on fixed random rolls (real-artifact runs). A
+# separate binary, so the main one (and the cache keyed on it) is unchanged.
+RUN sh services/genshin-calc/simulator/build.sh /out/kqmsim-seeded services/genshin-calc/simulator/patches-seeded
 
 # ---- Run ----
 FROM python:3.12-slim

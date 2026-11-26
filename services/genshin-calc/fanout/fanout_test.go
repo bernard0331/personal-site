@@ -219,3 +219,28 @@ func TestServiceDoesNotRetryWorkerErrors(t *testing.T) {
 		t.Fatalf("retry %v, err %v, calls %d: a worker's own error must not be retried", retry, err, calls)
 	}
 }
+
+func TestMeasureUsesTheCallersLabel(t *testing.T) {
+	st := Dir(t.TempDir())
+	var got Manifest
+	l := LaunchFunc(func(ctx context.Context, loc string, shards int) error {
+		storeLoc, batch, _ := SplitLocation(loc)
+		s, _ := Open(storeLoc)
+		for i := range shards {
+			go Work(context.Background(), s, batch, i, 2, func(m Manifest) (coarse.Simulator, error) {
+				got = m
+				return fakeSim{"the-workers-own-build"}, nil // a different build: fine for measurements
+			})
+		}
+		return nil
+	})
+	c := &Coordinator{Store: st, Launcher: l, Seed: 7, Poll: 10 * time.Millisecond, Timeout: 10 * time.Second}
+	n := 0
+	missing, err := c.Run(context.Background(), jobs(10), Label("measure"), Measure, "", func(coarse.Result) { n++ }, nil)
+	if err != nil || len(missing) != 0 || n != 10 {
+		t.Fatalf("saved %d, missing %d, err %v; want all 10", n, len(missing), err)
+	}
+	if got.Seed != 7 || got.Kind != Measure {
+		t.Fatalf("manifest %+v: want kind measure, seed 7", got)
+	}
+}

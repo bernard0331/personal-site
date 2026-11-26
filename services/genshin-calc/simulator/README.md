@@ -46,3 +46,16 @@ regenerate the catalog from a checkout of the same source:
 ```bash
 python3 services/genshin-calc/tools/gen_catalog.py PATH_TO_A_KQMSIM_CHECKOUT
 ```
+
+## The seeded variant
+
+`patches-seeded/` holds one more patch of our own, built only into a second
+binary, `kqmsim-seeded` (`build.sh OUTPUT patches-seeded`). It adds `-seed N`:
+iteration i runs with seed N+i instead of a random one. Two configs run with
+the same seed see the same random rolls, so their difference is the change
+alone. The substat optimiser already compares configs this way inside KQM Sim
+(`RunWithSeededConfig`); the flag exposes it for measuring what each stat or
+artifact set is worth to a team (real-artifact runs,
+[docs/real-artifacts-plan.md](../../../docs/real-artifacts-plan.md)). The
+main `kqmsim` binary doesn't change, so the shared cache keyed on it keeps
+its results.

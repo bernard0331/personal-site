@@ -1,0 +1,81 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: personal-site <build@localhost>
+Date: Thu, 26 Nov 2026 12:00:00 +0000
+Subject: [PATCH] Add a -seed flag: run iteration i with seed SEED+i
+
+Two configs run with the same -seed see the same random rolls, so the
+difference between them is the change itself. The substat optimiser already
+compares configs this way internally (RunWithSeededConfig); this exposes it.
+Built only into a second binary (kqmsim-seeded) for gear measurements.
+---
+ cmd/gcsim/main.go | 29 ++++++++++++++++++++++++++++-
+ 1 file changed, 28 insertions(+), 1 deletion(-)
+
+diff --git a/cmd/gcsim/main.go b/cmd/gcsim/main.go
+index 35b0b34..8d247d9 100644
+--- a/cmd/gcsim/main.go
++++ b/cmd/gcsim/main.go
+@@ -15,6 +15,7 @@ import (
+ 	"strings"
+ 
+ 	selfupdate "github.com/creativeprojects/go-selfupdate"
++	"github.com/genshinsim/gcsim/pkg/gcs/ast"
+ 	"github.com/genshinsim/gcsim/pkg/model"
+ 	"github.com/genshinsim/gcsim/pkg/optimization"
+ 	"github.com/genshinsim/gcsim/pkg/simulator"
+@@ -43,6 +44,7 @@ type opts struct {
+ 	cpuprofile       string
+ 	memprofile       string
+ 	update           bool
++	seed             int64
+ }
+ 
+ const (
+@@ -86,6 +88,7 @@ can be viewed in the browser via "go tool pprof -http=localhost:3000 cpu.prof" (
+ 	flag.StringVar(&opt.memprofile, "memprofile", "", `write memory profile to a file. supply file path (otherwise empty string for disabled). 
+ can be viewed in the browser via "go tool pprof -http=localhost:3000 mem.prof" (insert your desired host/port/filename, requires Graphviz)`)
+ 	flag.BoolVar(&opt.update, "update", false, "run autoupdater (default: false)")
++	flag.Int64Var(&opt.seed, "seed", 0, "run iteration i with seed SEED+i instead of a random one, so two configs can be compared on the same random rolls (0: random)")
+ 
+ 	flag.Parse()
+ 
+@@ -177,7 +180,11 @@ can be viewed in the browser via "go tool pprof -http=localhost:3000 mem.prof" (
+ 	var hash string
+ 
+ 	if !opt.norun {
+-		res, err = simulator.Run(context.Background(), simopt)
++		if opt.seed != 0 {
++			res, err = runSeeded(simopt, opt.seed)
++		} else {
++			res, err = simulator.Run(context.Background(), simopt)
++		}
+ 		if err != nil {
+ 			return err
+ 		}
+@@ -383,3 +390,23 @@ func update(version string) error {
+ 	log.Printf("Successfully updated to version %s", latest.Version())
+ 	return nil
+ }
++
++// runSeeded runs the config with iteration i seeded SEED+i: the same seeds the
++// substat optimiser uses internally to compare configs, exposed so a caller
++// can measure what one stat or set is worth without the run-to-run noise.
++func runSeeded(simopt simulator.Options, seed int64) (*model.SimulationResult, error) {
++	cfg, err := simulator.ReadConfig(simopt.ConfigPath)
++	if err != nil {
++		return nil, err
++	}
++	file := ast.NewFile()
++	simcfg, gcsl, err := simulator.Parse(file, cfg)
++	if err != nil {
++		return nil, err
++	}
++	seeds := make([]int64, simcfg.Settings.Iterations)
++	for i := range seeds {
++		seeds[i] = seed + int64(i)
++	}
++	return simulator.RunWithSeededConfig(context.Background(), file, cfg, simcfg, gcsl, seeds)
++}
+-- 
+2.42.0
+

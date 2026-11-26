@@ -41,7 +41,9 @@ func main() {
 	db := flag.String("db", "local/rotations/kqm-db.jsonl", "cached KQM Sim Database")
 	n := flag.Int("n", 4230, "simulations in the batch")
 	iterations := flag.Int("iterations", 15, "iterations per simulation")
-	kind := flag.String("kind", fanout.Quick, "quick or refine")
+	kind := flag.String("kind", fanout.Quick, "quick, refine or measure (the seeded simulator)")
+	seedFlag := flag.Int64("seed", 1, "measure: iteration i runs with seed SEED+i")
+	dump := flag.String("dump", "", "write each result's id and DPS here (JSON lines)")
 	options := flag.String("options", "", "refine: the optimiser's -options")
 	seed := flag.Int64("seed", 1, "which rotations (the same seed gives the same batch)")
 	store := flag.String("store", "", "gs://bucket/prefix or a directory")
@@ -91,6 +93,9 @@ func main() {
 	default:
 		log.Fatalf("-launch %q", *launch)
 	}
+	if *kind == fanout.Measure {
+		s = fanout.Label("bench-measure")
+	}
 	if *kind == fanout.Refine {
 		switch v := s.(type) {
 		case *coarse.Binary:
@@ -103,10 +108,17 @@ func main() {
 			}
 		}
 	}
-	c := &fanout.Coordinator{Store: st, Launcher: l, Shards: *shards, MinPerShard: *minPer, MaxRefineShards: *refineShards, Threads: *threads, Timeout: time.Hour}
+	c := &fanout.Coordinator{Store: st, Launcher: l, Shards: *shards, MinPerShard: *minPer, MaxRefineShards: *refineShards, Threads: *threads, Seed: *seedFlag, Timeout: time.Hour}
 	start := time.Now()
 	var mu sync.Mutex
 	var first time.Duration
+	var out *os.File
+	if *dump != "" {
+		if out, err = os.Create(*dump); err != nil {
+			log.Fatal(err)
+		}
+		defer out.Close()
+	}
 	failed := 0
 	got := 0
 	missing, err := c.Run(context.Background(), jobs, s, *kind, *options, func(r coarse.Result) {
@@ -118,6 +130,10 @@ func main() {
 		got++
 		if r.Error != "" {
 			failed++
+		}
+		if out != nil {
+			b, _ := json.Marshal(map[string]any{"id": r.ID, "dps": r.DPS, "sd": r.DPSSD, "error": r.Error})
+			out.Write(append(b, '\n'))
 		}
 	}, nil)
 	wall := time.Since(start)

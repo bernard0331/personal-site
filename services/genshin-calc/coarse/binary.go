@@ -32,6 +32,9 @@ type Binary struct {
 	// limit.
 	Timeout     time.Duration
 	MaxMemoryMB int
+	// Args are added to every simulation run's command line, e.g. "-seed",
+	// "1" for the seeded variant (kqmsim-seeded).
+	Args        []string
 	fingerprint string
 }
 
@@ -74,7 +77,7 @@ func (b *Binary) Run(ctx context.Context, config string) ([]byte, error) {
 	if err := os.WriteFile(cfg, []byte(config), 0o600); err != nil {
 		return nil, err
 	}
-	if _, err := b.run(ctx, dir, "-c", cfg, "-out", out); err != nil {
+	if _, err := b.run(ctx, dir, append([]string{"-c", cfg, "-out", out}, b.Args...)...); err != nil {
 		return nil, err
 	}
 	return os.ReadFile(out)
