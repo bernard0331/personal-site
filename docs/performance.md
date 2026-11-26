@@ -45,3 +45,44 @@ more machines is what shortens it.
 
 The optimiser's internal simulations don't follow the config's iteration
 count, and it rejects a `sim_iter` option, so there is nothing to tune there.
+
+## Fan-out to worker machines (2026-11-26)
+
+Simulations that aren't cached go to workers on other machines
+([services/genshin-calc/fanout](../services/genshin-calc/fanout)): the site
+splits them into shards in the bucket, each worker (the site's own image,
+8 vCPU) simulates one, and the site collects the results. Quick batches of
+200 or more go out in shards of at least 100; every refined team is its own
+shard. Timed with [tools/fanoutbench](../tools/fanoutbench), 4,230 quick
+simulations from scratch at 15 iterations:
+
+| Workers | How they start | Total | Of which |
+| :- | :- | :- | :- |
+| 1 (the site alone, before) | — | 5 min 32 s to 7 min 43 s | |
+| 8 | Cloud Run Job, one task per shard | 43 s to 2 min 14 s | tasks waited 17-105 s to start, then simulated in 10-15 s |
+| 16 | Cloud Run Job | 1 min 14 s to 2 min 6 s | tasks waited 53-100 s |
+| 8 | Cloud Run service, one request per instance | 41-45 s | |
+| 16 | Cloud Run service | 34-41 s | about 20 s of it is instances starting and simulating; the rest uploading shards and noticing results |
+
+A Job's tasks all start together, after a delay that varies run to run and
+dwarfs the work, so the site uses a private worker service (concurrency 1,
+scales to zero) and keeps the Job as an option (`FANOUT_VIA=job`). A burst of
+requests can outrun instance start-up; Cloud Run then answers 429 or 500 ("no
+available instance"), and the launcher asks again every 1-2 s.
+
+Through the live site, an uncached quick run on the owner's account took
+about 1.5 minutes from submit to teams, solve included (42 s of fan-out, on
+the Job).
+
+**Refined teams** (37 teams, 250 iterations, KQM standard substats):
+
+| Shards | Total |
+| :- | :- |
+| 16 fixed shards, site run | 4 min 1 s (workers busy 54-238 s: some drew three slow teams) |
+| 16 fixed shards, benchmark | 1 min 55 s |
+| One per team (37), benchmark, same teams | 1 min 44 s (each team 25-60 s on 8 cores) |
+
+A refined run is now bounded by its slowest team on one 8-vCPU instance (the
+most Cloud Run gives one instance) plus start-up. 16 instances of 8 vCPU plus
+the site fit Cloud Run's default regional quota of 200 vCPU; more workers
+need a quota increase.
