@@ -1,6 +1,6 @@
 # Plan: optimizing with the player's own artifacts
 
-Status: planned (2026-11-26), not built. Part of the original scope ("real
+Status: planned and decided (2026-11-26), not built. Part of the original scope ("real
 mode": allocate pieces from the whole inventory, like weapons), scheduled as
 phase 2b. Today every run gives characters KQM-standard or top-1% substats
 from KQM Sim's substat optimiser; the imported artifacts are only shown.
@@ -26,8 +26,9 @@ prototype's Fischl did best on Tenacity, a team buff, not her own damage).
 The four stages of the prototype (`local/opt/fischl_opt.py`, one character),
 turned into a pipeline for every character of every chosen team:
 
-1. **Choose teams as today.** The quick and refined passes run with standard
-   artifacts and pick each breakdown's teams. (Decision 1 below.)
+1. **Pick contenders as today.** The quick and refined passes run with
+   standard artifacts; their best teams become the contenders that get
+   geared (Decision 1 below).
 2. **Measure, per character, in its team:**
    - *ER need:* sweep extra ER with energy on, and take the least at which
      the character never waits for energy.
@@ -87,21 +88,33 @@ Without the fan-out (the site's 7 cores alone) the same work is about 1-1.5
 hours. On Cloud Run's prices that's roughly $0.75-1.50 of compute per run
 beyond the free tier.
 
-## Decisions to make before building
+## Decisions (owner, 2026-11-26)
 
-1. **Teams chosen first, then gear (recommended to start), or teams chosen
-   with real gear?** Choosing first is cheaper and simple. But a team that
-   loses on standard artifacts may win with the player's real pieces. A later
-   step could gear the top 2-3 alternatives per element too and let the
-   solver pick again.
-2. **ER: hard floor or soft?** A hard floor (never wait for energy) is safe
-   and matches how the site already distrusts teams that wait. A soft floor
-   lets the solver trade a little waiting for damage.
-3. **Keep current gear?** Optionally lock a piece to its current wearer, as
-   the approved design had ("lock to wearer"), for players who don't want to
-   reshuffle everything.
-4. **Which breakdowns?** All four, or only the one the player looks at
-   first, to save time.
+1. **Teams are chosen with real gear**, among contenders, for accuracy:
+   1. Gear each contender team on its own, as if it had the whole inventory.
+   2. Choose all four breakdowns' teams from those numbers.
+   3. Allocate jointly for the chosen teams, so each piece has one wearer.
+   4. Choose again with the corrected numbers, until the choice stops changing
+      (usually 2-3 rounds; each round re-gears only the teams that changed).
+
+   Contenders are the best few teams per element, plus any team within about
+   10% of the weakest chosen team on standard artifacts (adjustable in thorough
+   runs). Estimates with 16 Cloud Run workers:
+
+   | Teams geared | Light | Standard | Thorough |
+   | :- | :- | :- | :- |
+   | Only the chosen teams | 5-10 min, about $1 | same | same |
+   | Every refined candidate | about 37: 12 min, about $2 | about 120: 40 min, about $7 | about 300: 1.5 h, about $17 |
+   | Contenders (chosen) | about 30-40: 10-15 min, about $2 | about 40-60: 15-20 min, about $3-4 | about 60-80: 20-30 min, about $4-5 |
+
+   Gearing one team (four characters measured in it) is about 2,400
+   vCPU-seconds. Costs are before Cloud Run's free tier.
+2. **Energy Recharge is a hard floor:** a character never waits for energy.
+   The floor is measured under the run's energy setting, so generous energy
+   drops already give a softer floor.
+3. **No locking to the current wearer for now.** Exclude keeps a piece out.
+4. **All four breakdowns** get their own allocation. Measurements are shared
+   where the same character is in the same team.
 
 ## Build order
 
@@ -109,9 +122,9 @@ beyond the free tier.
    piece selection, final simulation. Check it reproduces the prototype on
    the owner's account (Fischl's team: Elegy R1 with 4-piece Tenacity at
    about 263k DPS, against 256k equipped).
-2. The multi-team allocation in HiGHS, checked on the owner's account:
-   every piece used at most once, every ER floor met, real-gear DPS by
-   simulation.
+2. Gearing contenders on their own, then the joint allocation in HiGHS and the
+   choose-allocate-choose rounds, checked on the owner's account: every piece
+   used at most once, every ER floor met, real-gear DPS by simulation.
 3. The snapshot, the run mode and the results page (pieces per member,
    "what to equip"), and the page wording fixed to match.
 4. Measure a real run end to end and record it in `docs/performance.md`.
