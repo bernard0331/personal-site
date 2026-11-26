@@ -49,6 +49,7 @@ func main() {
 	shards := flag.Int("shards", 8, "workers")
 	minPer := flag.Int("min-per-shard", 1, "quick: at least this many simulations per worker")
 	threads := flag.Int("threads", 8, "refine: cores per team on a worker")
+	refineShards := flag.Int("refine-shards", 64, "refine: most shards (one team each until there are more teams)")
 	workerCPUs := flag.Int("worker-cpus", 8, "cores each worker has")
 	fp := flag.String("fingerprint", "", "the workers' simulator build (required unless -launch local)")
 	sim := flag.String("sim", "bin/kqmsim", "local: the simulator the workers run")
@@ -102,7 +103,7 @@ func main() {
 			}
 		}
 	}
-	c := &fanout.Coordinator{Store: st, Launcher: l, Shards: *shards, MinPerShard: *minPer, Threads: *threads, Timeout: time.Hour}
+	c := &fanout.Coordinator{Store: st, Launcher: l, Shards: *shards, MinPerShard: *minPer, MaxRefineShards: *refineShards, Threads: *threads, Timeout: time.Hour}
 	start := time.Now()
 	var mu sync.Mutex
 	var first time.Duration

@@ -109,6 +109,16 @@ type Service struct {
 	Token  *IDToken
 	Client *http.Client
 	Log    func(format string, args ...any)
+	// Wait is how long a shard keeps asking while no instance is free
+	// (default 30 min, the coordinator's own limit).
+	Wait time.Duration
+}
+
+func (s *Service) wait() time.Duration {
+	if s.Wait > 0 {
+		return s.Wait
+	}
+	return 30 * time.Minute
 }
 
 // ShardRequest is what Service posts to a worker.
@@ -132,18 +142,18 @@ func (s *Service) Launch(ctx context.Context, location string, shards int) error
 			// Not ctx: the request must outlive Launch, and the coordinator
 			// stops waiting on its own timeout.
 			var err error
-			for attempt, wait := 0, time.Second; ; attempt++ {
+			deadline := time.Now().Add(s.wait())
+			for wait := time.Second; ; wait = 2 * time.Second {
 				var retry bool
 				retry, err = s.post(c, tok, body, i)
-				if err == nil || !retry || attempt == 60 || shardDone(location, i) {
+				if err == nil || !retry || time.Now().After(deadline) || shardDone(location, i) {
 					break
 				}
 				// Cloud Run turns a request away when it waited too long
-				// for an instance (a burst of shards outruns start-up):
-				// those instances are starting and take seconds, so ask
-				// again soon (for up to about two minutes).
+				// for an instance: a burst of shards outran start-up, or
+				// every instance is busy (more shards than instances, as
+				// refined batches have). Either way one frees up soon.
 				time.Sleep(wait)
-				wait = 2 * time.Second
 			}
 			if err == nil {
 				return

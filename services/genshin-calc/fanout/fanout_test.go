@@ -120,7 +120,7 @@ func TestPlan(t *testing.T) {
 		kind string
 		n    int
 		want int
-	}{{Quick, 4230, 16}, {Quick, 450, 5}, {Quick, 30, 1}, {Refine, 18, 16}, {Refine, 5, 5}} {
+	}{{Quick, 4230, 16}, {Quick, 450, 5}, {Quick, 30, 1}, {Refine, 37, 37}, {Refine, 100, 64}, {Refine, 5, 5}} {
 		if got := c.Plan(tc.kind, tc.n); got != tc.want {
 			t.Errorf("Plan(%s, %d) = %d, want %d", tc.kind, tc.n, got, tc.want)
 		}
