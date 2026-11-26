@@ -91,7 +91,7 @@ type Coordinator struct {
 	Launcher        Launcher
 	Shards          int
 	MinPerShard     int           // quick batches: at least this many jobs per worker (default 100)
-	MaxRefineShards int           // refined batches: most shards, one team each (default 64)
+	MaxRefineShards int           // refined batches: most shards, one team each (default 256)
 	Threads         int           // refine batches: cores per optimiser (default 1)
 	Poll            time.Duration // how often to look for results (default 3 s)
 	Timeout         time.Duration // how long to wait for the whole batch (default 15 min)
@@ -100,7 +100,7 @@ type Coordinator struct {
 // Plan returns how many shards a batch of n jobs of kind gets.
 //
 // A refined batch gets one shard per team (up to MaxRefineShards, default
-// 64): teams take 25-80 s each, so fixed shards of two or three left some
+// 256): teams take 25-80 s each, so fixed shards of two or three left some
 // workers busy four times as long as others (2026-11-26). With one team per
 // request, a worker that finishes takes the next waiting team; the Service
 // launcher keeps asking while every instance is busy.
@@ -109,7 +109,7 @@ func (c *Coordinator) Plan(kind string, n int) int {
 	if kind == Refine {
 		s = c.MaxRefineShards
 		if s <= 0 {
-			s = 64
+			s = 256
 		}
 	}
 	if kind == Quick {

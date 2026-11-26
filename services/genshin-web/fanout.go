@@ -43,7 +43,9 @@ func newCoordinator(c fanoutConfig, simPath string) (*fanout.Coordinator, error)
 	case strings.HasPrefix(c.launch, "cloudrun:"):
 		l = &fanout.CloudRunJob{Name: strings.TrimPrefix(c.launch, "cloudrun:"), Args: args, Token: &fanout.Token{}}
 	case strings.HasPrefix(c.launch, "service:"):
-		l = &fanout.Service{URL: strings.TrimPrefix(c.launch, "service:"), Token: &fanout.IDToken{}, Log: log.Printf}
+		// One shard per worker instance at a time: the service runs at
+		// most c.shards instances (deploy.sh sets both from FANOUT_SHARDS).
+		l = &fanout.Service{URL: strings.TrimPrefix(c.launch, "service:"), Token: &fanout.IDToken{}, Log: log.Printf, Parallel: c.shards}
 	case strings.HasPrefix(c.launch, "k8s:"):
 		// k8s:NAMESPACE: an Indexed Job on the worker node pool (GKE).
 		l = &fanout.IndexedJob{Namespace: strings.TrimPrefix(c.launch, "k8s:"), ServiceAccount: "genshin-web", Args: args,

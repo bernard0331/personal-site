@@ -79,7 +79,7 @@ func main() {
 		if *fp == "" {
 			log.Fatal("-fingerprint is required with service")
 		}
-		l = &fanout.Service{URL: strings.TrimPrefix(*launch, "service:"), Token: &fanout.IDToken{}, Log: log.Printf}
+		l = &fanout.Service{URL: strings.TrimPrefix(*launch, "service:"), Token: &fanout.IDToken{}, Log: log.Printf, Parallel: *shards}
 		s = claim(*fp)
 	case *launch == "local":
 		l = &fanout.Processes{Binary: *workerBin, Args: args}

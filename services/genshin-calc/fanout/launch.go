@@ -109,7 +109,10 @@ type Service struct {
 	Token  *IDToken
 	Client *http.Client
 	Log    func(format string, args ...any)
-	// Wait is how long a shard keeps asking while no instance is free
+	// Parallel is how many shard requests may be open at once: the
+	// service's --max-instances (one shard per instance).
+	Parallel int
+	// Wait is how long a shard keeps asking while Cloud Run turns it away
 	// (default 30 min, the coordinator's own limit).
 	Wait time.Duration
 }
@@ -128,31 +131,35 @@ type ShardRequest struct {
 }
 
 func (s *Service) Launch(ctx context.Context, location string, shards int) error {
-	tok, err := s.Token.Get(ctx, s.URL)
-	if err != nil {
+	if _, err := s.Token.Get(ctx, s.URL); err != nil {
 		return err
 	}
 	c := s.Client
 	if c == nil {
 		c = &http.Client{Timeout: 35 * time.Minute}
 	}
+	// At most Parallel requests at once (the service's instance limit), so
+	// shards beyond it wait here for a free worker instead of being turned
+	// away by Cloud Run: a refined batch has a shard per team, often 100+.
+	slots := make(chan struct{}, max(1, s.Parallel))
 	for i := range shards {
 		body, _ := json.Marshal(ShardRequest{Location: location, Index: i})
 		go func() {
-			// Not ctx: the request must outlive Launch, and the coordinator
+			// Not ctx: the requests must outlive Launch, and the coordinator
 			// stops waiting on its own timeout.
+			slots <- struct{}{}
+			defer func() { <-slots }()
 			var err error
 			deadline := time.Now().Add(s.wait())
 			for wait := time.Second; ; wait = 2 * time.Second {
 				var retry bool
-				retry, err = s.post(c, tok, body, i)
+				retry, err = s.post(c, body, i)
 				if err == nil || !retry || time.Now().After(deadline) || shardDone(location, i) {
 					break
 				}
-				// Cloud Run turns a request away when it waited too long
-				// for an instance: a burst of shards outran start-up, or
-				// every instance is busy (more shards than instances, as
-				// refined batches have). Either way one frees up soon.
+				// Cloud Run turned the request away before a worker took
+				// it (instances still starting, or a moment with none
+				// free): one will be ready soon.
 				time.Sleep(wait)
 			}
 			if err == nil {
@@ -168,8 +175,15 @@ func (s *Service) Launch(ctx context.Context, location string, shards int) error
 }
 
 // post sends one shard request. retry says whether Cloud Run turned it away
-// before a worker took it (no instance was free in time).
-func (s *Service) post(c *http.Client, tok string, body []byte, i int) (retry bool, err error) {
+// before a worker took it. A worker answers its own errors in JSON (and
+// writes the shard's done marker); any other 429 or 5xx came from Cloud Run
+// itself, as an HTML page whose wording varies (2026-11-26: a plain "500
+// Internal Server Error" for "no available instance").
+func (s *Service) post(c *http.Client, body []byte, i int) (retry bool, err error) {
+	tok, err := s.Token.Get(context.Background(), s.URL) // cached; renewed when a batch runs long
+	if err != nil {
+		return true, err
+	}
 	req, err := http.NewRequest(http.MethodPost, s.URL+"/shard", bytes.NewReader(body))
 	if err != nil {
 		return false, err
@@ -184,14 +198,9 @@ func (s *Service) post(c *http.Client, tok string, body []byte, i int) (retry bo
 	if resp.StatusCode/100 == 2 {
 		return false, nil
 	}
+	fromWorker := strings.HasPrefix(resp.Header.Get("Content-Type"), "application/json")
 	err = apiError(fmt.Sprintf("shard %d", i), resp)
-	switch resp.StatusCode {
-	case http.StatusTooManyRequests, http.StatusServiceUnavailable:
-		return true, err
-	case http.StatusInternalServerError: // Cloud Run's own "no available instance" comes as a 500 too
-		return strings.Contains(err.Error(), "available instance"), err
-	}
-	return false, err
+	return !fromWorker && (resp.StatusCode == http.StatusTooManyRequests || resp.StatusCode >= 500), err
 }
 
 // shardDone reports whether shard i of the batch at location has a done marker.

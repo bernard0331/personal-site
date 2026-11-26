@@ -2,8 +2,11 @@ package fanout
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"strings"
 	"sync"
 	"testing"
@@ -120,7 +123,7 @@ func TestPlan(t *testing.T) {
 		kind string
 		n    int
 		want int
-	}{{Quick, 4230, 16}, {Quick, 450, 5}, {Quick, 30, 1}, {Refine, 37, 37}, {Refine, 100, 64}, {Refine, 5, 5}} {
+	}{{Quick, 4230, 16}, {Quick, 450, 5}, {Quick, 30, 1}, {Refine, 37, 37}, {Refine, 129, 129}, {Refine, 300, 256}, {Refine, 5, 5}} {
 		if got := c.Plan(tc.kind, tc.n); got != tc.want {
 			t.Errorf("Plan(%s, %d) = %d, want %d", tc.kind, tc.n, got, tc.want)
 		}
@@ -149,5 +152,70 @@ func TestServiceFailureIsHandedBack(t *testing.T) {
 	}
 	if time.Since(start) > 10*time.Second {
 		t.Fatalf("took %s: the coordinator waited instead of seeing the failures", time.Since(start))
+	}
+}
+
+// A worker service stand-in: Cloud Run's "no available instance" HTML 500
+// for the first two tries of each shard, then a worker that records how many
+// requests were open at once and finishes the shard.
+func TestServiceRetriesCloudRunAndThrottles(t *testing.T) {
+	st := Dir(t.TempDir())
+	sim := fakeSim{"fp1"}
+	var mu sync.Mutex
+	tries := map[int]int{}
+	open, most := 0, 0
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var req ShardRequest
+		json.NewDecoder(r.Body).Decode(&req)
+		mu.Lock()
+		tries[req.Index]++
+		n := tries[req.Index]
+		mu.Unlock()
+		if n <= 2 {
+			w.Header().Set("Content-Type", "text/html")
+			http.Error(w, "<html><head>500 Internal Server Error</head></html>", http.StatusInternalServerError)
+			return
+		}
+		mu.Lock()
+		open++
+		most = max(most, open)
+		mu.Unlock()
+		defer func() { mu.Lock(); open--; mu.Unlock() }()
+		storeLoc, batch, _ := SplitLocation(req.Location)
+		s, _ := Open(storeLoc)
+		time.Sleep(20 * time.Millisecond)
+		if err := Work(r.Context(), s, batch, req.Index, 1, func(Manifest) (coarse.Simulator, error) { return sim, nil }); err != nil {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte(`{"error":"x"}`))
+		}
+	}))
+	defer srv.Close()
+	svc := &Service{URL: srv.URL, Token: &IDToken{value: "x", expires: time.Now().Add(time.Hour)}, Parallel: 2}
+	c := &Coordinator{Store: st, Launcher: svc, MaxRefineShards: 6, Poll: 10 * time.Millisecond, Timeout: 30 * time.Second}
+	n := 0
+	missing, err := c.Run(context.Background(), jobs(6), sim, Refine, "", func(coarse.Result) { n++ }, nil)
+	if err != nil || len(missing) != 0 || n != 6 {
+		t.Fatalf("saved %d, missing %d, err %v; want all 6 after retries", n, len(missing), err)
+	}
+	if most > 2 {
+		t.Fatalf("%d shards ran at once, want at most Parallel (2)", most)
+	}
+}
+
+func TestServiceDoesNotRetryWorkerErrors(t *testing.T) {
+	calls := 0
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls++
+		// As the worker's own httpError answers (http.Error would set text/plain).
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"error":"simulator missing"}`))
+	}))
+	defer srv.Close()
+	svc := &Service{URL: srv.URL, Token: &IDToken{value: "x", expires: time.Now().Add(time.Hour)}, Parallel: 1}
+	retry, err := svc.post(srv.Client(), []byte(`{}`), 0)
+	if err == nil || retry || calls != 1 {
+		t.Fatalf("retry %v, err %v, calls %d: a worker's own error must not be retried", retry, err, calls)
 	}
 }
