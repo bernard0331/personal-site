@@ -1,6 +1,8 @@
 #!/bin/sh
-# Deploy (or update) the genshin-web Cloud Run service, and the Cloud Run Job
-# its simulations fan out to (genshin-sim, the same image in -worker mode).
+# Deploy (or update) the genshin-web Cloud Run service and the workers its
+# simulations fan out to, all from the same image: the genshin-worker service
+# (-worker-serve mode, the default) and the genshin-sim Cloud Run Job
+# (-worker mode, the alternative).
 #
 # Usage: deploy/genshin-web/deploy.sh IMAGE
 #   IMAGE is what build.sh printed.
@@ -11,6 +13,9 @@
 #   BUCKET   Cloud Storage bucket for runs and the cache's copy (required)
 #   SA       service account the service and the job run as (default: genshin-web@PROJECT.iam.gserviceaccount.com)
 #   FANOUT_SHARDS  most workers one batch may use (default 8; 0 turns fan-out off)
+#   FANOUT_VIA     service (default) or job: which workers the site uses
+#   WORKER_MAX     most worker instances at once (default 16; 16 x 8 vCPU plus
+#                  the site fits Cloud Run's default 200 vCPU regional quota)
 #
 # Why each setting:
 #   --max-instances 1     One instance holds the run queue and the per-visitor
@@ -25,6 +30,16 @@
 #   --execution-environment gen2  Needed for the Cloud Storage volume.
 #   --add-volume ...      The bucket mounted at /data (runs, the cache's copy).
 #   --allow-unauthenticated  The site has no sign-in; anyone with the link can use it.
+#
+# The worker service (genshin-worker):
+#   --no-allow-unauthenticated  Private: only the service account may call it
+#                         (roles/run.invoker on this service only).
+#   --concurrency 1       One shard per instance, so each gets all 8 cores and
+#                         Cloud Run starts one instance per shard.
+#   --min-instances 0 --max-instances WORKER_MAX  Nothing runs between batches.
+#   --cpu-boost           More CPU while an instance starts.
+#   --timeout 1800        A request lasts as long as its shard (refined teams
+#                         take minutes).
 #
 # The job (genshin-sim):
 #   --cpu 8 --memory 4Gi  Eight quick simulations at once, or one refined team
@@ -47,6 +62,23 @@ BUCKET=${BUCKET:?set BUCKET to the Cloud Storage bucket for runs}
 SA=${SA:-genshin-web@$PROJECT.iam.gserviceaccount.com}
 
 FANOUT_SHARDS=${FANOUT_SHARDS:-8}
+FANOUT_VIA=${FANOUT_VIA:-service}
+WORKER_MAX=${WORKER_MAX:-16}
+
+gcloud run deploy genshin-worker \
+  --project "$PROJECT" --region "$REGION" \
+  --image "$IMAGE" \
+  --service-account "$SA" \
+  --no-allow-unauthenticated \
+  --concurrency 1 --min-instances 0 --max-instances "$WORKER_MAX" \
+  --cpu 8 --memory 4Gi --cpu-boost \
+  --timeout 1800 \
+  --port 8080 \
+  --args=-worker-serve,-addr=:8080,-sim=/app/kqmsim,-cpus=8
+
+gcloud run services add-iam-policy-binding genshin-worker \
+  --project "$PROJECT" --region "$REGION" \
+  --member "serviceAccount:$SA" --role roles/run.invoker >/dev/null
 
 gcloud run jobs deploy genshin-sim \
   --project "$PROJECT" --region "$REGION" \
@@ -65,6 +97,11 @@ FANOUT_STORE=""
 if [ "$FANOUT_SHARDS" -gt 0 ]; then
   FANOUT_STORE="gs://$BUCKET/fanout"
 fi
+if [ "$FANOUT_VIA" = job ]; then
+  FANOUT_LAUNCH="cloudrun:projects/$PROJECT/locations/$REGION/jobs/genshin-sim"
+else
+  FANOUT_LAUNCH="service:$(gcloud run services describe genshin-worker --project "$PROJECT" --region "$REGION" --format='value(status.url)')"
+fi
 
 gcloud run deploy genshin-web \
   --project "$PROJECT" --region "$REGION" \
@@ -77,5 +114,5 @@ gcloud run deploy genshin-web \
   --add-volume name=data,type=cloud-storage,bucket="$BUCKET" \
   --add-volume-mount volume=data,mount-path=/data \
   --port 8080 \
-  --update-env-vars "FANOUT_STORE=$FANOUT_STORE,FANOUT_LAUNCH=cloudrun:projects/$PROJECT/locations/$REGION/jobs/genshin-sim,FANOUT_SHARDS=$FANOUT_SHARDS,FANOUT_WORKER_CPUS=8" \
+  --update-env-vars "FANOUT_STORE=$FANOUT_STORE,FANOUT_LAUNCH=$FANOUT_LAUNCH,FANOUT_SHARDS=$FANOUT_SHARDS,FANOUT_WORKER_CPUS=8" \
   --allow-unauthenticated

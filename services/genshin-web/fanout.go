@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -40,6 +42,8 @@ func newCoordinator(c fanoutConfig, simPath string) (*fanout.Coordinator, error)
 	switch {
 	case strings.HasPrefix(c.launch, "cloudrun:"):
 		l = &fanout.CloudRunJob{Name: strings.TrimPrefix(c.launch, "cloudrun:"), Args: args, Token: &fanout.Token{}}
+	case strings.HasPrefix(c.launch, "service:"):
+		l = &fanout.Service{URL: strings.TrimPrefix(c.launch, "service:"), Token: &fanout.IDToken{}, Log: log.Printf}
 	case c.launch == "local":
 		self, err := os.Executable()
 		if err != nil {
@@ -47,7 +51,7 @@ func newCoordinator(c fanoutConfig, simPath string) (*fanout.Coordinator, error)
 		}
 		l = &fanout.Processes{Binary: self, Args: args}
 	default:
-		return nil, fmt.Errorf("-fanout-launch %q: want cloudrun:projects/P/locations/R/jobs/J or local", c.launch)
+		return nil, fmt.Errorf("-fanout-launch %q: want service:https://URL, cloudrun:projects/P/locations/R/jobs/J or local", c.launch)
 	}
 	log.Printf("fan-out: up to %d workers of %d cores (%s), batches in %s", c.shards, c.workerCPUs, c.launch, c.store)
 	return &fanout.Coordinator{Store: st, Launcher: l, Shards: c.shards, MinPerShard: c.minPerShard, Threads: c.threads,
@@ -103,7 +107,43 @@ func (e *engine) runJobs(todo []coarse.Job, p pass, save func(coarse.Result) err
 }
 
 // runWorker is -worker mode: simulate one shard of the batch at loc and exit.
+// The shard number comes from the platform (fanout.Index).
 func runWorker(loc, simPath string, cpus int) error {
+	i, err := fanout.Index()
+	if err != nil {
+		return err
+	}
+	return workShard(context.Background(), loc, i, simPath, cpus)
+}
+
+// serveWorker is -worker-serve mode: a Cloud Run service that runs one shard
+// per request (POST /shard, a fanout.ShardRequest), answering when it's done.
+// The service allows one request per instance, so each shard gets a whole
+// instance, and Cloud Run starts as many instances as there are shards.
+func serveWorker(addr, simPath string, cpus int) error {
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) { w.Write([]byte("ok")) })
+	mux.HandleFunc("POST /shard", func(w http.ResponseWriter, r *http.Request) {
+		var req fanout.ShardRequest
+		if err := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<16)).Decode(&req); err != nil {
+			httpError(w, http.StatusBadRequest, "not a shard request")
+			return
+		}
+		start := time.Now()
+		if err := workShard(r.Context(), req.Location, req.Index, simPath, cpus); err != nil {
+			log.Printf("shard %d of %s: %v", req.Index, req.Location, err)
+			httpError(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+		fmt.Fprintf(w, "shard %d done in %s\n", req.Index, time.Since(start).Round(time.Second))
+	})
+	log.Printf("worker service on %s, %d cores", addr, cpus)
+	srv := &http.Server{Addr: addr, Handler: mux, ReadHeaderTimeout: 10 * time.Second}
+	return srv.ListenAndServe()
+}
+
+// workShard simulates shard i of the batch at loc.
+func workShard(ctx context.Context, loc string, i int, simPath string, cpus int) error {
 	storeLoc, batch, err := fanout.SplitLocation(loc)
 	if err != nil {
 		return err
@@ -112,11 +152,7 @@ func runWorker(loc, simPath string, cpus int) error {
 	if err != nil {
 		return err
 	}
-	i, err := fanout.Index()
-	if err != nil {
-		return err
-	}
-	return fanout.Work(context.Background(), st, batch, i, cpus, func(m fanout.Manifest) (coarse.Simulator, error) {
+	return fanout.Work(ctx, st, batch, i, cpus, func(m fanout.Manifest) (coarse.Simulator, error) {
 		bin, err := coarse.NewBinary(simPath)
 		if err != nil {
 			return nil, err

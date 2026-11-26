@@ -45,7 +45,7 @@ func main() {
 	options := flag.String("options", "", "refine: the optimiser's -options")
 	seed := flag.Int64("seed", 1, "which rotations (the same seed gives the same batch)")
 	store := flag.String("store", "", "gs://bucket/prefix or a directory")
-	launch := flag.String("launch", "local", "cloudrun:projects/P/locations/R/jobs/J or local")
+	launch := flag.String("launch", "local", "service:https://URL, cloudrun:projects/P/locations/R/jobs/J or local")
 	shards := flag.Int("shards", 8, "workers")
 	minPer := flag.Int("min-per-shard", 1, "quick: at least this many simulations per worker")
 	threads := flag.Int("threads", 8, "refine: cores per team on a worker")
@@ -73,6 +73,12 @@ func main() {
 		}
 		args[1] = "/app/kqmsim"
 		l = &fanout.CloudRunJob{Name: strings.TrimPrefix(*launch, "cloudrun:"), Args: args, Token: &fanout.Token{}}
+		s = claim(*fp)
+	case strings.HasPrefix(*launch, "service:"):
+		if *fp == "" {
+			log.Fatal("-fingerprint is required with service")
+		}
+		l = &fanout.Service{URL: strings.TrimPrefix(*launch, "service:"), Token: &fanout.IDToken{}, Log: log.Printf}
 		s = claim(*fp)
 	case *launch == "local":
 		l = &fanout.Processes{Binary: *workerBin, Args: args}

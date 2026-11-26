@@ -5,10 +5,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
+	"sync"
 	"time"
 )
 
@@ -93,4 +97,115 @@ func (p *Processes) Launch(ctx context.Context, location string, shards int) err
 		go cmd.Wait()
 	}
 	return nil
+}
+
+// Service sends each shard to a Cloud Run service running workers (the
+// site's image in -worker-serve mode, one request per instance at a time).
+// A service starts new instances in seconds and scales to zero, where a
+// Cloud Run Job's tasks waited 17-105 s to start (2026-11-26). Each request
+// stays open while its shard runs; Launch returns once they are all sent.
+type Service struct {
+	URL    string // https://genshin-sim-....run.app
+	Token  *IDToken
+	Client *http.Client
+	Log    func(format string, args ...any)
+}
+
+// ShardRequest is what Service posts to a worker.
+type ShardRequest struct {
+	Location string `json:"location"` // the batch: store location and batch id
+	Index    int    `json:"index"`
+}
+
+func (s *Service) Launch(ctx context.Context, location string, shards int) error {
+	tok, err := s.Token.Get(ctx, s.URL)
+	if err != nil {
+		return err
+	}
+	c := s.Client
+	if c == nil {
+		c = &http.Client{Timeout: 35 * time.Minute}
+	}
+	for i := range shards {
+		body, _ := json.Marshal(ShardRequest{Location: location, Index: i})
+		go func() {
+			// Not ctx: the request must outlive Launch, and the coordinator
+			// stops waiting on its own timeout.
+			req, err := http.NewRequest(http.MethodPost, s.URL+"/shard", bytes.NewReader(body))
+			if err != nil {
+				return
+			}
+			req.Header.Set("Authorization", "Bearer "+tok)
+			req.Header.Set("Content-Type", "application/json")
+			resp, err := c.Do(req)
+			if err == nil {
+				defer resp.Body.Close()
+				if resp.StatusCode/100 != 2 {
+					err = apiError(fmt.Sprintf("shard %d", i), resp)
+				}
+			}
+			if err == nil {
+				return
+			}
+			if s.Log != nil {
+				s.Log("fanout: shard %d: %v", i, err)
+			}
+			markFailed(location, i, err) // so the coordinator stops waiting for it
+		}()
+	}
+	return nil
+}
+
+// IDToken is an OpenID Connect identity token for calling a private Cloud
+// Run service: from the metadata server (the workload's own identity), or
+// from gcloud on a developer's machine.
+type IDToken struct {
+	mu      sync.Mutex
+	value   string
+	expires time.Time
+}
+
+func (t *IDToken) Get(ctx context.Context, audience string) (string, error) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	if t.value != "" && time.Until(t.expires) > 5*time.Minute {
+		return t.value, nil
+	}
+	req, _ := http.NewRequestWithContext(ctx, http.MethodGet,
+		"http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/identity?audience="+url.QueryEscape(audience), nil)
+	req.Header.Set("Metadata-Flavor", "Google")
+	if resp, err := (&http.Client{Timeout: 5 * time.Second}).Do(req); err == nil {
+		defer resp.Body.Close()
+		b, _ := io.ReadAll(resp.Body)
+		if resp.StatusCode == http.StatusOK && len(b) > 0 {
+			t.value, t.expires = strings.TrimSpace(string(b)), time.Now().Add(55*time.Minute)
+			return t.value, nil
+		}
+	}
+	out, err := exec.CommandContext(ctx, "gcloud", "auth", "print-identity-token").Output()
+	if err != nil {
+		return "", fmt.Errorf("no identity token: not on Google Cloud, and gcloud failed: %w", err)
+	}
+	t.value, t.expires = strings.TrimSpace(string(out)), time.Now().Add(50*time.Minute)
+	return t.value, nil
+}
+
+// markFailed writes shard i's done marker with err, for a worker that never
+// got to write its own. The coordinator then hands the shard's jobs back.
+func markFailed(location string, i int, err error) {
+	storeLoc, batch, serr := SplitLocation(location)
+	if serr != nil {
+		return
+	}
+	st, serr := Open(storeLoc)
+	if serr != nil {
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	defer cancel()
+	if _, gerr := st.Get(ctx, shardName(batch, "done", i, "json")); gerr == nil {
+		return // the worker finished after all
+	}
+	b, _ := json.Marshal(Done{Shard: i, Error: err.Error()})
+	st.Put(ctx, shardName(batch, "done", i, "json"), b)
 }

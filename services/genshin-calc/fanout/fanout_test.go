@@ -136,3 +136,18 @@ func TestSplitLocation(t *testing.T) {
 		t.Fatal("want an error")
 	}
 }
+
+func TestServiceFailureIsHandedBack(t *testing.T) {
+	st := Dir(t.TempDir())
+	// Nothing listens here, so every request fails at once.
+	c := &Coordinator{Store: st, Launcher: &Service{URL: "http://127.0.0.1:1", Token: &IDToken{value: "x", expires: time.Now().Add(time.Hour)}},
+		Shards: 2, MinPerShard: 1, Poll: 10 * time.Millisecond, Timeout: 20 * time.Second}
+	start := time.Now()
+	missing, err := c.Run(context.Background(), jobs(4), fakeSim{"fp1"}, Quick, "", func(coarse.Result) {}, nil)
+	if err != nil || len(missing) != 4 {
+		t.Fatalf("missing %d, err %v; want all 4 handed back", len(missing), err)
+	}
+	if time.Since(start) > 10*time.Second {
+		t.Fatalf("took %s: the coordinator waited instead of seeing the failures", time.Since(start))
+	}
+}
