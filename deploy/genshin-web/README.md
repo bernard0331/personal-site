@@ -51,22 +51,25 @@ all traffic to it; runs and the cache survive in the bucket.
 
 ## Refined runs
 
-A refined run is a quick run, then its most promising teams again: KQM Sim's
-substat optimiser chooses their substats, and the result is simulated with
-250 iterations (500 for thorough; the command line's full pass uses 1,000).
-The quick teams show while it runs. Levels: Light (the
-quick run's picks and about 15 to 35 more teams, ~10 minutes), Standard
-(also each character's best team, ~120 teams, ~25 minutes) and Thorough
-(the full pass's 100 / 20 per element / 3 per character, adjustable; about
-an hour). A light run on a 12-character account took 3 minutes on Cloud Run
-(2026-11-22), quick pass included. Settings live in
-`refineLevels` in services/genshin-web/refine.go.
+A refined run is a quick run, then about 120 of its most promising teams
+again: the quick run's picks, the best of each element and each character's
+best team. KQM Sim's substat optimiser chooses their substats, and the result
+is simulated with 250 iterations (the command line's full pass uses 1,000).
+The quick teams show while it runs. There is one level since 2026-11-26
+(light and thorough were removed); its settings are `standardRefine` in
+services/genshin-web/refine.go.
+
+Each refined team goes to its own worker (see the fan-out in the main
+README). A standard run on the owner's account with nothing refined cached
+took 6 min 19 s on 2026-11-26: 129 teams in 5 min 41 s on 16 workers (a team
+takes 26 s at the median, 190 s at worst). Before the fan-out the site alone
+took about 25 minutes.
 
 ## Limits
 
 One run at a time and 6 runs an hour per visitor (IP address), and at most 20
 runs waiting. More visitors make the queue longer; they cannot add instances.
-A thorough run holds the queue for about an hour; everyone else waits.
+A refined run holds the queue for about 6 minutes; everyone else waits.
 
 ## Cost
 
@@ -74,9 +77,12 @@ Nothing while no instance is up. While one is, Cloud Run bills 8 vCPU and
 8 GiB per second: a run from scratch takes about 5 minutes (about 4 of
 simulating), one with everything cached under a minute, and an idle
 instance stays up to about 15 minutes after the last visit. At about $0.58
-an instance-hour beyond the free tier, a light refined run costs roughly
-$0.10, a standard one $0.25 and a thorough one $0.60. Cloud Run's
-monthly free tier covers light testing. The bucket and the registry cost
+an instance-hour beyond the free tier. The workers bill only while they
+simulate: a refined run with nothing cached kept them busy for about 33,000
+vCPU-seconds, about $0.85 beyond the free tier (2026-11-26). It costs more
+than the site alone did (about $0.25), because a team on 8 cores finishes far
+sooner but uses more CPU-seconds in all. Cloud Run's monthly free tier
+(180,000 vCPU-seconds) covers a few such runs. The bucket and the registry cost
 cents a month. Check the project's budget alerts and the billing report.
 
 ## Taking it down

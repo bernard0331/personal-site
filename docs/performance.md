@@ -93,3 +93,16 @@ Compute Engine quota (32 vCPU in all regions) leaves room for 3 such workers,
 against 16 on Cloud Run, and the cluster autoscaler takes 1-2 minutes to add
 a node from zero. So it is expected to be slower: by estimate about 40-50 s of
 simulating for the quick batch above and 6-7 minutes for the 37 refined teams.
+
+**Refined runs after the fix (2026-11-26):** the first live standard run (129
+teams) took 29 minutes. The launcher sent 64 shards at once to 16 workers;
+Cloud Run turned most away with a plain HTML 500, which the retry didn't
+recognise, so the site simulated about 105 teams itself. Now at most one
+request per worker instance is open (the rest wait on the site), any Cloud
+Run rejection is retried, and each team is its own shard. The same kind of
+run (top-1% artifacts, nothing refined cached) then took **6 min 19 s**: 129
+teams in 5 min 41 s, 26 s per team at the median and 190 s for the slowest,
+about 33,000 vCPU-seconds of worker time (about $0.85).
+
+Refined runs now have one level (standard) instead of light, standard and
+thorough (owner, 2026-11-26).
