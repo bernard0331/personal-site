@@ -1,6 +1,6 @@
 # Plan: optimizing with the player's own artifacts
 
-Status: planned and decided (2026-11-26), not built. Part of the original scope ("real
+Status: step 1 built and checked (2026-11-26, below); steps 2-4 to do. Part of the original scope ("real
 mode": allocate pieces from the whole inventory, like weapons), scheduled as
 phase 2b. Today every run gives characters KQM-standard or top-1% substats
 from KQM Sim's substat optimiser; the imported artifacts are only shown.
@@ -129,3 +129,45 @@ beyond the free tier.
 3. The snapshot, the run mode and the results page (pieces per member,
    "what to equip"), and the page wording fixed to match.
 4. Measure a real run end to end and record it in `docs/performance.md`.
+
+## Step 1: what was built and learned (2026-11-26)
+
+`services/genshin-calc/gear` with `tools/gearbench`, run on the Cloud Run
+workers. On Fischl alone (the prototype's case) it matched the hand-built
+prototype: 4-piece Tenacity on Elegy, 263,386 against 263,392 team DPS.
+Gearing the whole team (Arlecchino, Mona, Bennett, Fischl) from the whole
+inventory took several changes to the method above before it beat the gear
+the team came with: **265,101 against 259,747 (+2.1%)**.
+
+What changed, and why:
+
+- **Fixed-seed simulations.** A second simulator binary, `kqmsim-seeded`
+  (`-seed`), runs every measurement on the same random rolls, so a
+  measurement's difference is the stat alone. Seed 5 twice gave identical
+  DPS on all 16 configs tried.
+- **Each set layout has its own ER floor.** A set can change how much energy
+  a character needs (Mona without Celestial Gift). After the main sweep,
+  each candidate layout gets a short sweep around the character's floor.
+- **Floors are measured against the character's least waiting.** Some
+  rotations wait a little whatever the ER (Mona about 0.6 s per fight). The
+  floor is the least ER within 0.5 s of the least waiting in the sweep.
+- **Hard floors first, priced floors only if impossible.** When no allocation
+  meets every floor (Mona's is beyond the inventory), the solver chased it at
+  any cost and took Bennett's Noblesse pieces, losing the team's ATK buff.
+  Now each point missed costs what the sweep says it is worth in team DPS.
+- **Crit is modelled, not linear.** CRIT Rate and CRIT DMG multiply and CRIT
+  Rate stops at 100%; with straight-line values the rounds swung between
+  extremes (Arlecchino 70%/90%, then 28%/188%). The estimate is now linear
+  for other stats plus A * min(1, CR) * CD on totals, with whole builds
+  enumerated per character and HiGHS picking one per character without
+  sharing pieces.
+- **In-combat CRIT Rate is calibrated from the measurements.** The snapshot
+  misses buffs that come on during the fight (Arlecchino: 27.1% from outside
+  artifacts by the snapshot, 44.5% in combat). Below the cap, the ratio of
+  the measured CRIT Rate and CRIT DMG values gives the real figure.
+- **Rounds.** Each round measures again at the previous round's build;
+  every round's answer is simulated and the best kept.
+
+Cost: one round for a four-character team is about 400 simulations (stat
+values, layouts and ER sweeps at 300-1,000 iterations), about 1.5-3 minutes
+on 16 workers; three rounds about 8 minutes, well inside the free tier.

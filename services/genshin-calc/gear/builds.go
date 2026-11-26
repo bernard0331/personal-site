@@ -1,6 +1,7 @@
 package gear
 
 import (
+	"fmt"
 	"math"
 	"sort"
 	"strconv"
@@ -22,9 +23,26 @@ import (
 // enumerated per character from each slot's strongest candidates, and the
 // solver picks one build per character with no piece used twice.
 
+// critRateOther is the CRIT Rate the character fights with from everything
+// but artifacts. The snapshot only sees what holds at the fight's start, not
+// buffs that come on during it. Below the cap, though, the measured values
+// say what the character really fights with: for A*cr*cd, the value of a
+// CRIT Rate point over a CRIT DMG point is cd/cr (2026-11-26).
+func (m *Measured) critRateOther() float64 {
+	wr, wd := m.Weights["critRate_"], m.Weights["critDMG_"]
+	cd0 := m.CritDMGOther + m.BaseArtifacts["critDMG_"]
+	if wr > 0 && wd > 0 && cd0 > 0 {
+		cr := cd0 * wd / wr // total CRIT Rate in combat
+		if cr < 100 {
+			return math.Max(m.CritRateOther, cr-m.BaseArtifacts["critRate_"])
+		}
+	}
+	return m.CritRateOther
+}
+
 // critCoef is A: the crit term's size, from the measured crit values.
 func (m *Measured) critCoef() float64 {
-	cr0 := m.CritRateOther + m.BaseArtifacts["critRate_"]
+	cr0 := m.critRateOther() + m.BaseArtifacts["critRate_"]
 	cd0 := m.CritDMGOther + m.BaseArtifacts["critDMG_"]
 	var est []float64
 	// d/dCR of A*cr*cd (cr, cd as fractions, per GOOD point) = A*cd/1e4
@@ -58,7 +76,7 @@ func (m *Measured) Value(s Stats) float64 {
 	if a == 0 {
 		return v + m.Weights["critRate_"]*s["critRate_"] + m.Weights["critDMG_"]*s["critDMG_"]
 	}
-	cr := math.Min(1, (m.CritRateOther+s["critRate_"])/100)
+	cr := math.Min(1, (m.critRateOther()+s["critRate_"])/100)
 	cd := (m.CritDMGOther + s["critDMG_"]) / 100
 	return v + a*cr*cd
 }
@@ -254,4 +272,10 @@ func assignments(needs []SetNeed) [][]*SetNeed {
 	}
 	perm(labels, 0)
 	return out
+}
+
+// CritModel describes the crit estimate, for checking it.
+func (m *Measured) CritModel() string {
+	return fmt.Sprintf("CRIT Rate outside artifacts %.1f (snapshot %.1f), CRIT DMG outside %.1f, A %.0f",
+		m.critRateOther(), m.CritRateOther, m.CritDMGOther, m.critCoef())
 }

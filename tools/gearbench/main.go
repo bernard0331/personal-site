@@ -157,6 +157,7 @@ func main() {
 		plan.ApplyERChecks(ms, run(checks, *seed))
 		for _, m := range ms {
 			minWait[m.Char] = m.MinWait
+			log.Printf("round %d: %s: %s, CR %.1f%% per point vs CD %.1f", r, m.Char, m.CritModel(), m.Weights["critRate_"], m.Weights["critDMG_"])
 		}
 		if *verbose {
 			printMeasured(ms, base)

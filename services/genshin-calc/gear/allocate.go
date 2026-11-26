@@ -175,8 +175,8 @@ func (a *Allocator) Allocate(wearers []Wearer, pieces []Piece, objective string,
 			}
 		}
 		c := char{Team: w.Team, ERValue: m.ERValue}
-		if m.CritRateOther > 0 {
-			v := math.Max(0, 100-m.CritRateOther)
+		if cr := m.critRateOther(); cr > 0 {
+			v := math.Max(0, 100-cr)
 			c.CRCap = &v
 		}
 		ids := make([]int, 0, len(chosen))
