@@ -105,7 +105,7 @@ func Summarise(job Job, raw []byte) (Result, error) {
 		SimVersion string `json:"sim_version"`
 		Chars      []struct {
 			Stats    []float64 `json:"stats"`
-			Snapshot []float64 `json:"snapshot_stats"`
+			Snapshot []float64 `json:"snapshot"` // the output's name for snapshot_stats
 		} `json:"character_details"`
 		Statistics struct {
 			Iterations int               `json:"iterations"`
@@ -138,7 +138,7 @@ func Summarise(job Job, raw []byte) (Result, error) {
 	for _, member := range s.Failed {
 		r.EnergyWaits = append(r.EnergyWaits, member["insufficient_energy"].Mean)
 	}
-	const critRate = 8 // the simulator's stat index (attributes.CR)
+	const critRate = 9 // attributes.CR's index in the output's stat arrays (index 0 is NoStat)
 	for _, c := range out.Chars {
 		other := 0.0
 		if len(c.Snapshot) > critRate {

@@ -83,7 +83,10 @@ const elementStep = 10
 const (
 	erStep = 5.0
 	erMax  = 120.0
-	// A character waiting under half a second per fight in all is not waiting.
+	// A character waiting under half a second per fight more than it does
+	// with all the ER in the sweep is not waiting for want of ER. (Some
+	// rotations wait a little whatever the ER, from particle timing; that
+	// must not push the floor up.)
 	waitOK = 0.5
 )
 
@@ -167,6 +170,9 @@ type Measured struct {
 	ERNeed  float64 // artifact plus set-bonus ER (GOOD %) at which it never waits; +Inf if no amount was enough
 	BaseDPS float64 // the team on standard artifacts, energy ignored
 	OwnSets map[string]int
+	// MinWait is the least the character waits anywhere in its ER sweep:
+	// waiting no ER removes.
+	MinWait float64
 	// CritRateOther is the character's CRIT Rate from everything but
 	// artifacts (GOOD %); artifacts may add up to 100 minus this.
 	CritRateOther float64
@@ -206,14 +212,15 @@ func (p *Plan) Analyze(res map[string]coarse.Result) ([]Measured, error) {
 			m.Layouts = append(m.Layouts, LayoutValue{Layout: l, Value: r.DPS - base.DPS})
 		}
 		sort.Slice(m.Layouts, func(i, j int) bool { return m.Layouts[i].Value > m.Layouts[j].Value })
-		m.ERNeed = p.erNeed(ch.Key, res)
+		m.ERNeed, m.MinWait = p.erNeed(ch.Key, res)
 		out = append(out, m)
 	}
 	return out, nil
 }
 
-// erNeed is the least ER above which the character never waits for energy.
-func (p *Plan) erNeed(char string, res map[string]coarse.Result) float64 {
+// erNeed is the least ER above which the character waits no more than
+// waitOK longer than with the most ER in the sweep, and that least waiting.
+func (p *Plan) erNeed(char string, res map[string]coarse.Result) (float64, float64) {
 	idx := -1
 	for i, c := range p.order {
 		if c == char {
@@ -232,14 +239,18 @@ func (p *Plan) erNeed(char string, res map[string]coarse.Result) float64 {
 		pts = append(pts, point{p.er0[char] + o, r.EnergyWaits[idx]})
 	}
 	if len(pts) == 0 {
-		return math.Inf(1)
+		return math.Inf(1), 0
 	}
 	sort.Slice(pts, func(i, j int) bool { return pts[i].er < pts[j].er })
+	least := math.Inf(1)
+	for _, pt := range pts {
+		least = math.Min(least, pt.wait)
+	}
 	need := math.Inf(1)
-	for i := len(pts) - 1; i >= 0 && pts[i].wait < waitOK; i-- {
+	for i := len(pts) - 1; i >= 0 && pts[i].wait <= least+waitOK; i-- {
 		need = pts[i].er
 	}
-	return math.Max(0, need)
+	return math.Max(0, need), least
 }
 
 // erCheckOffsets are the layout checks' points, relative to the character's
@@ -304,7 +315,7 @@ func (p *Plan) ApplyERChecks(ms []Measured, res map[string]coarse.Result) {
 				pts = append(pts, point{er, r.EnergyWaits[idx]})
 			}
 			sort.Slice(pts, func(i, j int) bool { return pts[i].er < pts[j].er })
-			for i := len(pts) - 1; i >= 0 && pts[i].wait < waitOK; i-- {
+			for i := len(pts) - 1; i >= 0 && pts[i].wait <= m.MinWait+waitOK; i-- {
 				l.ERNeed = math.Max(0, pts[i].er)
 			}
 		}

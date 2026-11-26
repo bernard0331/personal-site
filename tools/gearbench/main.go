@@ -132,6 +132,7 @@ func main() {
 	// energy in the check gets a higher floor and the round solves again.
 	alloc := &gear.Allocator{Python: *python}
 	extra := map[string]float64{} // ER added to a character's floor after it waited
+	minWait := map[string]float64{} // the least each character waits at any ER (from the sweeps)
 	type result struct {
 		name string
 		cfg  string
@@ -153,6 +154,9 @@ func main() {
 			log.Fatal(err)
 		}
 		plan.ApplyERChecks(ms, run(checks, *seed))
+		for _, m := range ms {
+			minWait[m.Char] = m.MinWait
+		}
 		if *verbose {
 			printMeasured(ms, base)
 		}
@@ -181,7 +185,7 @@ func main() {
 			chk := run([]coarse.Job{{ID: "check", Team: team, Config: gear.Options(geared, *checkIterations, false)}}, *seed+1_000_000)["check"]
 			var waiting []string
 			for i, c := range team {
-				if geared := gearedSet[c]; geared && i < len(chk.EnergyWaits) && chk.EnergyWaits[i] > 0.5 {
+				if geared := gearedSet[c]; geared && i < len(chk.EnergyWaits) && chk.EnergyWaits[i] > minWait[c]+0.5 {
 					waiting = append(waiting, fmt.Sprintf("%s %.1fs", c, chk.EnergyWaits[i]))
 					extra[c] += 10
 				}
@@ -207,11 +211,13 @@ func main() {
 	best := -1
 	for i, r := range results {
 		c := check[r.name]
-		waits := 0.0
-		for _, w := range c.EnergyWaits {
-			waits = math.Max(waits, w)
+		waits := 0.0 // the most any geared character waits beyond its least
+		for i, w := range c.EnergyWaits {
+			if i < len(team) && gearedSet[team[i]] {
+				waits = math.Max(waits, w-minWait[team[i]])
+			}
 		}
-		fmt.Printf("  %s: %.0f (%+.1f%%), longest energy wait %.1f s\n", r.name, c.DPS, 100*(c.DPS/before-1), waits)
+		fmt.Printf("  %s: %.0f (%+.1f%%), energy waiting beyond the least %.1f s\n", r.name, c.DPS, 100*(c.DPS/before-1), waits)
 		b := check["before"]
 		for ci, ch := range team {
 			if ci >= len(c.CharDPS) || ci >= len(b.CharDPS) {
