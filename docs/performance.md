@@ -86,3 +86,10 @@ A refined run is now bounded by its slowest team on one 8-vCPU instance (the
 most Cloud Run gives one instance) plus start-up. 16 instances of 8 vCPU plus
 the site fit Cloud Run's default regional quota of 200 vCPU; more workers
 need a quota increase.
+
+**GKE** (built 2026-11-26, not yet run live): workers are an Indexed Job on
+a spot pool of c2d-highcpu-8 nodes that autoscales from zero. The project's
+Compute Engine quota (32 vCPU in all regions) leaves room for 3 such workers,
+against 16 on Cloud Run, and the cluster autoscaler takes 1-2 minutes to add
+a node from zero. So it is expected to be slower: by estimate about 40-50 s of
+simulating for the quick batch above and 6-7 minutes for the 37 refined teams.

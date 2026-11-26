@@ -142,6 +142,23 @@ Terraform reads the same file and gives each site:
 
 `sitectl check` validates the repository against the list, for use in CI.
 
+### Fan-out of simulations
+
+Uncached simulations are spread over worker machines
+([services/genshin-calc/fanout](services/genshin-calc/fanout)). The site
+writes shards to the bucket, starts one worker per shard (its own image in
+worker mode), and collects the results; whatever a worker doesn't return,
+the site simulates itself. There is one launcher per platform:
+
+| Where | Workers | Status |
+| :- | :- | :- |
+| Cloud Run (the live site) | a private Cloud Run service, one shard per instance, up to 16 x 8 vCPU, scales to zero | live: 4,230 quick simulations from scratch in 34-41 s (5.5-7.7 min before) |
+| Cloud Run, alternative | a Cloud Run Job, one task per shard | works, but tasks waited 17-105 s to start |
+| GKE | a Kubernetes Indexed Job on a tainted spot pool that autoscales from zero (`fanout_nodes`), created by the site through the API with a namespace-scoped RBAC Role, one NetworkPolicy exception for the control plane, and Pod Security Admission | built and checked offline; not yet run live |
+
+Refined runs send each team as its own request, so a free worker takes the
+next team. Measurements are in [docs/performance.md](docs/performance.md).
+
 ### Canary releases
 
 [deploy/gke/canary.sh](deploy/gke/canary.sh) runs a new image beside the
@@ -252,6 +269,7 @@ the rollback ([docs/verification.md](docs/verification.md)).
 | `deploy/gke/verify-*.sh` | Live checks of the NetworkPolicies and the mesh |
 | `tools/sitectl` | The self-serve CLI for adding a site |
 | `tools/faultserver`, `deploy/gke/fault.yaml` | A backend that only fails, for testing the alerts as a broken canary |
+| `services/genshin-calc/fanout`, `tools/fanoutbench` | Spreading simulations over worker machines, and its benchmark |
 | `deploy/genshin-web` | Image build (Cloud Build) and the Cloud Run deployment |
 
 ## Bringing it up and down
